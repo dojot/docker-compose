@@ -1,0 +1,91 @@
+version: '2'
+services:
+
+  mongodb:
+    image: "mongo:3.2"
+    networks:
+      subs:
+        aliases:
+          - mongodb
+
+  mqtt:
+    image: ansi/mosquitto
+    networks:
+      subs:
+        aliases:
+          - mqtt
+
+  iotagent:
+    # image: "iotmid-docker:5000/jenkins/iotagent-json:35c7a9b"
+    # image: "iotmid-docker:5000/jenkins/iotagent-json:1a34409"
+    # image: "local/iotagent"
+    image: telefonicaiot/iotagent-json
+    volumes:
+      - ./iotagent/config.js:/opt/iotajson/config.js
+    networks:
+      subs:
+        aliases:
+          - iotagent
+
+  orion:
+    # image: iotmid-docker:5000/jenkins/fiware-orion:54cea66
+    image: fiware/orion
+    command: -dbhost mongodb
+    # links:
+    #   - mongodb
+    networks:
+      subs:
+        aliases:
+          - orion
+
+  mysql:
+    image: mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: not_safe
+    networks:
+      subs:
+        aliases:
+          - mysql
+
+  cygnus:
+    image: fiware/cygnus-ngsi
+    volumes:
+      - ./cygnus/agent.conf:/opt/apache-flume/conf/agent.conf
+    networks:
+      subs:
+        aliases:
+          - cygnus
+
+networks:
+  subs:
+
+  # postgres:
+  #   image: "postgres:9.4"
+  #   environment:
+  #     POSTGRES_USER: "kong"
+  #     POSTGRES_DB: "kong"
+
+  # device-manager:
+  #   image: "local/devm"
+  #   links:
+  #     - mongodb
+  # front:
+  #   image:
+  #   links:
+  #   - device-manager
+  #
+  # apigw:
+  #   image: "kong"
+  #   ports:
+  #     - "8000:8000"
+  #     - "8443:8443"
+  #     - "8001:8001"
+  #     - "7946:7946"
+  #     - "7946:7946/udp"
+  #   environment:
+  #     KONG_DATABASE: "postgres"
+  #     KONG_CASSANDRA_CONTACT_POINTS: "kong-database"
+  #     KONG_PG_HOST: "kong-database"
+  #   links:
+  #     - "postgres:kong-database"
+  #     - device-manager
