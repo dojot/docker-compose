@@ -62,13 +62,37 @@ curl -X POST $kong/apis/device/plugins --data "name=jwt"
 }
 PAYLOAD
 
+(curl $kong/apis -s -S -X POST \
+    --header "Content-Type: application/json" \
+    -d @- | python -m json.tool) <<PAYLOAD
+{
+    "name": "flows",
+    "uris": "/flows",
+    "strip_uri": true,
+    "upstream_url": "http://orch:5000"
+}
+PAYLOAD
+
+(curl $kong/apis -s -S -X POST \
+    --header "Content-Type: application/json" \
+    -d @- | python -m json.tool) <<PAYLOAD
+{
+    "name": "history",
+    "uris": "/history",
+    "strip_uri": true,
+    "upstream_url": "http://sth:8666"
+}
+PAYLOAD
+
+# TODO add docker image for the mashup backend (dummy node-red backend)
+# TODO it might be a good idea to merge this with the orchestrator itself
 # (curl $kong/apis -s -S -X POST \
 #     --header "Content-Type: application/json" \
 #     -d @- | python -m json.tool) <<PAYLOAD
 # {
-#     "name": "flows",
-#     "uris": "/flows",
+#     "name": "mashup",
+#     "uris": "/mashup",
 #     "strip_uri": true,
-#     "upstream_url": "http://orch:5000"
+#     "upstream_url": "http://mashup:1880"
 # }
 # PAYLOAD

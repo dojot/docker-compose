@@ -115,6 +115,3 @@ curl -X POST -H "Content-Type: application/json" -H "Accept: application/json" -
        }
    ]
 }' 'http://orion:1026/NGSI10/queryContext'
-
-
-

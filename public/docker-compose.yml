@@ -1,6 +1,20 @@
 version: '2'
 services:
 
+  certs:
+    image: nginx
+    depends_on:
+      - apigw
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - /etc/letsencrypt:/certs
+      - ./certs/default.conf:/etc/nginx/conf.d/default.conf
+
+  gui:
+    image: dckr/gui
+
   sth:
     image: telefonicaiot/fiware-sth-comet
     depends_on:
