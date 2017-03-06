@@ -17,6 +17,6 @@ client.loop_start()
 it=0
 while True:
 	print("About to send temp: %f " % (it))
-	client.publish("/device/%s/attrs" % device, "{ \"temperature\": %f }" % (it))
+	client.publish("/device/%s/attrs" % device, "{ \"temperature\": %f , \"huh\": 0.32}" % (it))
 	it+=1
 	time.sleep(1.0)

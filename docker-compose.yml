@@ -1,6 +1,19 @@
 version: '2'
 services:
 
+  sth:
+    image: telefonicaiot/fiware-sth-comet
+    networks:
+      subs:
+        aliases:
+          - sth
+          - comet
+          - history
+    environment:
+      STH_HOST: "0.0.0.0"
+      DB_URI: "mongodb:27017"
+
+
   mongodb:
     image: "mongo:3.2"
     networks:
@@ -10,82 +23,89 @@ services:
 
   mqtt:
     image: ansi/mosquitto
+    ports:
+      - "1883:1883"
     networks:
       subs:
         aliases:
           - mqtt
 
   iotagent:
-    # image: "iotmid-docker:5000/jenkins/iotagent-json:35c7a9b"
-    # image: "iotmid-docker:5000/jenkins/iotagent-json:1a34409"
-    # image: "local/iotagent"
-    image: telefonicaiot/iotagent-json
+    image: "iotmid-docker:5000/jenkins/iotagent-json:7f188b8"
     volumes:
       - ./iotagent/config.js:/opt/iotajson/config.js
     networks:
       subs:
         aliases:
           - iotagent
+          - idas
 
   orion:
-    # image: iotmid-docker:5000/jenkins/fiware-orion:54cea66
     image: fiware/orion
     command: -dbhost mongodb
-    # links:
-    #   - mongodb
     networks:
       subs:
         aliases:
           - orion
 
-  mysql:
-    image: mysql
-    environment:
-      MYSQL_ROOT_PASSWORD: not_safe
-    networks:
-      subs:
-        aliases:
-          - mysql
+  # mysql:
+  #   image: mysql
+  #   environment:
+  #     MYSQL_ROOT_PASSWORD: not_safe
+  #   networks:
+  #     subs:
+  #       aliases:
+  #         - mysql
+  #
+  # cygnus:
+  #   image: fiware/cygnus-ngsi
+  #   volumes:
+  #     - ./cygnus/agent.conf:/opt/apache-flume/conf/agent.conf
+  #   networks:
+  #     subs:
+  #       aliases:
+  #         - cygnus
 
-  cygnus:
-    image: fiware/cygnus-ngsi
-    volumes:
-      - ./cygnus/agent.conf:/opt/apache-flume/conf/agent.conf
+  device-manager:
+    image: "iotmid-docker:5000/jenkins/devicemanager:efd5d37"
     networks:
       subs:
         aliases:
-          - cygnus
+          - devm
+  auth:
+    image: "iotmid-docker:5000/jenkins/auth:24e66a7"
+    networks:
+      subs:
+        aliases:
+          - auth
+
+  postgres:
+    image: "postgres:9.4"
+    environment:
+      POSTGRES_USER: "kong"
+      POSTGRES_DB: "kong"
+    networks:
+      subs:
+        aliases:
+          - postgres
+
+  apigw:
+    image: "kong:0.10.0"
+    ports:
+      - "8000:8000"
+      - "8443:8443"
+      - "127.0.0.1:8001:8001"
+      # - "7946:7946"
+      # - "7946:7946/udp"  # cluster
+    environment:
+      KONG_DATABASE: "postgres"
+      KONG_CASSANDRA_CONTACT_POINTS: "postgres"
+      KONG_PG_HOST: "postgres"
+    networks:
+      subs:
+        aliases:
+          - apigw
+          - kong
 
 networks:
   subs:
-
-  # postgres:
-  #   image: "postgres:9.4"
-  #   environment:
-  #     POSTGRES_USER: "kong"
-  #     POSTGRES_DB: "kong"
-
-  # device-manager:
-  #   image: "local/devm"
-  #   links:
-  #     - mongodb
-  # front:
-  #   image:
-  #   links:
-  #   - device-manager
-  #
-  # apigw:
-  #   image: "kong"
-  #   ports:
-  #     - "8000:8000"
-  #     - "8443:8443"
-  #     - "8001:8001"
-  #     - "7946:7946"
-  #     - "7946:7946/udp"
-  #   environment:
-  #     KONG_DATABASE: "postgres"
-  #     KONG_CASSANDRA_CONTACT_POINTS: "kong-database"
-  #     KONG_PG_HOST: "kong-database"
-  #   links:
-  #     - "postgres:kong-database"
-  #     - device-manager

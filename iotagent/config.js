@@ -18,7 +18,7 @@ config.iota = {
         port: 4041
     },
     deviceRegistry: {
-        type: 'memory'
+        type: 'mongodb'
     },
     mongodb: {
         host: 'mongodb',

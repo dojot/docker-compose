@@ -6,7 +6,7 @@ service=${service-"devm"}
 service_path=${svcpath-"/"}
 entity_type=${type-"device"}
 
-curl -X POST -H "Fiware-Service: $service" \
+curl -v -X POST -H "Fiware-Service: $service" \
              -H "Fiware-ServicePath: $service_path" \
              -H "Content-Type: application/json" \
              -H "Cache-Control: no-cache" \

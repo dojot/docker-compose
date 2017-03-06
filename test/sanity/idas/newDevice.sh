@@ -8,7 +8,7 @@ service_path=${svcpath-"/"}
 entity_type=${type-"device"}
 
 did=${did-"dummy"}
-attrs=${attrs-"[{\"name\": \"temperature\", \"type\": \"float\"}]"}
+attrs=${attrs-"[{\"object_id\":\"t\", \"name\": \"temperature\", \"type\": \"float\"}]"}
 
 curl -X POST -H "Fiware-Service: $service" \
              -H "Fiware-ServicePath: $service_path" \
