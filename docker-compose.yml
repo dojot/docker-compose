@@ -3,6 +3,8 @@ services:
 
   sth:
     image: telefonicaiot/fiware-sth-comet
+    depends_on:
+      - mongodb
     networks:
       subs:
         aliases:
@@ -32,6 +34,9 @@ services:
 
   iotagent:
     image: "iotmid-docker:5000/jenkins/iotagent-json:7f188b8"
+    depends_on:
+      - mongodb
+      - mqtt
     volumes:
       - ./iotagent/config.js:/opt/iotajson/config.js
     networks:
@@ -42,6 +47,8 @@ services:
 
   orion:
     image: fiware/orion
+    depends_on:
+      - mongodb
     command: -dbhost mongodb
     networks:
       subs:
@@ -68,12 +75,18 @@ services:
 
   device-manager:
     image: "iotmid-docker:5000/jenkins/devicemanager:efd5d37"
+    depends_on:
+      - mongodb
     networks:
       subs:
         aliases:
           - devm
+
   auth:
     image: "iotmid-docker:5000/jenkins/auth:24e66a7"
+    depends_on:
+      - mongodb
+      - apigw
     networks:
       subs:
         aliases:
@@ -91,6 +104,8 @@ services:
 
   apigw:
     image: "kong:0.10.0"
+    depends_on:
+      - postgres
     ports:
       - "8000:8000"
       - "8443:8443"
