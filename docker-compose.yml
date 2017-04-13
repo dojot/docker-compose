@@ -38,7 +38,7 @@ services:
       - mongodb
       - mqtt
     volumes:
-      - ./iotagent/config.js:/opt/iotajson/config.js
+      - ./iotagent/config.js:/opt/iotajson/config.js:Z
     networks:
       subs:
         aliases:
@@ -121,6 +121,23 @@ services:
         aliases:
           - apigw
           - kong
+          
+  perseo-core:
+    image: telefonicaiot/perseo-core
+    command: -perseo_fe_url perseo-fe:9090
+    networks:
+      subs:
+
+  perseo-fe:
+    image: telefonicaiot/perseo-fe
+    depends_on:
+      - perseo-core
+      - mongodb
+    environment:
+      - PERSEO_MONGO_HOST=mongodb
+      - PERSEO_CORE_URL=http://perseo-core:8080
+    networks:
+      subs:
 
 networks:
   subs:
