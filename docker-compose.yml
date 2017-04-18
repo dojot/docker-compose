@@ -6,9 +6,8 @@ services:
     depends_on:
       - mongodb
     networks:
-      subs:
+      default:
         aliases:
-          - sth
           - comet
           - history
     environment:
@@ -19,19 +18,11 @@ services:
   mongodb:
     image: "mongo:3.2"
     user: "mongodb"
-    networks:
-      subs:
-        aliases:
-          - mongodb
 
   mqtt:
     image: ansi/mosquitto
     ports:
       - "1883:1883"
-    networks:
-      subs:
-        aliases:
-          - mqtt
 
   iotagent:
     image: "iotmid-docker:5000/jenkins/iotagent-json:7f188b8"
@@ -41,9 +32,8 @@ services:
     volumes:
       - ./iotagent/config.js:/opt/iotajson/config.js:Z
     networks:
-      subs:
+      default:
         aliases:
-          - iotagent
           - idas
 
   orion:
@@ -51,17 +41,13 @@ services:
     depends_on:
       - mongodb
     command: -dbhost mongodb
-    networks:
-      subs:
-        aliases:
-          - orion
 
   # mysql:
   #   image: mysql
   #   environment:
   #     MYSQL_ROOT_PASSWORD: not_safe
   #   networks:
-  #     subs:
+  #     default:
   #       aliases:
   #         - mysql
   #
@@ -70,7 +56,7 @@ services:
   #   volumes:
   #     - ./cygnus/agent.conf:/opt/apache-flume/conf/agent.conf
   #   networks:
-  #     subs:
+  #     default:
   #       aliases:
   #         - cygnus
 
@@ -79,7 +65,7 @@ services:
     depends_on:
       - mongodb
     networks:
-      subs:
+      default:
         aliases:
           - devm
 
@@ -88,10 +74,6 @@ services:
     depends_on:
       - mongodb
       - apigw
-    networks:
-      subs:
-        aliases:
-          - auth
 
   postgres:
     image: "postgres:9.4"
@@ -99,9 +81,9 @@ services:
       POSTGRES_USER: "kong"
       POSTGRES_DB: "kong"
     networks:
-      subs:
+      default:
         aliases:
-          - postgres
+          - kong-db
 
   apigw:
     image: "kong:0.10.0"
@@ -118,16 +100,13 @@ services:
       KONG_CASSANDRA_CONTACT_POINTS: "postgres"
       KONG_PG_HOST: "postgres"
     networks:
-      subs:
+      default:
         aliases:
-          - apigw
           - kong
-          
+
   perseo-core:
     image: telefonicaiot/perseo-core
     command: -perseo_fe_url perseo-fe:9090
-    networks:
-      subs:
 
   perseo-fe:
     image: telefonicaiot/perseo-fe
@@ -137,8 +116,4 @@ services:
     environment:
       - PERSEO_MONGO_HOST=mongodb
       - PERSEO_CORE_URL=http://perseo-core:8080
-    networks:
-      subs:
-
-networks:
-  subs:
+      - PERSEO_ORION_URL=http://orion:1026/NGSI10/updateContext
