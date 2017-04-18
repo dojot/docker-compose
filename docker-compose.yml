@@ -18,6 +18,7 @@ services:
 
   mongodb:
     image: "mongo:3.2"
+    user: "mongodb"
     networks:
       subs:
         aliases:
