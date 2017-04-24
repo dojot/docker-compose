@@ -14,6 +14,18 @@ kong="http://localhost:8001"
 }
 PAYLOAD
 
+(curl $kong/apis -sS -X POST \
+    --header "Content-Type: application/json" \
+    -d @- | python -m json.tool) <<PAYLOAD
+{
+    "name": "metric",
+    "uris": "/metric",
+    "strip_uri": true,
+    "upstream_url": "http://orion:1026"
+}
+PAYLOAD
+
+
 (curl $kong/apis -s -S -X POST \
     --header "Content-Type: application/json" \
     -d @- | python -m json.tool) <<PAYLOAD
