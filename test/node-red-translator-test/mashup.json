@@ -1,0 +1,231 @@
+[
+    {
+        "id": "c93255a1.08a318",
+        "type": "switch",
+        "z": "16fbb07c.3cd45",
+        "name": "SpeedDetector",
+        "property": "payload.Speed",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "eq",
+                "v": "0",
+                "vt": "num"
+            },
+            {
+                "t": "gte",
+                "v": "30",
+                "vt": "num"
+            },
+            {
+                "t": "btwn",
+                "v": "150",
+                "vt": "num",
+                "v2": "300",
+                "v2t": "num"
+            }
+        ],
+        "checkall": "true",
+        "outputs": 3,
+        "x": 324.9480514526367,
+        "y": 333.28825664520264,
+        "wires": [
+            [
+                "d6b785b8.1b30e8"
+            ],
+            [
+                "e835ca5.db3b438"
+            ],
+            [
+                "90b7773e.406538"
+            ]
+        ]
+    },
+    {
+        "id": "e835ca5.db3b438",
+        "type": "change",
+        "z": "16fbb07c.3cd45",
+        "name": "ChangeToMoving",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload.State",
+                "pt": "msg",
+                "to": "moving",
+                "tot": "str"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 570.9411125183105,
+        "y": 481.8230209350586,
+        "wires": [
+            [
+                "cae9c7cf.db4b98",
+                "f857f049.bd189"
+            ]
+        ]
+    },
+    {
+        "id": "d6b785b8.1b30e8",
+        "type": "change",
+        "z": "16fbb07c.3cd45",
+        "name": "ChangeToStopped",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload.State",
+                "pt": "msg",
+                "to": "stopped",
+                "tot": "str"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 563.9515228271484,
+        "y": 222.0000820159912,
+        "wires": [
+            [
+                "f857f049.bd189",
+                "911bb511.1013c8"
+            ]
+        ]
+    },
+    {
+        "id": "f857f049.bd189",
+        "type": "device in",
+        "z": "16fbb07c.3cd45",
+        "name": "truck-01-states",
+        "device": "VirtualDevice",
+        "attrs": "truck-01",
+        "x": 822.9518585205078,
+        "y": 336.5834560394287,
+        "wires": []
+    },
+    {
+        "id": "61d506a.968eef8",
+        "type": "device out",
+        "z": "16fbb07c.3cd45",
+        "name": "truck-01",
+        "device": "TruckSensor",
+        "x": 117.95146179199219,
+        "y": 332.8437910079956,
+        "wires": [
+            [
+                "c93255a1.08a318"
+            ]
+        ]
+    },
+    {
+        "id": "911bb511.1013c8",
+        "type": "template",
+        "z": "16fbb07c.3cd45",
+        "name": "TruckTemplate",
+        "field": "payload",
+        "fieldType": "msg",
+        "format": "handlebars",
+        "syntax": "mustache",
+        "template": "The truck is {{payload.State}}",
+        "x": 827.895881652832,
+        "y": 222.88903141021729,
+        "wires": [
+            [
+                "75de97dc.5d58b8"
+            ]
+        ]
+    },
+    {
+        "id": "75de97dc.5d58b8",
+        "type": "http request",
+        "z": "16fbb07c.3cd45",
+        "name": "TruckAlarm",
+        "method": "POST",
+        "ret": "txt",
+        "url": "http://172.22.0.1:8081/devices/truck",
+        "tls": "",
+        "x": 1029.8959255218506,
+        "y": 222.88897323608398,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "9dd43b36.12abb8",
+        "type": "device in",
+        "z": "16fbb07c.3cd45",
+        "name": "truck-billing",
+        "device": "VirtualDevice",
+        "attrs": "truck-01",
+        "x": 1068.896053314209,
+        "y": 479.8889961242676,
+        "wires": []
+    },
+    {
+        "id": "cae9c7cf.db4b98",
+        "type": "switch",
+        "z": "16fbb07c.3cd45",
+        "name": "DistanceDetector",
+        "property": "payload.Distance",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "gt",
+                "v": "100",
+                "vt": "num"
+            }
+        ],
+        "checkall": "true",
+        "outputs": 1,
+        "x": 830.9410400390625,
+        "y": 481.8334732055664,
+        "wires": [
+            [
+                "9dd43b36.12abb8"
+            ]
+        ]
+    },
+    {
+        "id": "90b7773e.406538",
+        "type": "change",
+        "z": "16fbb07c.3cd45",
+        "name": "ChangeToFlying",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload.State",
+                "pt": "msg",
+                "to": "flying",
+                "tot": "str"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 572.8958129882812,
+        "y": 544.8888835906982,
+        "wires": [
+            [
+                "2bffc0e3.61f76"
+            ]
+        ]
+    },
+    {
+        "id": "2bffc0e3.61f76",
+        "type": "device in",
+        "z": "16fbb07c.3cd45",
+        "name": "truck-01-tickets",
+        "device": "VirtualDevice",
+        "attrs": "truck-01",
+        "x": 824.895923614502,
+        "y": 543.8887796401978,
+        "wires": []
+    }
+]
