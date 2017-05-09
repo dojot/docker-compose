@@ -38,6 +38,9 @@ services:
         aliases:
           - idas
 
+  gui:
+    image: "iotmid-docker:5000/jenkins/devm-gui:fcc4576"
+
   orion:
     image: fiware/orion
     depends_on:
@@ -65,8 +68,7 @@ services:
   #         - cygnus
 
   device-manager:
-    # image: "iotmid-docker:5000/jenkins/devicemanager:efd5d37"
-    image: "dckr/devm"
+    image: "iotmid-docker:5000/jenkins/devicemanager:75df0ce"
     depends_on:
       - mongodb
     networks:
@@ -75,7 +77,9 @@ services:
           - devm
 
   orch:
-    image: "dckr/orch"
+    image: "iotmid-docker:5000/jenkins/node-orch:a461be4"
+    depends_on:
+      - mongodb
     networks:
       default:
         aliases:
@@ -140,3 +144,6 @@ services:
       - PERSEO_MONGO_HOST=mongodb
       - PERSEO_CORE_URL=http://perseo-core:8080
       - PERSEO_ORION_URL=http://orion:1026/NGSI10/updateContext
+
+  mashup:
+    image: "iotmid-docker:5000/dckr/customred"

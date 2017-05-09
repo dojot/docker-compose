@@ -84,15 +84,14 @@ PAYLOAD
 }
 PAYLOAD
 
-# TODO add docker image for the mashup backend (dummy node-red backend)
 # TODO it might be a good idea to merge this with the orchestrator itself
-# (curl $kong/apis -s -S -X POST \
-#     --header "Content-Type: application/json" \
-#     -d @- | python -m json.tool) <<PAYLOAD
-# {
-#     "name": "mashup",
-#     "uris": "/mashup",
-#     "strip_uri": true,
-#     "upstream_url": "http://mashup:1880"
-# }
-# PAYLOAD
+(curl $kong/apis -s -S -X POST \
+    --header "Content-Type: application/json" \
+    -d @- | python -m json.tool) <<PAYLOAD
+{
+    "name": "mashup",
+    "uris": "/mashup",
+    "strip_uri": true,
+    "upstream_url": "http://mashup:1880"
+}
+PAYLOAD
