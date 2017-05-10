@@ -69,7 +69,7 @@ PAYLOAD
     "name": "flows",
     "uris": "/flows",
     "strip_uri": true,
-    "upstream_url": "http://orch:5000"
+    "upstream_url": "http://orch:3000"
 }
 PAYLOAD
 
