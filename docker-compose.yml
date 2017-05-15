@@ -39,7 +39,7 @@ services:
           - idas
 
   gui:
-    image: "iotmid-docker:5000/jenkins/devm-gui:fcc4576"
+    image: "iotmid-docker:5000/jenkins/devm-gui:4554868"
 
   orion:
     image: fiware/orion
@@ -68,7 +68,7 @@ services:
   #         - cygnus
 
   device-manager:
-    image: "iotmid-docker:5000/jenkins/devicemanager:75df0ce"
+    image: "iotmid-docker:5000/jenkins/devicemanager:af73077"
     depends_on:
       - mongodb
     networks:
@@ -77,7 +77,7 @@ services:
           - devm
 
   orch:
-    image: "iotmid-docker:5000/jenkins/node-orch:a461be4"
+    image: "iotmid-docker:5000/jenkins/node-orch:508b577"
     depends_on:
       - mongodb
     networks:
