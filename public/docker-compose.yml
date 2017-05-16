@@ -36,7 +36,7 @@ services:
       - "1883:1883"
 
   iotagent:
-    image: "iotmid-docker:5000/jenkins/iotagent-json:7f188b8"
+    image: "iotmid-docker:5000/jenkins/iotagent-json:36a972c"
     depends_on:
       - mongodb
       - mqtt
