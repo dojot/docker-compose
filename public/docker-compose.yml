@@ -3,6 +3,7 @@ services:
 
   certs:
     image: nginx
+    restart: always
     depends_on:
       - apigw
     ports:
@@ -14,6 +15,7 @@ services:
 
   sth:
     image: telefonicaiot/fiware-sth-comet
+    restart: always
     depends_on:
       - mongodb
     networks:
@@ -28,15 +30,18 @@ services:
 
   mongodb:
     image: "mongo:3.2"
+    restart: always
     user: "mongodb"
 
   mqtt:
     image: ansi/mosquitto
+    restart: always
     ports:
       - "1883:1883"
 
   iotagent:
     image: "iotmid-docker:5000/jenkins/iotagent-json:36a972c"
+    restart: always
     depends_on:
       - mongodb
       - mqtt
@@ -51,9 +56,11 @@ services:
 
   gui:
     image: "iotmid-docker:5000/jenkins/devm-gui:4554868"
+    restart: always
 
   orion:
     image: fiware/orion
+    restart: always
     depends_on:
       - mongodb
     ports:
@@ -80,6 +87,7 @@ services:
 
   device-manager:
     image: "iotmid-docker:5000/jenkins/devicemanager:af73077"
+    restart: always
     depends_on:
       - mongodb
     networks:
@@ -89,6 +97,7 @@ services:
 
   orch:
     image: "iotmid-docker:5000/jenkins/node-orch:508b577"
+    restart: always
     depends_on:
       - mongodb
     networks:
@@ -98,12 +107,14 @@ services:
 
   auth:
     image: "iotmid-docker:5000/jenkins/auth:24e66a7"
+    restart: always
     depends_on:
       - mongodb
       - apigw
 
   postgres:
     image: "postgres:9.4"
+    restart: always
     environment:
       POSTGRES_USER: "kong"
       POSTGRES_DB: "kong"
@@ -122,6 +133,7 @@ services:
 
   apigw:
     image: "kong:0.10.0"
+    restart: always
     depends_on:
       - postgres
     ports:
@@ -142,10 +154,12 @@ services:
 
   perseo-core:
     image: telefonicaiot/perseo-core
+    restart: always
     command: -perseo_fe_url perseo-fe:9090
 
   perseo-fe:
     image: telefonicaiot/perseo-fe
+    restart: always
     ports:
       - "127.0.0.1:9090:9090"
     depends_on:
@@ -158,3 +172,4 @@ services:
 
   mashup:
     image: "iotmid-docker:5000/dckr/customred"
+    restart: always
