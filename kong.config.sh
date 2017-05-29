@@ -66,6 +66,18 @@ PAYLOAD
     --header "Content-Type: application/json" \
     -d @- | python -m json.tool) <<PAYLOAD
 {
+    "name": "user-service",
+    "uris": "/auth/user",
+    "strip_uri": true,
+    "upstream_url": "http://auth:5000/user"
+}
+PAYLOAD
+curl -X POST $kong/apis/user-service/plugins --data "name=jwt"
+
+(curl $kong/apis -s -S -X POST \
+    --header "Content-Type: application/json" \
+    -d @- | python -m json.tool) <<PAYLOAD
+{
     "name": "flows",
     "uris": "/flows",
     "strip_uri": true,
