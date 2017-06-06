@@ -43,7 +43,7 @@ services:
           - idas
 
   gui:
-    image: "iotmid-docker:5000/jenkins/devm-gui:c054ac9"
+    image: "iotmid-docker:5000/jenkins/devm-gui:9cc3a8e"
     restart: always
 
   orion:
@@ -84,7 +84,7 @@ services:
           - devm
 
   orch:
-    image: "iotmid-docker:5000/jenkins/node-orch:f084525"
+    image: "iotmid-docker:5000/jenkins/node-orch:2bf35b3"
     restart: always
     depends_on:
       - mongodb
@@ -146,7 +146,7 @@ services:
     restart: always
 
   perseo-fe:
-    image: "iotmid-docker:5000/jenkins/perseo-fe:94e378a"
+    image: "iotmid-docker:5000/jenkins/perseo-fe:30f0eb7"
     restart: always
     ports:
       - "127.0.0.1:9090:9090"
