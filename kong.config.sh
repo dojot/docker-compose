@@ -84,6 +84,7 @@ curl -X POST $kong/apis/user-service/plugins --data "name=jwt"
     "upstream_url": "http://orch:3000"
 }
 PAYLOAD
+curl -X POST $kong/apis/flows/plugins --data "name=jwt"
 
 (curl $kong/apis -s -S -X POST \
     --header "Content-Type: application/json" \
