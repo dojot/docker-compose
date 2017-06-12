@@ -9,5 +9,5 @@ getIp() {
 
 curl -sS $(getIp auth):5000/user \
            -H 'content-type: application/json' \
-           -d '{"username": "admin", "passwd":"admin", "service":"admin", "user":"Admin", "email":"admin@noemail.com"}' |
+           -d '{"username": "admin", "passwd":"admin", "service":"admin", "email":"admin@noemail.com", "name":"Admin (superuser)"}' |
   python -m json.tool
