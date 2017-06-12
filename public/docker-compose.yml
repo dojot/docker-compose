@@ -55,7 +55,7 @@ services:
           - idas
 
   gui:
-    image: "iotmid-docker:5000/jenkins/devm-gui:9cc3a8e"
+    image: "iotmid-docker:5000/jenkins/devm-gui:4ad2ef7"
     restart: always
 
   orion:
@@ -86,7 +86,7 @@ services:
   #         - cygnus
 
   device-manager:
-    image: "iotmid-docker:5000/jenkins/devicemanager:44d06fe"
+    image: "iotmid-docker:5000/jenkins/devicemanager:82b8d26"
     restart: always
     depends_on:
       - mongodb
@@ -106,7 +106,7 @@ services:
           - orchestrator
 
   auth:
-    image: "iotmid-docker:5000/jenkins/auth:fc5c46f"
+    image: "iotmid-docker:5000/jenkins/auth:ab5b34a"
     restart: always
     depends_on:
       - mongodb
