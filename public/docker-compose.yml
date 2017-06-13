@@ -55,7 +55,7 @@ services:
           - idas
 
   gui:
-    image: "iotmid-docker:5000/jenkins/devm-gui:4ad2ef7"
+    image: "iotmid-docker:5000/jenkins/devm-gui:4f0c522"
     restart: always
 
   orion:
