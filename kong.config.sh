@@ -13,6 +13,7 @@ kong="http://localhost:8001"
     "upstream_url": "http://gui:80"
 }
 PAYLOAD
+# no auth: serves only static front-end content
 
 (curl $kong/apis -sS -X POST \
     --header "Content-Type: application/json" \
@@ -24,6 +25,7 @@ PAYLOAD
     "upstream_url": "http://orion:1026"
 }
 PAYLOAD
+curl -X POST $kong/apis/metric/plugins --data "name=jwt"
 
 
 (curl $kong/apis -s -S -X POST \
@@ -61,6 +63,7 @@ curl -X POST $kong/apis/device/plugins --data "name=jwt"
     "upstream_url": "http://auth:5000"
 }
 PAYLOAD
+# no auth: this is actually the endpoint used to get a token
 
 (curl $kong/apis -s -S -X POST \
     --header "Content-Type: application/json" \
@@ -96,6 +99,7 @@ curl -X POST $kong/apis/flows/plugins --data "name=jwt"
     "upstream_url": "http://sth:8666"
 }
 PAYLOAD
+curl -X POST $kong/apis/history/plugins --data "name=jwt"
 
 # TODO it might be a good idea to merge this with the orchestrator itself
 (curl $kong/apis -s -S -X POST \
@@ -108,3 +112,4 @@ PAYLOAD
     "upstream_url": "http://mashup:1880"
 }
 PAYLOAD
+# no auth: serves only available types
