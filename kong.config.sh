@@ -3,9 +3,9 @@
 # ---  0.10.x
 kong="http://localhost:8001"
 
-(curl $kong/apis -sS -X PUT \
+(curl -o /dev/null $kong/apis -sS -X PUT \
     --header "Content-Type: application/json" \
-    -d @- | python -m json.tool) <<PAYLOAD
+    -d @- ) <<PAYLOAD
 {
     "name": "gui",
     "uris": "/",
@@ -15,9 +15,9 @@ kong="http://localhost:8001"
 PAYLOAD
 # no auth: serves only static front-end content
 
-(curl $kong/apis -sS -X POST \
+(curl -o /dev/null $kong/apis -sS -X POST \
     --header "Content-Type: application/json" \
-    -d @- | python -m json.tool) <<PAYLOAD
+    -d @- ) <<PAYLOAD
 {
     "name": "metric",
     "uris": "/metric",
@@ -25,12 +25,12 @@ PAYLOAD
     "upstream_url": "http://orion:1026"
 }
 PAYLOAD
-curl -X POST $kong/apis/metric/plugins --data "name=jwt"
+curl -o /dev/null -sS -X POST $kong/apis/metric/plugins --data "name=jwt"
 
 
-(curl $kong/apis -s -S -X POST \
+(curl -o /dev/null $kong/apis -s -S -X POST \
     --header "Content-Type: application/json" \
-    -d @- | python -m json.tool) <<PAYLOAD
+    -d @- ) <<PAYLOAD
 {
     "name": "template",
     "uris": "/template",
@@ -38,11 +38,11 @@ curl -X POST $kong/apis/metric/plugins --data "name=jwt"
     "upstream_url": "http://devm:5000"
 }
 PAYLOAD
-curl -X POST $kong/apis/template/plugins --data "name=jwt"
+curl -o /dev/null -sS -X POST $kong/apis/template/plugins --data "name=jwt"
 
-(curl $kong/apis -s -S -X POST \
+(curl -o /dev/null $kong/apis -s -S -X POST \
     --header "Content-Type: application/json" \
-    -d @- | python -m json.tool) <<PAYLOAD
+    -d @- ) <<PAYLOAD
 {
     "name": "device",
     "uris": "/device",
@@ -50,12 +50,12 @@ curl -X POST $kong/apis/template/plugins --data "name=jwt"
     "upstream_url": "http://devm:5000"
 }
 PAYLOAD
-curl -X POST $kong/apis/device/plugins --data "name=jwt"
+curl -o /dev/null -sS -X POST $kong/apis/device/plugins --data "name=jwt"
 
 
-(curl $kong/apis -s -S -X POST \
+(curl -o /dev/null $kong/apis -s -S -X POST \
     --header "Content-Type: application/json" \
-    -d @- | python -m json.tool) <<PAYLOAD
+    -d @- ) <<PAYLOAD
 {
     "name": "auth-service",
     "uris": "/auth",
@@ -65,9 +65,9 @@ curl -X POST $kong/apis/device/plugins --data "name=jwt"
 PAYLOAD
 # no auth: this is actually the endpoint used to get a token
 
-(curl $kong/apis -s -S -X POST \
+(curl -o /dev/null $kong/apis -s -S -X POST \
     --header "Content-Type: application/json" \
-    -d @- | python -m json.tool) <<PAYLOAD
+    -d @- ) <<PAYLOAD
 {
     "name": "user-service",
     "uris": "/auth/user",
@@ -75,11 +75,11 @@ PAYLOAD
     "upstream_url": "http://auth:5000/user"
 }
 PAYLOAD
-curl -X POST $kong/apis/user-service/plugins --data "name=jwt"
+curl -o /dev/null -sS -X POST $kong/apis/user-service/plugins --data "name=jwt"
 
-(curl $kong/apis -s -S -X POST \
+(curl -o /dev/null $kong/apis -s -S -X POST \
     --header "Content-Type: application/json" \
-    -d @- | python -m json.tool) <<PAYLOAD
+    -d @- ) <<PAYLOAD
 {
     "name": "flows",
     "uris": "/flows",
@@ -87,11 +87,11 @@ curl -X POST $kong/apis/user-service/plugins --data "name=jwt"
     "upstream_url": "http://orch:3000"
 }
 PAYLOAD
-curl -X POST $kong/apis/flows/plugins --data "name=jwt"
+curl -o /dev/null -sS -X POST $kong/apis/flows/plugins --data "name=jwt"
 
-(curl $kong/apis -s -S -X POST \
+(curl -o /dev/null $kong/apis -s -S -X POST \
     --header "Content-Type: application/json" \
-    -d @- | python -m json.tool) <<PAYLOAD
+    -d @- ) <<PAYLOAD
 {
     "name": "history",
     "uris": "/history",
@@ -99,12 +99,12 @@ curl -X POST $kong/apis/flows/plugins --data "name=jwt"
     "upstream_url": "http://sth:8666"
 }
 PAYLOAD
-curl -X POST $kong/apis/history/plugins --data "name=jwt"
+curl -o /dev/null -sS -X POST $kong/apis/history/plugins --data "name=jwt"
 
 # TODO it might be a good idea to merge this with the orchestrator itself
-(curl $kong/apis -s -S -X POST \
+(curl -o /dev/null $kong/apis -s -S -X POST \
     --header "Content-Type: application/json" \
-    -d @- | python -m json.tool) <<PAYLOAD
+    -d @- ) <<PAYLOAD
 {
     "name": "mashup",
     "uris": "/mashup",
