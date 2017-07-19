@@ -26,6 +26,10 @@ PAYLOAD
 }
 PAYLOAD
 curl -o /dev/null -sS -X POST $kong/apis/metric/plugins --data "name=jwt"
+#    --data "config.claims_to_verify=exp"
+ 
+curl -o /dev/null -sS -X POST $kong/apis/metric/plugins --data "name=pepkong" \
+	 -d "config.pdpUrl=http://keypass:7070"
 
 
 (curl -o /dev/null $kong/apis -s -S -X POST \
@@ -39,6 +43,11 @@ curl -o /dev/null -sS -X POST $kong/apis/metric/plugins --data "name=jwt"
 }
 PAYLOAD
 curl -o /dev/null -sS -X POST $kong/apis/template/plugins --data "name=jwt"
+#    --data "config.claims_to_verify=exp"
+    
+curl -o /dev/null -sS -X POST $kong/apis/template/plugins --data "name=pepkong" \
+	 -d "config.pdpUrl=http://keypass:7070"
+
 
 (curl -o /dev/null $kong/apis -s -S -X POST \
     --header "Content-Type: application/json" \
@@ -51,6 +60,10 @@ curl -o /dev/null -sS -X POST $kong/apis/template/plugins --data "name=jwt"
 }
 PAYLOAD
 curl -o /dev/null -sS -X POST $kong/apis/device/plugins --data "name=jwt"
+#    --data "config.claims_to_verify=exp"
+    
+curl -o /dev/null -sS -X POST $kong/apis/device/plugins --data "name=pepkong" \
+	 -d "config.pdpUrl=http://keypass:7070"
 
 
 (curl -o /dev/null $kong/apis -s -S -X POST \
@@ -76,6 +89,10 @@ PAYLOAD
 }
 PAYLOAD
 curl -o /dev/null -sS -X POST $kong/apis/user-service/plugins --data "name=jwt"
+#    --data "config.claims_to_verify=exp"
+    
+curl -o /dev/null -sS -X POST $kong/apis/user-service/plugins --data "name=pepkong" \
+	 -d "config.pdpUrl=http://keypass:7070"
 
 (curl -o /dev/null $kong/apis -s -S -X POST \
     --header "Content-Type: application/json" \
@@ -88,6 +105,10 @@ curl -o /dev/null -sS -X POST $kong/apis/user-service/plugins --data "name=jwt"
 }
 PAYLOAD
 curl -o /dev/null -sS -X POST $kong/apis/flows/plugins --data "name=jwt"
+#    --data "config.claims_to_verify=exp"
+    
+curl -o /dev/null -sS -X POST $kong/apis/flows/plugins --data "name=pepkong" \
+	 -d "config.pdpUrl=http://keypass:7070"
 
 (curl -o /dev/null $kong/apis -s -S -X POST \
     --header "Content-Type: application/json" \
@@ -100,6 +121,10 @@ curl -o /dev/null -sS -X POST $kong/apis/flows/plugins --data "name=jwt"
 }
 PAYLOAD
 curl -o /dev/null -sS -X POST $kong/apis/history/plugins --data "name=jwt"
+#    --data "config.claims_to_verify=exp"
+    
+curl -o /dev/null -sS -X POST $kong/apis/history/plugins --data "name=pepkong" \
+	 -d "config.pdpUrl=http://keypass:7070"
 
 # TODO it might be a good idea to merge this with the orchestrator itself
 (curl -o /dev/null $kong/apis -s -S -X POST \
