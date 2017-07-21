@@ -1,6 +1,18 @@
 version: '2'
 services:
 
+#  certs:
+#    image: nginx
+#    restart: always
+#    depends_on:
+#      - apigw
+#    ports:
+#      - "80:80"
+#      - "443:443"
+#    volumes:
+#      - /etc/letsencrypt:/certs
+#      - ./certs/default.conf:/etc/nginx/conf.d/default.conf
+
   sth:
     image: telefonicaiot/fiware-sth-comet
     restart: always
@@ -18,8 +30,8 @@ services:
 
   mongodb:
     image: "mongo:3.2"
-    user: "mongodb"
     restart: always
+    user: "mongodb"
 
   mqtt:
     image: ansi/mosquitto
@@ -152,8 +164,8 @@ services:
 
   perseo-core:
     image: telefonicaiot/perseo-core
-    command: -perseo_fe_url perseo-fe:9090
     restart: always
+    command: -perseo_fe_url perseo-fe:9090
 
   perseo-fe:
     image: "iotmid-docker:5000/jenkins/perseo-fe:30f0eb7"

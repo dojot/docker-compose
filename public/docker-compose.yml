@@ -38,15 +38,25 @@ services:
     restart: always
     ports:
       - "1883:1883"
+      - "8883:8883"
+    volumes:
+      - ./mqtt/mosquitto.conf:/usr/local/src/mosquitto-1.4.13/mosquitto.conf:Z
+      - ./certs/ca.crt:/usr/local/src/mosquitto-1.4.13/certs/ca.crt:Z
+      - ./certs/server.crt:/usr/local/src/mosquitto-1.4.13/certs/server.crt:Z
+      - ./certs/server.key:/usr/local/src/mosquitto-1.4.13/certs/server.key:Z
+    command: "/usr/local/sbin/mosquitto -c /usr/local/src/mosquitto-1.4.13/mosquitto.conf"
 
   iotagent:
-    image: "iotmid-docker:5000/jenkins/iotagent-json:ddeb9e0"
+    image: "iotmid-docker:5000/jenkins/iotagent-json:e341d35"
     restart: always
     depends_on:
       - mongodb
       - mqtt
     volumes:
       - ./iotagent/config.js:/opt/iotajson/config.js:Z
+      - ./certs/ca.crt:/opt/iotajson/certs/ca.crt:Z
+      - ./certs/iotagent.crt:/opt/iotajson/certs/iotagent.crt:Z
+      - ./certs/iotagent.key:/opt/iotajson/certs/iotagent.key:Z
     ports:
       - "127.0.0.1:4041:4041"
     networks:
@@ -55,7 +65,7 @@ services:
           - idas
 
   gui:
-    image: "iotmid-docker:5000/jenkins/devm-gui:118bb38"
+    image: "iotmid-docker:5000/jenkins/devm-gui:5af7ab8"
     restart: always
 
   orion:
@@ -86,7 +96,7 @@ services:
   #         - cygnus
 
   device-manager:
-    image: "iotmid-docker:5000/jenkins/devicemanager:0347578"
+    image: "iotmid-docker:5000/jenkins/devicemanager:bfef486"
     restart: always
     depends_on:
       - mongodb
@@ -96,7 +106,7 @@ services:
           - devm
 
   orch:
-    image: "iotmid-docker:5000/jenkins/node-orch:d1e5d63"
+    image: "iotmid-docker:5000/jenkins/node-orch:e2e1644"
     restart: always
     depends_on:
       - mongodb
@@ -106,7 +116,7 @@ services:
           - orchestrator
 
   auth:
-    image: "iotmid-docker:5000/jenkins/auth:ab5b34a"
+    image: "iotmid-docker:5000/jenkins/auth:64951d8"
     restart: always
     depends_on:
       - mongodb
@@ -171,5 +181,5 @@ services:
       - PERSEO_ORION_URL=http://orion:1026/NGSI10/updateContext
 
   mashup:
-    image: "iotmid-docker:5000/jenkins/mashup-nodes:9292e1a"
+    image: "iotmid-docker:5000/jenkins/mashup-nodes:663bc28"
     restart: always

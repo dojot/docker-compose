@@ -2,9 +2,20 @@ var config = {};
 
 config.mqtt = {
     host: 'mqtt',
+    // port: 8883,
     port: 1883,
     defaultKey: '1234',
-    thinkingThingsPlugin: false
+    thinkingThingsPlugin: false,
+    options: {
+        keepalive: 0,
+        connectTimeout: 60 * 60 * 1000
+    },
+    secure: false
+    // tls: {
+    //    key: '/opt/iotajson/certs/iotagent.key',
+    //    cert: '/opt/iotajson/certs/iotagent.crt',
+    //    ca: [ '/opt/iotajson/certs/ca.crt' ]
+    //}
 };
 
 config.iota = {
@@ -33,6 +44,15 @@ config.iota = {
     defaultType: 'Thing',
     dieOnUnexpectedError: true
 };
+
+config.timeout = {
+    /** Number of messages skipped before dec   laring a device as offline */
+    waitMultiplier: 3,
+    /** Number of messages to calculate average message arrival time */
+    sampleQueueMaxSize: 10,
+    /** Timeout resolution and minimum timeout - in miliseconds.*/
+    minimumTimeoutBase: 50
+}
 
 config.configRetrieval = false;
 
