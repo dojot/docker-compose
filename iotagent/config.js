@@ -2,19 +2,20 @@ var config = {};
 
 config.mqtt = {
     host: 'mqtt',
-    port: 8883,
+    // port: 8883,
+    port: 1883,
     defaultKey: '1234',
     thinkingThingsPlugin: false,
     options: {
         keepalive: 0,
         connectTimeout: 60 * 60 * 1000
     },
-    secure: true,
-    tls: {
-        key: '/opt/iotajson/certs/iotagent.key',
-        cert: '/opt/iotajson/certs/iotagent.crt',
-        ca: [ '/opt/iotajson/certs/ca.crt' ]
-    }
+    secure: false
+    // tls: {
+    //    key: '/opt/iotajson/certs/iotagent.key',
+    //    cert: '/opt/iotajson/certs/iotagent.crt',
+    //    ca: [ '/opt/iotajson/certs/ca.crt' ]
+    //}
 };
 
 config.iota = {
