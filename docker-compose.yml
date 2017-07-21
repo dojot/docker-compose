@@ -35,7 +35,7 @@ services:
     command: "/usr/local/sbin/mosquitto -c /usr/local/src/mosquitto-1.4.13/mosquitto.conf"
 
   iotagent:
-    image: "iotmid-docker:5000/jenkins/iotagent-json:ddeb9e0"
+    image: "iotmid-docker:5000/jenkins/iotagent-json:e341d35"
     restart: always
     depends_on:
       - mongodb
@@ -53,7 +53,7 @@ services:
           - idas
 
   gui:
-    image: "iotmid-docker:5000/jenkins/devm-gui:118bb38"
+    image: "iotmid-docker:5000/jenkins/devm-gui:5af7ab8"
     restart: always
 
   orion:
@@ -84,7 +84,7 @@ services:
   #         - cygnus
 
   device-manager:
-    image: "iotmid-docker:5000/jenkins/devicemanager:0347578"
+    image: "iotmid-docker:5000/jenkins/devicemanager:bfef486"
     restart: always
     depends_on:
       - mongodb
@@ -94,7 +94,7 @@ services:
           - devm
 
   orch:
-    image: "iotmid-docker:5000/jenkins/node-orch:d1e5d63"
+    image: "iotmid-docker:5000/jenkins/node-orch:e2e1644"
     restart: always
     depends_on:
       - mongodb
@@ -104,7 +104,7 @@ services:
           - orchestrator
 
   auth:
-    image: "iotmid-docker:5000/jenkins/auth:ab5b34a"
+    image: "iotmid-docker:5000/jenkins/auth:64951d8"
     restart: always
     depends_on:
       - mongodb
@@ -169,5 +169,5 @@ services:
       - PERSEO_ORION_URL=http://orion:1026/NGSI10/updateContext
 
   mashup:
-    image: "iotmid-docker:5000/jenkins/mashup-nodes:9292e1a"
+    image: "iotmid-docker:5000/jenkins/mashup-nodes:663bc28"
     restart: always
