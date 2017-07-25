@@ -57,12 +57,21 @@ services:
       - ./certs/ca.crt:/opt/iotajson/certs/ca.crt:Z
       - ./certs/iotagent.crt:/opt/iotajson/certs/iotagent.crt:Z
       - ./certs/iotagent.key:/opt/iotajson/certs/iotagent.key:Z
-    ports:
-      - "127.0.0.1:4041:4041"
+    # ports:
+    #   - "127.0.0.1:4041:4041"
     networks:
       default:
         aliases:
           - idas
+
+  coap:
+    image: "telefonicaiot/lightweightm2m-iotagent:latest"
+    restart: always
+    depends_on:
+      - mongodb
+    ports:
+      - "127.0.0.1:4041:4041"
+      - 5684:5684/udp
 
   gui:
     image: "iotmid-docker.cpqd.com.br:5000/jenkins/devm-gui:e34b29c"
