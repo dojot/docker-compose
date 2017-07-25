@@ -47,7 +47,7 @@ services:
     command: "/usr/local/sbin/mosquitto -c /usr/local/src/mosquitto-1.4.13/mosquitto.conf"
 
   iotagent:
-    image: "iotmid-docker:5000/jenkins/iotagent-json:e341d35"
+    image: "iotmid-docker:5000/jenkins/iotagent-json:9e3ad68"
     restart: always
     depends_on:
       - mongodb
