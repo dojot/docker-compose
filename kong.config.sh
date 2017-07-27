@@ -27,7 +27,7 @@ PAYLOAD
 PAYLOAD
 curl -o /dev/null -sS -X POST $kong/apis/metric/plugins --data "name=jwt"
 #    --data "config.claims_to_verify=exp"
- 
+
 curl -o /dev/null -sS -X POST $kong/apis/metric/plugins --data "name=pepkong" \
 	 -d "config.pdpUrl=http://keypass:7070"
 
@@ -44,7 +44,7 @@ curl -o /dev/null -sS -X POST $kong/apis/metric/plugins --data "name=pepkong" \
 PAYLOAD
 curl -o /dev/null -sS -X POST $kong/apis/template/plugins --data "name=jwt"
 #    --data "config.claims_to_verify=exp"
-    
+
 curl -o /dev/null -sS -X POST $kong/apis/template/plugins --data "name=pepkong" \
 	 -d "config.pdpUrl=http://keypass:7070"
 
@@ -61,7 +61,7 @@ curl -o /dev/null -sS -X POST $kong/apis/template/plugins --data "name=pepkong" 
 PAYLOAD
 curl -o /dev/null -sS -X POST $kong/apis/device/plugins --data "name=jwt"
 #    --data "config.claims_to_verify=exp"
-    
+
 curl -o /dev/null -sS -X POST $kong/apis/device/plugins --data "name=pepkong" \
 	 -d "config.pdpUrl=http://keypass:7070"
 
@@ -90,7 +90,7 @@ PAYLOAD
 PAYLOAD
 curl -o /dev/null -sS -X POST $kong/apis/user-service/plugins --data "name=jwt"
 #    --data "config.claims_to_verify=exp"
-    
+
 curl -o /dev/null -sS -X POST $kong/apis/user-service/plugins --data "name=pepkong" \
 	 -d "config.pdpUrl=http://keypass:7070"
 
@@ -106,7 +106,7 @@ curl -o /dev/null -sS -X POST $kong/apis/user-service/plugins --data "name=pepko
 PAYLOAD
 curl -o /dev/null -sS -X POST $kong/apis/flows/plugins --data "name=jwt"
 #    --data "config.claims_to_verify=exp"
-    
+
 curl -o /dev/null -sS -X POST $kong/apis/flows/plugins --data "name=pepkong" \
 	 -d "config.pdpUrl=http://keypass:7070"
 
@@ -122,7 +122,7 @@ curl -o /dev/null -sS -X POST $kong/apis/flows/plugins --data "name=pepkong" \
 PAYLOAD
 curl -o /dev/null -sS -X POST $kong/apis/history/plugins --data "name=jwt"
 #    --data "config.claims_to_verify=exp"
-    
+
 curl -o /dev/null -sS -X POST $kong/apis/history/plugins --data "name=pepkong" \
 	 -d "config.pdpUrl=http://keypass:7070"
 
@@ -138,3 +138,14 @@ curl -o /dev/null -sS -X POST $kong/apis/history/plugins --data "name=pepkong" \
 }
 PAYLOAD
 # no auth: serves only available types
+
+(curl -o /dev/null $kong/apis -s -S -X POST \
+    --header "Content-Type: application/json" \
+    -d @- ) <<PAYLOAD
+{
+    "name": "httpDevices",
+    "uris": "/iot",
+    "strip_uri": false,
+    "upstream_url": "http://iotagent:8080"
+}
+PAYLOAD

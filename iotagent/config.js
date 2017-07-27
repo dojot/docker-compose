@@ -47,6 +47,11 @@ config.iota = {
     dieOnUnexpectedError: true
 };
 
+config.http = {
+  port: 8080,
+  host: "0.0.0.0"
+}
+
 config.timeout = {
     /** Number of messages skipped before dec   laring a device as offline */
     waitMultiplier: 3,
