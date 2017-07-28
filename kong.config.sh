@@ -77,6 +77,12 @@ curl -o /dev/null -sS -X POST $kong/apis/device/plugins --data "name=pepkong" \
 }
 PAYLOAD
 # no auth: this is actually the endpoint used to get a token
+# rate plugin limit to avoid brute-force atacks
+curl -o /dev/null -X POST $kong/apis/auth-service/plugins \
+    --data "name=rate-limiting" \
+    --data "config.minute=5" \
+    --data "config.hour=40" \
+    --data "config.policy=local"
 
 (curl -o /dev/null $kong/apis -s -S -X POST \
     --header "Content-Type: application/json" \
