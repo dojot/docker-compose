@@ -47,7 +47,7 @@ services:
     command: "/usr/local/sbin/mosquitto -c /usr/local/src/mosquitto-1.4.13/mosquitto.conf"
 
   iotagent:
-    image: "iotmid-docker:5000/jenkins/iotagent-json:9e3ad68"
+    image: "iotmid-docker.cpqd.com.br:5000/jenkins/iotagent-json:9e3ad68"
     restart: always
     depends_on:
       - mongodb
@@ -65,7 +65,7 @@ services:
           - idas
 
   gui:
-    image: "iotmid-docker:5000/jenkins/devm-gui:5af7ab8"
+    image: "iotmid-docker.cpqd.com.br:5000/jenkins/devm-gui:e34b29c"
     restart: always
 
   orion:
@@ -96,7 +96,7 @@ services:
   #         - cygnus
 
   device-manager:
-    image: "iotmid-docker:5000/jenkins/devicemanager:bfef486"
+    image: "iotmid-docker.cpqd.com.br:5000/jenkins/devicemanager:bfef486"
     restart: always
     depends_on:
       - mongodb
@@ -106,7 +106,7 @@ services:
           - devm
 
   orch:
-    image: "iotmid-docker:5000/jenkins/node-orch:e2e1644"
+    image: "iotmid-docker.cpqd.com.br:5000/jenkins/node-orch:e8911a1"
     restart: always
     depends_on:
       - mongodb
@@ -116,7 +116,7 @@ services:
           - orchestrator
 
   auth:
-    image: "iotmid-docker:5000/jenkins/auth:64951d8"
+    image: "iotmid-docker.cpqd.com.br:5000/jenkins/auth:26386d7"
     restart: always
     depends_on:
       - mongodb
@@ -168,7 +168,7 @@ services:
     command: -perseo_fe_url perseo-fe:9090
 
   perseo-fe:
-    image: "iotmid-docker:5000/jenkins/perseo-fe:30f0eb7"
+    image: "giovannicuriel/perseo-fe:release-0.0.0-beta5"
     restart: always
     ports:
       - "127.0.0.1:9090:9090"
@@ -181,5 +181,29 @@ services:
       - PERSEO_ORION_URL=http://orion:1026/NGSI10/updateContext
 
   mashup:
-    image: "iotmid-docker:5000/jenkins/mashup-nodes:663bc28"
+    image: "iotmid-docker.cpqd.com.br:5000/jenkins/mashup-nodes:663bc28"
     restart: always
+
+
+
+  mysql:
+    image: mysql
+    ports:
+      - "3307:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: keypass
+      MYSQL_DATABASE: keypass
+      MYSQL_USER: keypass
+      MYSQL_PASSWORD: keypass
+
+  keypass:
+    image: telefonicaiot/fiware-keypass
+    links:
+      - mysql
+    expose:
+      - "7070"
+      - "7071"
+    ports:
+      - "7070:7070"
+      - "7071:7071"
+    command: -dbhost mysql
