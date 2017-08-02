@@ -76,6 +76,7 @@ curl -o /dev/null -sS -X POST $kong/apis/device/plugins --data "name=pepkong" \
     "upstream_url": "http://auth:5000"
 }
 PAYLOAD
+
 # no auth: this is actually the endpoint used to get a token
 # rate plugin limit to avoid brute-force atacks
 curl -o /dev/null -X POST $kong/apis/auth-service/plugins \
@@ -83,6 +84,23 @@ curl -o /dev/null -X POST $kong/apis/auth-service/plugins \
     --data "config.minute=5" \
     --data "config.hour=40" \
     --data "config.policy=local"
+
+
+# revoke all tokens: maintence only API
+(curl -o /dev/null $kong/apis -s -S -X POST \
+    --header "Content-Type: application/json" \
+    -d @- ) <<PAYLOAD
+{
+    "name": "auth-revoke",
+    "uris": "/auth/revoke",
+    "strip_uri": true,
+    "upstream_url": "http://auth:5000/auth/revoke"
+}
+PAYLOAD
+curl -o /dev/null -X POST  $kong/apis/auth-revoke/plugins \
+    --data "name=request-termination" \
+    --data "config.status_code=403" \
+    --data "config.message=Not authorized"
 
 (curl -o /dev/null $kong/apis -s -S -X POST \
     --header "Content-Type: application/json" \
