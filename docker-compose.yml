@@ -74,7 +74,7 @@ services:
       - 5684:5684/udp
 
   gui:
-    image: "iotmid-docker.cpqd.com.br:5000/jenkins/devm-gui:e34b29c"
+    image: "iotmid-docker.cpqd.com.br:5000/jenkins/devm-gui:661e245"
     restart: always
 
   orion:
@@ -151,7 +151,7 @@ services:
   #         - kong-db
 
   apigw:
-    image: "kong:0.10.0"
+    image: "iotmid-docker.cpqd.com.br:5000/jenkins/pep-kong:1ff2171"
     restart: always
     depends_on:
       - postgres
@@ -193,12 +193,8 @@ services:
     image: "iotmid-docker.cpqd.com.br:5000/jenkins/mashup-nodes:663bc28"
     restart: always
 
-
-
   mysql:
     image: mysql
-    ports:
-      - "3307:3306"
     environment:
       MYSQL_ROOT_PASSWORD: keypass
       MYSQL_DATABASE: keypass
@@ -207,12 +203,10 @@ services:
 
   keypass:
     image: telefonicaiot/fiware-keypass
-    links:
+    depends_on: 
       - mysql
-    expose:
-      - "7070"
-      - "7071"
+    restart: always
     ports:
-      - "7070:7070"
-      - "7071:7071"
+      - "127.0.0.1:7070:7070"
+      - "127.0.0.1:7071:7071"
     command: -dbhost mysql
