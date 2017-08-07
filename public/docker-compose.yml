@@ -57,15 +57,22 @@ services:
       - ./certs/ca.crt:/opt/iotajson/certs/ca.crt:Z
       - ./certs/iotagent.crt:/opt/iotajson/certs/iotagent.crt:Z
       - ./certs/iotagent.key:/opt/iotajson/certs/iotagent.key:Z
-    ports:
-      - "127.0.0.1:4041:4041"
     networks:
       default:
         aliases:
           - idas
 
+  coap:
+    image: "telefonicaiot/lightweightm2m-iotagent:latest"
+    restart: always
+    depends_on:
+      - mongodb
+    ports:
+      - "127.0.0.1:4041:4041"
+      - 5684:5684/udp
+
   gui:
-    image: "iotmid-docker.cpqd.com.br:5000/jenkins/devm-gui:e34b29c"
+    image: "iotmid-docker.cpqd.com.br:5000/jenkins/devm-gui:3cbf43a"
     restart: always
 
   orion:
@@ -106,7 +113,7 @@ services:
           - devm
 
   orch:
-    image: "iotmid-docker.cpqd.com.br:5000/jenkins/node-orch:e8911a1"
+    image: "iotmid-docker.cpqd.com.br:5000/jenkins/node-orch:a94cd00"
     restart: always
     depends_on:
       - mongodb
@@ -116,7 +123,7 @@ services:
           - orchestrator
 
   auth:
-    image: "iotmid-docker.cpqd.com.br:5000/jenkins/auth:26386d7"
+    image: "iotmid-docker.cpqd.com.br:5000/jenkins/auth:38c7491"
     restart: always
     depends_on:
       - mongodb
@@ -142,7 +149,8 @@ services:
   #         - kong-db
 
   apigw:
-    image: "iotmid-docker.cpqd.com.br:5000/jenkins/pep-kong:1ff2171"
+    image: "kong:0.10"
+    #image: "iotmid-docker.cpqd.com.br:5000/jenkins/pep-kong:1ff2171"
     restart: always
     depends_on:
       - postgres
@@ -194,7 +202,7 @@ services:
 
   keypass:
     image: telefonicaiot/fiware-keypass
-    depends_on: 
+    depends_on:
       - mysql
     restart: always
     ports:
