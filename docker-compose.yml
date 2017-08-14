@@ -72,7 +72,7 @@ services:
       - 5684:5684/udp
 
   gui:
-    image: "iotmid-docker.cpqd.com.br:5000/jenkins/devm-gui:3cbf43a"
+    image: "iotmid-docker.cpqd.com.br:5000/jenkins/devm-gui:60ea6a3"
     restart: always
 
   orion:
@@ -123,7 +123,7 @@ services:
           - orchestrator
 
   auth:
-    image: "iotmid-docker.cpqd.com.br:5000/jenkins/auth:38c7491"
+    image: "iotmid-docker.cpqd.com.br:5000/jenkins/auth:82cf9a8"
     restart: always
     depends_on:
       - mongodb
@@ -192,20 +192,20 @@ services:
     image: "iotmid-docker.cpqd.com.br:5000/jenkins/mashup-nodes:663bc28"
     restart: always
 
-  mysql:
-    image: mysql
-    environment:
-      MYSQL_ROOT_PASSWORD: keypass
-      MYSQL_DATABASE: keypass
-      MYSQL_USER: keypass
-      MYSQL_PASSWORD: keypass
-
-  keypass:
-    image: telefonicaiot/fiware-keypass
-    depends_on:
-      - mysql
-    restart: always
-    ports:
-      - "127.0.0.1:7070:7070"
-      - "127.0.0.1:7071:7071"
-    command: -dbhost mysql
+  # mysql:
+  #   image: mysql
+  #   environment:
+  #     MYSQL_ROOT_PASSWORD: keypass
+  #     MYSQL_DATABASE: keypass
+  #     MYSQL_USER: keypass
+  #     MYSQL_PASSWORD: keypass
+  #
+  # keypass:
+  #   image: telefonicaiot/fiware-keypass
+  #   depends_on:
+  #     - mysql
+  #   restart: always
+  #   ports:
+  #     - "127.0.0.1:7070:7070"
+  #     - "127.0.0.1:7071:7071"
+  #   command: -dbhost mysql
