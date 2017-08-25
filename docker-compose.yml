@@ -47,7 +47,7 @@ services:
     command: "/usr/local/sbin/mosquitto -c /usr/local/src/mosquitto-1.4.13/mosquitto.conf"
 
   iotagent:
-    image: "iotmid-docker.cpqd.com.br:5000/jenkins/iotagent-json:9e3ad68"
+    image: dojot/iotagent-json:latest
     restart: always
     depends_on:
       - mongodb
@@ -72,11 +72,11 @@ services:
       - 5684:5684/udp
 
   gui:
-    image: "iotmid-docker.cpqd.com.br:5000/jenkins/devm-gui:60ea6a3"
+    image: dojot/gui:latest
     restart: always
 
   orion:
-    image: fiware/orion
+    image: dojot/fiware-orion:latest
     restart: always
     depends_on:
       - mongodb
@@ -103,7 +103,7 @@ services:
   #         - cygnus
 
   device-manager:
-    image: "iotmid-docker.cpqd.com.br:5000/jenkins/devicemanager:bfef486"
+    image: dojot/device-manager:latest
     restart: always
     depends_on:
       - mongodb
@@ -112,18 +112,8 @@ services:
         aliases:
           - devm
 
-  orch:
-    image: "iotmid-docker.cpqd.com.br:5000/jenkins/node-orch:a94cd00"
-    restart: always
-    depends_on:
-      - mongodb
-    networks:
-      default:
-        aliases:
-          - orchestrator
-
   auth:
-    image: "iotmid-docker.cpqd.com.br:5000/jenkins/auth:82cf9a8"
+    image: dojot/auth
     restart: always
     depends_on:
       - mongodb
@@ -176,7 +166,7 @@ services:
     command: -perseo_fe_url perseo-fe:9090
 
   perseo-fe:
-    image: "giovannicuriel/perseo-fe:release-0.0.0-beta5"
+    image: dojot/perseo-fe:latest
     restart: always
     ports:
       - "127.0.0.1:9090:9090"
@@ -189,7 +179,7 @@ services:
       - PERSEO_ORION_URL=http://orion:1026/NGSI10/updateContext
 
   mashup:
-    image: "iotmid-docker.cpqd.com.br:5000/jenkins/mashup-nodes:663bc28"
+    image: dojot/mashup:latest
     restart: always
 
   # mysql:
