@@ -45,23 +45,6 @@ be found at the project's documentation:
 
 https://docs.docker.com/compose/install/
 
-Internal Docker registry
-^^^^^^^^^^^^^^^^^^^^^^^^
-
-While the project is not released, an internal docker registry will be used
-to host the docker images built by jenkins as part of our CI/CD workflow.
-
-As of now, that registry has no valid TLS certificate associated with it,
-thus requiring the users of such registry to configure their docker engine
-clients to allow this particular insecure registry.
-
-To configure the machine's docker client to allow the internal registry, edit
-the docker engine parameters as follows.::
-
-  echo '{ "insecure-registries":["iotmid-docker.cpqd.com.br:5000"] }' | sudo tee /etc/docker/daemon.json
-  sudo service docker stop
-  sudo service docker start
-
 Installation
 ------------
 
