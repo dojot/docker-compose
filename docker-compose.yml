@@ -84,24 +84,6 @@ services:
       - "127.0.0.1:1026:1026"
     command: -dbhost mongodb
 
-  # mysql:
-  #   image: mysql
-  #   environment:
-  #     MYSQL_ROOT_PASSWORD: not_safe
-  #   networks:
-  #     default:
-  #       aliases:
-  #         - mysql
-  #
-  # cygnus:
-  #   image: fiware/cygnus-ngsi
-  #   volumes:
-  #     - ./cygnus/agent.conf:/opt/apache-flume/conf/agent.conf
-  #   networks:
-  #     default:
-  #       aliases:
-  #         - cygnus
-
   device-manager:
     image: dojot/device-manager:latest
     restart: always
@@ -130,17 +112,8 @@ services:
         aliases:
           - kong-db
 
-  # cassandra:
-  #   image: "cassandra:2.2"
-  #   networks:
-  #     default:
-  #       aliases:
-  #         - cassandra
-  #         - kong-db
-
   apigw:
     image: "kong:0.10"
-    #image: "iotmid-docker.cpqd.com.br:5000/jenkins/pep-kong:1ff2171"
     restart: always
     depends_on:
       - postgres
@@ -181,21 +154,3 @@ services:
   mashup:
     image: dojot/mashup:latest
     restart: always
-
-  # mysql:
-  #   image: mysql
-  #   environment:
-  #     MYSQL_ROOT_PASSWORD: keypass
-  #     MYSQL_DATABASE: keypass
-  #     MYSQL_USER: keypass
-  #     MYSQL_PASSWORD: keypass
-  #
-  # keypass:
-  #   image: telefonicaiot/fiware-keypass
-  #   depends_on:
-  #     - mysql
-  #   restart: always
-  #   ports:
-  #     - "127.0.0.1:7070:7070"
-  #     - "127.0.0.1:7071:7071"
-  #   command: -dbhost mysql
