@@ -27,7 +27,6 @@ services:
       STH_HOST: "0.0.0.0"
       DB_URI: "mongodb:27017"
 
-
   mongodb:
     image: "mongo:3.2"
     restart: always
@@ -47,7 +46,7 @@ services:
     command: "/usr/local/sbin/mosquitto -c /usr/local/src/mosquitto-1.4.13/mosquitto.conf"
 
   iotagent:
-    image: "iotmid-docker.cpqd.com.br:5000/jenkins/iotagent-json:9e3ad68"
+    image: "dojot/iotagent-json:0.1.0-dojot-RC1"
     restart: always
     depends_on:
       - mongodb
@@ -72,7 +71,7 @@ services:
       - 5684:5684/udp
 
   gui:
-    image: "iotmid-docker.cpqd.com.br:5000/jenkins/devm-gui:60ea6a3"
+    image: "dojot/gui:0.1.0-dojot-RC1"
     restart: always
 
   orion:
@@ -84,26 +83,8 @@ services:
       - "127.0.0.1:1026:1026"
     command: -dbhost mongodb
 
-  # mysql:
-  #   image: mysql
-  #   environment:
-  #     MYSQL_ROOT_PASSWORD: not_safe
-  #   networks:
-  #     default:
-  #       aliases:
-  #         - mysql
-  #
-  # cygnus:
-  #   image: fiware/cygnus-ngsi
-  #   volumes:
-  #     - ./cygnus/agent.conf:/opt/apache-flume/conf/agent.conf
-  #   networks:
-  #     default:
-  #       aliases:
-  #         - cygnus
-
   device-manager:
-    image: "iotmid-docker.cpqd.com.br:5000/jenkins/devicemanager:bfef486"
+    image: "dojot/device-manager:0.1.0-dojot-RC1"
     restart: always
     depends_on:
       - mongodb
@@ -113,7 +94,7 @@ services:
           - devm
 
   orch:
-    image: "iotmid-docker.cpqd.com.br:5000/jenkins/node-orch:a94cd00"
+    image: "dojot/orchestrator:0.1.0-dojot-RC1"
     restart: always
     depends_on:
       - mongodb
@@ -123,7 +104,7 @@ services:
           - orchestrator
 
   auth:
-    image: "iotmid-docker.cpqd.com.br:5000/jenkins/auth:82cf9a8"
+    image: "dojot/auth:0.1.0-dojot-RC1"
     restart: always
     depends_on:
       - mongodb
@@ -140,17 +121,8 @@ services:
         aliases:
           - kong-db
 
-  # cassandra:
-  #   image: "cassandra:2.2"
-  #   networks:
-  #     default:
-  #       aliases:
-  #         - cassandra
-  #         - kong-db
-
   apigw:
     image: "kong:0.10"
-    #image: "iotmid-docker.cpqd.com.br:5000/jenkins/pep-kong:1ff2171"
     restart: always
     depends_on:
       - postgres
@@ -176,7 +148,7 @@ services:
     command: -perseo_fe_url perseo-fe:9090
 
   perseo-fe:
-    image: "giovannicuriel/perseo-fe:release-0.0.0-beta5"
+    image: "dojot/perseo-fe:0.1.0-dojot-RC1"
     restart: always
     ports:
       - "127.0.0.1:9090:9090"
@@ -189,23 +161,5 @@ services:
       - PERSEO_ORION_URL=http://orion:1026/NGSI10/updateContext
 
   mashup:
-    image: "iotmid-docker.cpqd.com.br:5000/jenkins/mashup-nodes:663bc28"
+    image: "dojot/mashup-nodes:0.1.0-dojot-RC1"
     restart: always
-
-  # mysql:
-  #   image: mysql
-  #   environment:
-  #     MYSQL_ROOT_PASSWORD: keypass
-  #     MYSQL_DATABASE: keypass
-  #     MYSQL_USER: keypass
-  #     MYSQL_PASSWORD: keypass
-  #
-  # keypass:
-  #   image: telefonicaiot/fiware-keypass
-  #   depends_on:
-  #     - mysql
-  #   restart: always
-  #   ports:
-  #     - "127.0.0.1:7070:7070"
-  #     - "127.0.0.1:7071:7071"
-  #   command: -dbhost mysql
