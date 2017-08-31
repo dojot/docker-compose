@@ -72,12 +72,6 @@ That done, the environment can be brought up by: ::
   # May need sudo to work: sudo docker-compose up -d
   docker-compose up -d
 
-.. note::
-
-  Should the pulling of the container a container image fail, adding the explicit
-  reference to the internal registry may solve the problem.
-
-  Should that suffice or not, be sure to open a JIRA ticket for that error.
 
 To check individual container status, docker's commands may be used, for instance: ::
 
@@ -115,7 +109,7 @@ User creation
 ^^^^^^^^^^^^^
 
 To be able to use the system's web front-end and make API calls, a user must be created. To create
-a first `admin` user, the following script can be run on the host machine of the middleware (that
+a first `admin` user, the following script can be run on the host machine of the platform (that
 is, the machine where docker-compose was run). The script is located at the root of the repository.
 ::
 
