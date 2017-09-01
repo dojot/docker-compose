@@ -3,6 +3,16 @@
 # ---  0.10.x
 kong="http://localhost:8001"
 
+authConfig() {
+  curl -o /dev/null -sS -X POST $kong/apis/$1/plugins -d "name=jwt" # -d "config.claims_to_verify=exp"
+  curl -o /dev/null -sS -X POST $kong/apis/$1/plugins -d "name=pepkong" -d "config.pdpUrl=http://keypass:7070"
+}
+
+# remove all previously configured apis from gateway
+for i in $(curl -sS localhost:8001/apis  | grep -oP '(?<="id":")[a-f0-9-]+(?=")'); do
+  curl -o /dev/null -sS -X DELETE $kong/apis/$i
+done
+
 (curl -o /dev/null $kong/apis -sS -X PUT \
     --header "Content-Type: application/json" \
     -d @- ) <<PAYLOAD
@@ -25,11 +35,7 @@ PAYLOAD
     "upstream_url": "http://orion:1026"
 }
 PAYLOAD
-curl -o /dev/null -sS -X POST $kong/apis/metric/plugins --data "name=jwt"
-#    --data "config.claims_to_verify=exp"
-
-curl -o /dev/null -sS -X POST $kong/apis/metric/plugins --data "name=pepkong" \
-	 -d "config.pdpUrl=http://keypass:7070"
+authConfig "metric"
 
 
 (curl -o /dev/null $kong/apis -s -S -X POST \
@@ -42,11 +48,7 @@ curl -o /dev/null -sS -X POST $kong/apis/metric/plugins --data "name=pepkong" \
     "upstream_url": "http://devm:5000"
 }
 PAYLOAD
-curl -o /dev/null -sS -X POST $kong/apis/template/plugins --data "name=jwt"
-#    --data "config.claims_to_verify=exp"
-
-curl -o /dev/null -sS -X POST $kong/apis/template/plugins --data "name=pepkong" \
-	 -d "config.pdpUrl=http://keypass:7070"
+authConfig "template"
 
 
 (curl -o /dev/null $kong/apis -s -S -X POST \
@@ -59,12 +61,7 @@ curl -o /dev/null -sS -X POST $kong/apis/template/plugins --data "name=pepkong" 
     "upstream_url": "http://devm:5000"
 }
 PAYLOAD
-curl -o /dev/null -sS -X POST $kong/apis/device/plugins --data "name=jwt"
-#    --data "config.claims_to_verify=exp"
-
-curl -o /dev/null -sS -X POST $kong/apis/device/plugins --data "name=pepkong" \
-	 -d "config.pdpUrl=http://keypass:7070"
-
+authConfig "device"
 
 (curl -o /dev/null $kong/apis -s -S -X POST \
     --header "Content-Type: application/json" \
@@ -76,7 +73,6 @@ curl -o /dev/null -sS -X POST $kong/apis/device/plugins --data "name=pepkong" \
     "upstream_url": "http://auth:5000"
 }
 PAYLOAD
-
 # no auth: this is actually the endpoint used to get a token
 # rate plugin limit to avoid brute-force atacks
 curl -o /dev/null -sS -X POST $kong/apis/auth-service/plugins \
@@ -102,6 +98,7 @@ curl -o /dev/null -sS -X POST  $kong/apis/auth-revoke/plugins \
     --data "config.status_code=403" \
     --data "config.message=Not authorized"
 
+
 (curl -o /dev/null $kong/apis -s -S -X POST \
     --header "Content-Type: application/json" \
     -d @- ) <<PAYLOAD
@@ -112,11 +109,7 @@ curl -o /dev/null -sS -X POST  $kong/apis/auth-revoke/plugins \
     "upstream_url": "http://auth:5000/user"
 }
 PAYLOAD
-curl -o /dev/null -sS -X POST $kong/apis/user-service/plugins --data "name=jwt"
-#    --data "config.claims_to_verify=exp"
-
-curl -o /dev/null -sS -X POST $kong/apis/user-service/plugins --data "name=pepkong" \
-	 -d "config.pdpUrl=http://keypass:7070"
+authConfig "user-service"
 
 (curl -o /dev/null $kong/apis -s -S -X POST \
     --header "Content-Type: application/json" \
@@ -128,11 +121,7 @@ curl -o /dev/null -sS -X POST $kong/apis/user-service/plugins --data "name=pepko
     "upstream_url": "http://mashup:3000"
 }
 PAYLOAD
-curl -o /dev/null -sS -X POST $kong/apis/flows/plugins --data "name=jwt"
-#    --data "config.claims_to_verify=exp"
-
-curl -o /dev/null -sS -X POST $kong/apis/flows/plugins --data "name=pepkong" \
-	 -d "config.pdpUrl=http://keypass:7070"
+authConfig "flows"
 
 (curl -o /dev/null $kong/apis -s -S -X POST \
     --header "Content-Type: application/json" \
@@ -144,11 +133,7 @@ curl -o /dev/null -sS -X POST $kong/apis/flows/plugins --data "name=pepkong" \
     "upstream_url": "http://sth:8666"
 }
 PAYLOAD
-curl -o /dev/null -sS -X POST $kong/apis/history/plugins --data "name=jwt"
-#    --data "config.claims_to_verify=exp"
-
-curl -o /dev/null -sS -X POST $kong/apis/history/plugins --data "name=pepkong" \
-	 -d "config.pdpUrl=http://keypass:7070"
+authConfig "history"
 
 # TODO it might be a good idea to merge this with the orchestrator itself
 (curl -o /dev/null $kong/apis -s -S -X POST \
@@ -173,3 +158,4 @@ PAYLOAD
     "upstream_url": "http://iotagent:8080"
 }
 PAYLOAD
+# no auth: used for middleware <-> device communication via HTTP(s)
