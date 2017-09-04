@@ -75,7 +75,7 @@ services:
     restart: always
 
   orion:
-    image: fiware/orion
+    image: dojot/fiware-orion:latest
     restart: always
     depends_on:
       - mongodb
@@ -93,18 +93,9 @@ services:
         aliases:
           - devm
 
-  orch:
-    image: "dojot/orchestrator:0.1.0-dojot-RC1"
-    restart: always
-    depends_on:
-      - mongodb
-    networks:
-      default:
-        aliases:
-          - orchestrator
 
   auth:
-    image: "dojot/auth:0.1.0-dojot-RC1"
+    image: dojot/auth:latest
     restart: always
     depends_on:
       - mongodb
@@ -161,5 +152,5 @@ services:
       - PERSEO_ORION_URL=http://orion:1026/NGSI10/updateContext
 
   mashup:
-    image: "dojot/mashup-nodes:0.1.0-dojot-RC1"
+    image: "dojot/mashup:latest"
     restart: always

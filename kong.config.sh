@@ -125,7 +125,7 @@ curl -o /dev/null -sS -X POST $kong/apis/user-service/plugins --data "name=pepko
     "name": "flows",
     "uris": "/flows",
     "strip_uri": true,
-    "upstream_url": "http://orch:3000"
+    "upstream_url": "http://mashup:3000"
 }
 PAYLOAD
 curl -o /dev/null -sS -X POST $kong/apis/flows/plugins --data "name=jwt"
