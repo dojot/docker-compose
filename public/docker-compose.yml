@@ -46,7 +46,7 @@ services:
     command: "/usr/local/sbin/mosquitto -c /usr/local/src/mosquitto-1.4.13/mosquitto.conf"
 
   iotagent:
-    image: "dojot/iotagent-json:0.1.0-dojot-RC1"
+    image: "dojot/iotagent-json:0.1.0-dojot-RC2"
     restart: always
     depends_on:
       - mongodb
@@ -71,11 +71,11 @@ services:
       - 5684:5684/udp
 
   gui:
-    image: "dojot/gui:0.1.0-dojot-RC1"
+    image: "dojot/gui:0.1.0-dojot-RC2"
     restart: always
 
   orion:
-    image: fiware/orion
+    image: dojot/fiware-orion:0.1.0-dojot-RC2
     restart: always
     depends_on:
       - mongodb
@@ -84,7 +84,7 @@ services:
     command: -dbhost mongodb
 
   device-manager:
-    image: "dojot/device-manager:0.1.0-dojot-RC1"
+    image: "dojot/device-manager:0.1.0-dojot-RC2"
     restart: always
     depends_on:
       - mongodb
@@ -93,18 +93,9 @@ services:
         aliases:
           - devm
 
-  orch:
-    image: "dojot/orchestrator:0.1.0-dojot-RC1"
-    restart: always
-    depends_on:
-      - mongodb
-    networks:
-      default:
-        aliases:
-          - orchestrator
 
   auth:
-    image: "dojot/auth:0.1.0-dojot-RC1"
+    image: dojot/auth:0.1.0-dojot-RC2
     restart: always
     depends_on:
       - mongodb
@@ -148,7 +139,7 @@ services:
     command: -perseo_fe_url perseo-fe:9090
 
   perseo-fe:
-    image: "dojot/perseo-fe:0.1.0-dojot-RC1"
+    image: "dojot/perseo-fe:0.1.0-dojot-RC2"
     restart: always
     ports:
       - "127.0.0.1:9090:9090"
@@ -161,5 +152,5 @@ services:
       - PERSEO_ORION_URL=http://orion:1026/NGSI10/updateContext
 
   mashup:
-    image: "dojot/mashup-nodes:0.1.0-dojot-RC1"
+    image: "dojot/mashup:0.1.0-dojot-RC2"
     restart: always
