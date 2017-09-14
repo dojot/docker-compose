@@ -133,7 +133,7 @@ services:
         aliases:
           - kong
 
-  pep-ws:
+  pdp-ws:
     image: "dojot/pep-ws"
     restart: always
     depends_on:

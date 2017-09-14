@@ -36,6 +36,10 @@ if [ "$existsPEPWS" = "" ]; then
     	('POST', 'device', 'admin'),
     	('GET', 'device', 'user'),
     	('POST', 'device', 'user'),
+    	('GET', 'metric', 'admin'),
+    	('POST', 'metric', 'admin'),
+    	('GET', 'metric', 'user'),
+    	('POST', 'metric', 'user'),
     	('GET', 'template', 'admin'),
     	('POST', 'template', 'admin'),
     	('GET', 'template', 'user'),
@@ -44,10 +48,8 @@ if [ "$existsPEPWS" = "" ]; then
     	('POST', 'flows', 'admin'),
     	('GET', 'flows', 'user'),
     	('POST', 'flows', 'user'),
-    	('GET', 'auth', 'admin'),
-    	('POST', 'auth', 'admin'),
-    	('GET', 'auth', 'user'),
-    	('POST', 'auth', 'user');"
+    	('GET', 'auth/user', 'admin'),
+    	('POST', 'auth/user', 'admin');"
 fi
 
 echo "PEP-WS environment is Ok!"
