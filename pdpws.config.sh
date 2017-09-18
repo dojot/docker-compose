@@ -1,27 +1,21 @@
 #!/bin/bash
 
-getIp() {
-  name=$(docker ps -f name=$1 --format "{{.Names}}")
-  if [[ ! -z "$name" ]] ; then
-      docker inspect --format='{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' $name
-  fi
-}
-
-ipPostgres=$(getIp postgres)
-
 echo "Checking PEP-WS environment..."
 
-existsPEPWS=($(psql --host=$ipPostgres --port=5432 --username=postgres -t -c "select true from pg_database where datname = 'dojot'"))
+ipPostgres=localhost
+PSQL="docker exec $(docker ps -f name=postgres --format "{{.Names}}" | head -1) psql"
+
+existsPEPWS=($($PSQL --host=$ipPostgres --port=5432 --username=postgres -t -c "select true from pg_database where datname = 'dojot'"))
 
 if [ "$existsPEPWS" = "" ]; then
   echo "Creating PEP-WS database..."
-  psql --host=$ipPostgres --port=5432 --username=postgres -c "CREATE DATABASE dojot WITH ENCODING 'UTF8'"
+  $PSQL --host=$ipPostgres --port=5432 --username=postgres -c "CREATE DATABASE dojot WITH ENCODING 'UTF8'"
 
   echo "Creating PEP-WS schema..."
-  psql --host=$ipPostgres --port=5432 --username=postgres --dbname=dojot -c "CREATE SCHEMA dojot_authorization"
+  $PSQL --host=$ipPostgres --port=5432 --username=postgres --dbname=dojot -c "CREATE SCHEMA dojot_authorization"
 
   echo "Creating PEP-WS schema..."
-  psql --host=$ipPostgres --port=5432 --username=postgres --dbname=dojot -c 'CREATE TABLE dojot_authorization."authorization"
+  $PSQL --host=$ipPostgres --port=5432 --username=postgres --dbname=dojot -c 'CREATE TABLE dojot_authorization."authorization"
     (
       action character varying(200),
       resource character varying(200),
@@ -29,7 +23,7 @@ if [ "$existsPEPWS" = "" ]; then
     );'
 
   echo "Inserting PEP-WS policies..."
-  psql --host=$ipPostgres --port=5432 --username=postgres --dbname=dojot -c "insert into dojot_authorization.authorization
+  $PSQL --host=$ipPostgres --port=5432 --username=postgres --dbname=dojot -c "insert into dojot_authorization.authorization
     	(action, resource, accessSubject)
     values
     	('GET', 'device', 'admin'),
