@@ -5,7 +5,7 @@ kong="http://localhost:8001"
 
 authConfig() {
   curl -o /dev/null -sS -X POST $kong/apis/$1/plugins -d "name=jwt" # -d "config.claims_to_verify=exp"
-  curl -o /dev/null -sS -X POST $kong/apis/$1/plugins -d "name=pepkong" -d "config.pdpUrl=http://keypass:7070"
+  curl -o /dev/null -sS -X POST $kong/apis/$1/plugins -d "name=pepkong" -d "config.pdpUrl=http://pdp-ws:9763"
 }
 
 # remove all previously configured apis from gateway
