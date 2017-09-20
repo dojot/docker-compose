@@ -113,7 +113,7 @@ services:
           - kong-db
 
   apigw:
-    image: "dojot/pep-kong"
+    image: dojot/pep-kong:latest
     restart: always
     depends_on:
       - postgres
@@ -134,14 +134,14 @@ services:
           - kong
 
   pdp-ws:
-    image: "dojot/pep-ws"
+    image: dojot/pdp-ws:latest
     restart: always
     depends_on:
       - postgres
     ports:
       - "9763:9763"
     volumes:
-      - ./pepws/standalone.xml:/opt/jboss/wildfly/standalone/configuration/standalone.xml
+      - ./pdpws/standalone.xml:/opt/jboss/wildfly/standalone/configuration/standalone.xml
 
   perseo-core:
     image: telefonicaiot/perseo-core

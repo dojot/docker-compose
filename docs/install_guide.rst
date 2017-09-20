@@ -114,3 +114,11 @@ is, the machine where docker-compose was run). The script is located at the root
 ::
 
   ./create.user.sh
+
+Policies creation
+^^^^^^^^^^^^^
+
+To create the policies that defines who can access what, we need to register the policies in the
+pdp-ws service. To do so, please run pdpws.config.sh, present at the root of the repository.::
+
+./pdpws.config.sh
