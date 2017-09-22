@@ -22,28 +22,18 @@ if [ "$existsPEPWS" = "" ]; then
       accessSubject character varying(200)
     );'
 
+  echo "Creating index subject_idx"
+  $PSQL --host=$ipPostgres --port=5432 --username=postgres --dbname=dojot -c 'CREATE INDEX subject_idx ON dojot_authorization."authorization" (accessSubject)'
+
   echo "Inserting PEP-WS policies..."
   $PSQL --host=$ipPostgres --port=5432 --username=postgres --dbname=dojot -c "insert into dojot_authorization.authorization
     	(action, resource, accessSubject)
     values
-    	('GET', 'device', 'admin'),
-    	('POST', 'device', 'admin'),
-    	('GET', 'device', 'user'),
-    	('POST', 'device', 'user'),
-    	('GET', 'metric', 'admin'),
-    	('POST', 'metric', 'admin'),
-    	('GET', 'metric', 'user'),
-    	('POST', 'metric', 'user'),
-    	('GET', 'template', 'admin'),
-    	('POST', 'template', 'admin'),
-    	('GET', 'template', 'user'),
-    	('POST', 'template', 'user'),
-    	('GET', 'flows', 'admin'),
-    	('POST', 'flows', 'admin'),
-    	('GET', 'flows', 'user'),
-    	('POST', 'flows', 'user'),
-    	('GET', 'auth/user', 'admin'),
-    	('POST', 'auth/user', 'admin');"
+    	('.*', '.*', 'admin'),
+    	('.*', '/device.*', 'user'),
+    	('.*', '/metric.*', 'user'),
+    	('.*', '/template.*', 'user'),
+    	('.*', '/flows.*', 'user');"
 fi
 
 echo "PEP-WS environment is Ok!"
