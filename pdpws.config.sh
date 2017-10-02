@@ -29,12 +29,12 @@ if [ "$existsPEPWS" = "" ]; then
   $PSQL --host=$ipPostgres --port=5432 --username=postgres --dbname=dojot -c "insert into dojot_authorization.authorization
       (action, resource, accessSubject)
     values
-    	('.*', '.*', 'admin'),
-    	('.*', '/device.*', 'user'),
-    	('.*', '/metric.*', 'user'),
-    	('.*', '/template.*', 'user'),
+      ('.*', '.*', 'admin'),
+      ('.*', '/device.*', 'user'),
+      ('.*', '/metric.*', 'user'),
+      ('.*', '/template.*', 'user'),
       ('.*', '/history.*', 'user'),
-    	('.*', '/flows.*', 'user');"
+      ('.*', '/flows.*', 'user');"
 fi
 
 echo "PEP-WS environment is Ok!"
