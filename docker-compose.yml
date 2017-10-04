@@ -113,7 +113,7 @@ services:
           - kong-db
 
   apigw:
-    image: dojot/pep-kong:latest
+    image: dojot/kong:latest
     restart: always
     depends_on:
       - postgres
@@ -128,6 +128,9 @@ services:
       KONG_DATABASE: "postgres"
       KONG_CASSANDRA_CONTACT_POINTS: "cassandra"
       KONG_PG_HOST: "postgres"
+    volumes:    
+      - ./apigw/kong.conf:/etc/kong/kong.conf
+      - ./apigw/plugins/pep-kong:/plugins/pep-kong
     networks:
       default:
         aliases:
