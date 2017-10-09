@@ -141,7 +141,7 @@ services:
     ports:
       - "9763:9763"
     volumes:
-      - ./pdpws/standalone.xml:/opt/jboss/wildfly/standalone/configuration/standalone.xml
+      - ./pdpws/standalone.xml:/opt/jboss/wildfly/standalone/configuration/standalone.xml:Z
 
   perseo-core:
     image: telefonicaiot/perseo-core
