@@ -47,7 +47,7 @@ services:
     command: "/usr/local/sbin/mosquitto -c /usr/local/src/mosquitto-1.4.13/mosquitto.conf"
 
   iotagent:
-    image: dojot/iotagent-json:latest
+    image: dojot/iotagent-json:0.2.0-nightly20171010
     restart: always
     depends_on:
       - mongodb
@@ -72,11 +72,11 @@ services:
       - 5684:5684/udp
 
   gui:
-    image: dojot/gui:latest
+    image: dojot/gui:0.2.0-nightly20171010
     restart: always
 
   orion:
-    image: dojot/fiware-orion:latest
+    image: dojot/fiware-orion:0.2.0-nightly20171010
     restart: always
     depends_on:
       - mongodb
@@ -85,7 +85,7 @@ services:
     command: -dbhost mongodb
 
   device-manager:
-    image: dojot/device-manager:latest
+    image: dojot/device-manager:0.2.0-nightly20171010
     restart: always
     depends_on:
       - mongodb
@@ -95,11 +95,16 @@ services:
           - devm
 
   auth:
-    image: dojot/auth
+    image: dojot/auth:0.2.0-nightly20171010
     restart: always
     depends_on:
       - mongodb
       - apigw
+    environment:
+      DB_HOST: "postgres"
+      DB_USER: "postgres"
+      DB_PWD: ""
+      KONG_URL: "http://apigw:8001"
 
   postgres:
     image: "postgres:9.4"
@@ -113,7 +118,7 @@ services:
           - kong-db
 
   apigw:
-    image: dojot/pep-kong:latest
+    image: dojot/pep-kong:0.2.0-nightly20171010
     restart: always
     depends_on:
       - postgres
@@ -134,14 +139,14 @@ services:
           - kong
 
   pdp-ws:
-    image: dojot/pdp-ws:latest
+    image: dojot/pdp-ws:0.2.0-nightly20171010
     restart: always
     depends_on:
       - postgres
     ports:
       - "9763:9763"
     volumes:
-      - ./pdpws/standalone.xml:/opt/jboss/wildfly/standalone/configuration/standalone.xml
+      - ./pdpws/standalone.xml:/opt/jboss/wildfly/standalone/configuration/standalone.xml:Z
 
   perseo-core:
     image: telefonicaiot/perseo-core
@@ -149,7 +154,7 @@ services:
     command: -perseo_fe_url perseo-fe:9090
 
   perseo-fe:
-    image: dojot/perseo-fe:latest
+    image: dojot/perseo-fe:0.2.0-nightly20171010
     restart: always
     ports:
       - "127.0.0.1:9090:9090"
@@ -162,5 +167,5 @@ services:
       - PERSEO_ORION_URL=http://orion:1026/NGSI10/updateContext
 
   mashup:
-    image: dojot/mashup:latest
+    image: dojot/mashup:0.2.0-nightly20171010
     restart: always
