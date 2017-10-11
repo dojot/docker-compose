@@ -108,17 +108,18 @@ present at the root of the repository. ::
 User creation
 ^^^^^^^^^^^^^
 
-To be able to use the system's web front-end and make API calls, a user must be created. To create
-a first `admin` user, the following script can be run on the host machine of the platform (that
-is, the machine where docker-compose was run). The script is located at the root of the repository.
-::
+The `admin` user is automatically created and have complete access privilege.
+Admin default password is 'admin'. Change this password ASAP.
+One can easily change password and create new users using the web interface.
+Login as admin and navigate to the 'Auth' menu.
 
-  ./create.user.sh
 
-Policies creation
+Access policies
 ^^^^^^^^^^^^^
 
-To create the policies that defines who can access what, we need to register the policies in the
-pdp-ws service. To do so, please run pdpws.config.sh, present at the root of the repository.::
+Dojot use a RBAC system to manage authorization.
+Two groups are created automatically:
+- Admin: full privilege group
+- User: Can access everything, except manage user and permissions.
 
-./pdpws.config.sh
+Soon, a interface to manage groups and permissions will be available.
