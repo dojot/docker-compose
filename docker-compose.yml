@@ -38,13 +38,6 @@ services:
     restart: always
     ports:
       - "1883:1883"
-      - "8883:8883"
-    volumes:
-      - ./mqtt/mosquitto.conf:/usr/local/src/mosquitto-1.4.13/mosquitto.conf:Z
-      - ./certs/ca.crt:/usr/local/src/mosquitto-1.4.13/certs/ca.crt:Z
-      - ./certs/server.crt:/usr/local/src/mosquitto-1.4.13/certs/server.crt:Z
-      - ./certs/server.key:/usr/local/src/mosquitto-1.4.13/certs/server.key:Z
-    command: "/usr/local/sbin/mosquitto -c /usr/local/src/mosquitto-1.4.13/mosquitto.conf"
 
   iotagent:
     image: dojot/iotagent-json:latest
@@ -54,9 +47,6 @@ services:
       - mqtt
     volumes:
       - ./iotagent/config.js:/opt/iotajson/config.js:Z
-      - ./certs/ca.crt:/opt/iotajson/certs/ca.crt:Z
-      - ./certs/iotagent.crt:/opt/iotajson/certs/iotagent.crt:Z
-      - ./certs/iotagent.key:/opt/iotajson/certs/iotagent.key:Z
     networks:
       default:
         aliases:
