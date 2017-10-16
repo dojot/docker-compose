@@ -1,0 +1,3 @@
+[submodule "apigw/plugins/pep-kong"]
+	path = apigw/plugins/pep-kong
+	url = https://github.com/dojot/pep-kong
