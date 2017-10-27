@@ -1,4 +1,4 @@
-version: '2'
+version: '2.1'
 services:
 
 #  certs:
@@ -101,12 +101,30 @@ services:
       default:
         aliases:
           - kong-db
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  kong-migration:
+    image: dojot/kong:latest
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      - KONG_DATABASE=postgres
+      - KONG_PG_HOST=postgres
+    command: kong migrations up
 
   apigw:
     image: dojot/kong:latest
     restart: always
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
+      kong-migration:
+        condition: service_started
     ports:
       - "8000:8000"
       - "8443:8443"
@@ -118,7 +136,7 @@ services:
       KONG_DATABASE: "postgres"
       KONG_CASSANDRA_CONTACT_POINTS: "cassandra"
       KONG_PG_HOST: "postgres"
-    volumes:    
+    volumes:
       - ./apigw/plugins/pep-kong:/plugins/pep-kong
     networks:
       default:
