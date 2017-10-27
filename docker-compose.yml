@@ -89,11 +89,16 @@ services:
     restart: always
     depends_on:
       - apigw
-      - postgres
+      - redis
+    depends_on:
+      postgres:
+        condition: service_healthy
     environment:
-      DB_HOST: "postgres"
-      DB_USER: "kong"
-      KONG_URL: "http://kong:8001"
+      AUTH_DB_HOST: "postgres"
+      AUTH_DB_USER: "kong"
+      AUTH_KONG_URL: "http://kong:8001"
+      AUTH_CACHE_NAME: "redis"
+      AUTH_CACHE_HOST: "redis"
 
   postgres:
     image: "postgres:9.4"
@@ -167,4 +172,8 @@ services:
 
   mashup:
     image: dojot/mashup:latest
+    restart: always
+
+  redis:
+    image: redis
     restart: always
