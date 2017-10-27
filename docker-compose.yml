@@ -88,8 +88,12 @@ services:
     image: dojot/auth
     restart: always
     depends_on:
-      - mongodb
       - apigw
+      - postgres
+    environment:
+      DB_HOST: "postgres"
+      DB_USER: "kong"
+      KONG_URL: "http://kong:8001"
 
   postgres:
     image: "postgres:9.4"
@@ -142,16 +146,6 @@ services:
       default:
         aliases:
           - kong
-
-  pdp-ws:
-    image: dojot/pdp-ws:latest
-    restart: always
-    depends_on:
-      - postgres
-    ports:
-      - "9763:9763"
-    volumes:
-      - ./pdpws/standalone.xml:/opt/jboss/wildfly/standalone/configuration/standalone.xml:Z
 
   perseo-core:
     image: telefonicaiot/perseo-core
