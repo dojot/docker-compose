@@ -180,45 +180,24 @@ services:
     restart: always
 
 
-
-
-
   zookeeper:
     image: "zookeeper:3.4"
-    container_name: zookeeper
-    ports:
-      - "2181:2181"
 
   kafka:
-    image: "wurstmeister/kafka:0.10.1.1"
-    container_name: kafka
-    ports:
-      - "9092:9092"
-      - "32773:32773"
+    image: "ches/kafka:0.10.1.1"
     depends_on:
       - zookeeper
     environment:
-      KAFKA_ADVERTISED_HOST_NAME: kafka
-      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      ZOOKEEPER_IP: zookeeper
     volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
       - ./ma/kafka_init.sh:/root/kafka_init.sh
     command: "/root/kafka_init.sh"
 
   cassandra:
     image: "cassandra:3.10"
-    container_name: cassandra
-    volumes:
-      - ./ma/cassandra_init.sh:/var/lib/cassandra/cassandra_init.sh
-      - ./ma/cassandra.conf:/var/lib/cassandra/cassandra.conf
-    command: "/var/lib/cassandra/cassandra_init.sh cassandra -f"
 
   ma_redis:
     image: "redis:3.2.8"
-    container_name: ma_redis
-    ports:
-      - "6379"
-      - "16379"
     volumes:
       - ./ma/redis.conf:/usr/local/etc/redis/redis.conf
       - ./ma/sentinel.conf:/usr/local/etc/redis/sentinel.conf
@@ -226,15 +205,13 @@ services:
     command: sh -c "chmod +x /usr/local/etc/redis/redis_init.sh && /usr/local/etc/redis/redis_init.sh"
 
   kerberos:
-    image: "dojot/kerberos"
-    container_name: kerberos
+    image: "kerberos_image_test"
     environment:
       - CASSANDRA_HOSTNAME=cassandra
       - CASSANDRA_PORT=9042
-    ports:
-      - "8080:8080"
     volumes:
       - ./ma/wait_for_it.sh:/home/kerberos/wait_for_it.sh
+      - ./ma/cassandra.conf:/home/kerberos/cassandra.conf
       - ./ma/node.config:/opt/jboss/wildfly/standalone/configuration/node.config
       - ./ma/kafka.brokers:/opt/jboss/wildfly/standalone/configuration/kafka.brokers
       - ./ma/redis.sentinels:/opt/jboss/wildfly/standalone/configuration/redis.sentinels

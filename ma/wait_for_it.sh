@@ -4,7 +4,7 @@ echo "Waiting for cassandra on $CASSANDRA_HOSTNAME:$CASSANDRA_PORT..."
 result=1
 while [ $result -ne "0" ]
 do
-  nmap -Pn -p$CASSANDRA_PORT $CASSANDRA_HOSTNAME | awk "\$1 ~ /$CASSANDRA_PORT/ {print \$2}" | grep open
+  cqlsh $CASSANDRA_HOSTNAME $CASSANDRA_PORT -f /home/kerberos/cassandra.conf --cqlversion="3.4.4"
   result=$?
   sleep 10
 done
