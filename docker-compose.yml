@@ -205,7 +205,7 @@ services:
     command: sh -c "chmod +x /usr/local/etc/redis/redis_init.sh && /usr/local/etc/redis/redis_init.sh"
 
   kerberos:
-    image: "kerberos_image_test"
+    image: "dojot/kerberos"
     environment:
       - CASSANDRA_HOSTNAME=cassandra
       - CASSANDRA_PORT=9042
