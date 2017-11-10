@@ -147,6 +147,7 @@ services:
       KONG_PG_HOST: "postgres"
     volumes:
       - ./apigw/plugins/pep-kong:/plugins/pep-kong
+      - ./apigw/plugins/mutualauthentication:/plugins/mutualauthentication
     networks:
       default:
         aliases:
@@ -177,3 +178,40 @@ services:
   redis:
     image: redis
     restart: always
+
+
+  zookeeper:
+    image: "zookeeper:3.4"
+
+  kafka:
+    image: "ches/kafka:0.10.1.1"
+    depends_on:
+      - zookeeper
+    environment:
+      ZOOKEEPER_IP: zookeeper
+      KAFKA_NUM_PARTITIONS: 10
+
+  cassandra:
+    image: "cassandra:3.10"
+
+  ma_redis:
+    image: "redis:3.2.8"
+    volumes:
+      - ./ma/redis.conf:/usr/local/etc/redis/redis.conf
+      - ./ma/sentinel.conf:/usr/local/etc/redis/sentinel.conf
+      - ./ma/redis_init.sh:/usr/local/etc/redis/redis_init.sh
+    command: sh -c "chmod +x /usr/local/etc/redis/redis_init.sh && /usr/local/etc/redis/redis_init.sh"
+
+  kerberos:
+    image: "dojot/kerberos"
+    environment:
+      - CASSANDRA_HOSTNAME=cassandra
+      - CASSANDRA_PORT=9042
+    volumes:
+      - ./ma/node.config:/opt/jboss/wildfly/standalone/configuration/node.config
+      - ./ma/kafka.brokers:/opt/jboss/wildfly/standalone/configuration/kafka.brokers
+      - ./ma/redis.sentinels:/opt/jboss/wildfly/standalone/configuration/redis.sentinels
+    depends_on:
+      - kafka
+      - redis
+      - cassandra
