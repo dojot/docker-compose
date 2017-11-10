@@ -189,9 +189,7 @@ services:
       - zookeeper
     environment:
       ZOOKEEPER_IP: zookeeper
-    volumes:
-      - ./ma/kafka_init.sh:/root/kafka_init.sh
-    command: "/root/kafka_init.sh"
+      KAFKA_NUM_PARTITIONS: 10
 
   cassandra:
     image: "cassandra:3.10"
@@ -210,8 +208,6 @@ services:
       - CASSANDRA_HOSTNAME=cassandra
       - CASSANDRA_PORT=9042
     volumes:
-      - ./ma/wait_for_it.sh:/home/kerberos/wait_for_it.sh
-      - ./ma/cassandra.conf:/home/kerberos/cassandra.conf
       - ./ma/node.config:/opt/jboss/wildfly/standalone/configuration/node.config
       - ./ma/kafka.brokers:/opt/jboss/wildfly/standalone/configuration/kafka.brokers
       - ./ma/redis.sentinels:/opt/jboss/wildfly/standalone/configuration/redis.sentinels
@@ -219,4 +215,3 @@ services:
       - kafka
       - redis
       - cassandra
-    command: sh -c "/home/kerberos/wait_for_it.sh /opt/jboss/wildfly/bin/standalone.sh -b 0.0.0.0"
