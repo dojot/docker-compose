@@ -1,4 +1,4 @@
-version: '2'
+version: '2.1'
 services:
 
 #  certs:
@@ -38,13 +38,6 @@ services:
     restart: always
     ports:
       - "1883:1883"
-      - "8883:8883"
-    volumes:
-      - ./mqtt/mosquitto.conf:/usr/local/src/mosquitto-1.4.13/mosquitto.conf:Z
-      - ./certs/ca.crt:/usr/local/src/mosquitto-1.4.13/certs/ca.crt:Z
-      - ./certs/server.crt:/usr/local/src/mosquitto-1.4.13/certs/server.crt:Z
-      - ./certs/server.key:/usr/local/src/mosquitto-1.4.13/certs/server.key:Z
-    command: "/usr/local/sbin/mosquitto -c /usr/local/src/mosquitto-1.4.13/mosquitto.conf"
 
   iotagent:
     image: dojot/iotagent-json:0.2.0-nightly20171010
@@ -54,9 +47,6 @@ services:
       - mqtt
     volumes:
       - ./iotagent/config.js:/opt/iotajson/config.js:Z
-      - ./certs/ca.crt:/opt/iotajson/certs/ca.crt:Z
-      - ./certs/iotagent.crt:/opt/iotajson/certs/iotagent.crt:Z
-      - ./certs/iotagent.key:/opt/iotajson/certs/iotagent.key:Z
     networks:
       default:
         aliases:
@@ -98,13 +88,17 @@ services:
     image: dojot/auth:0.2.0-nightly20171010
     restart: always
     depends_on:
-      - mongodb
       - apigw
+      - redis
+    depends_on:
+      postgres:
+        condition: service_healthy
     environment:
-      DB_HOST: "postgres"
-      DB_USER: "postgres"
-      DB_PWD: ""
-      KONG_URL: "http://apigw:8001"
+      AUTH_DB_HOST: "postgres"
+      AUTH_DB_USER: "kong"
+      AUTH_KONG_URL: "http://kong:8001"
+      AUTH_CACHE_NAME: "redis"
+      AUTH_CACHE_HOST: "redis"
 
   postgres:
     image: "postgres:9.4"
@@ -116,12 +110,30 @@ services:
       default:
         aliases:
           - kong-db
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  kong-migration:
+    image: dojot/kong:latest
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      - KONG_DATABASE=postgres
+      - KONG_PG_HOST=postgres
+    command: kong migrations up
 
   apigw:
-    image: dojot/pep-kong:0.2.0-nightly20171010
+    image: dojot/kong:latest
     restart: always
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
+      kong-migration:
+        condition: service_started
     ports:
       - "8000:8000"
       - "8443:8443"
@@ -133,20 +145,13 @@ services:
       KONG_DATABASE: "postgres"
       KONG_CASSANDRA_CONTACT_POINTS: "cassandra"
       KONG_PG_HOST: "postgres"
+    volumes:
+      - ./apigw/plugins/pep-kong:/plugins/pep-kong
+      - ./apigw/plugins/mutualauthentication:/plugins/mutualauthentication
     networks:
       default:
         aliases:
           - kong
-
-  pdp-ws:
-    image: dojot/pdp-ws:0.2.0-nightly20171010
-    restart: always
-    depends_on:
-      - postgres
-    ports:
-      - "9763:9763"
-    volumes:
-      - ./pdpws/standalone.xml:/opt/jboss/wildfly/standalone/configuration/standalone.xml:Z
 
   perseo-core:
     image: telefonicaiot/perseo-core
@@ -169,3 +174,44 @@ services:
   mashup:
     image: dojot/mashup:0.2.0-nightly20171010
     restart: always
+
+  redis:
+    image: redis
+    restart: always
+
+
+  zookeeper:
+    image: "zookeeper:3.4"
+
+  kafka:
+    image: "ches/kafka:0.10.1.1"
+    depends_on:
+      - zookeeper
+    environment:
+      ZOOKEEPER_IP: zookeeper
+      KAFKA_NUM_PARTITIONS: 10
+
+  cassandra:
+    image: "cassandra:3.10"
+
+  ma_redis:
+    image: "redis:3.2.8"
+    volumes:
+      - ./ma/redis.conf:/usr/local/etc/redis/redis.conf
+      - ./ma/sentinel.conf:/usr/local/etc/redis/sentinel.conf
+      - ./ma/redis_init.sh:/usr/local/etc/redis/redis_init.sh
+    command: sh -c "chmod +x /usr/local/etc/redis/redis_init.sh && /usr/local/etc/redis/redis_init.sh"
+
+  kerberos:
+    image: "dojot/kerberos"
+    environment:
+      - CASSANDRA_HOSTNAME=cassandra
+      - CASSANDRA_PORT=9042
+    volumes:
+      - ./ma/node.config:/opt/jboss/wildfly/standalone/configuration/node.config
+      - ./ma/kafka.brokers:/opt/jboss/wildfly/standalone/configuration/kafka.brokers
+      - ./ma/redis.sentinels:/opt/jboss/wildfly/standalone/configuration/redis.sentinels
+    depends_on:
+      - kafka
+      - redis
+      - cassandra
