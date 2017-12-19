@@ -120,7 +120,3 @@ present at the root of the repository. ::
 
   ./kong.config.sh
 
-.. note::
-
-  On previous iterations of dojot, two extra installation steps were required: creating an 'admin'
-  user and configuring default access policies. Those are no longer necessary.
