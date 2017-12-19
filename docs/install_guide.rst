@@ -69,14 +69,15 @@ checking out the appropriate tag (do notice that the tagname has to be replaced)
 .. warning::
   While it should be ok to use the tip of the master branch at dojot/docker-compose,
   be aware that doing so will invariably use the latest versions of all services that
-  comprise the platform. As such some services might still be incompatible with others,
+  comprise the platform. As such some, services might still be incompatible with others,
   leading to an unstable environment.
 
   We strongly suggest new users to try out an stable release first. For a list
   of such releases, please check https://github.com/dojot/docker-compose/releases
 
-After the repository is cloned, and a release (or branch) has been selected, one needs to
-fetch the submodules that should be mounted onto a few of the services. To do so: ::
+After the repository is cloned, and a release (or branch) has been selected, there are still
+a few external modules that must be gathered before using the platform. These modules can 
+be retrieved by executing the following command: ::
 
   git submodule update --init --recursive
 
