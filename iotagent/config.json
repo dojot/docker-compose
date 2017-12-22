@@ -1,0 +1,32 @@
+{
+  "mqtt": {
+    "host": "mqtt",
+    "port" : 1883,
+    "protocolId": "MQIsdp",
+    "protocolVersion": 3,
+    "secure": false,
+    "tls": {
+      "key": "certs/iotagent.key",
+      "cert": "certs/iotagent.crt",
+      "ca": [ "certs/ca.crt" ],
+      "version": "TLSv1_2_method"
+    },
+    "topics": ["/cagent/admin/+/notify", "/cagent/admin/+/deviceinfo"]
+  },
+  "broker": {
+    "host": "zookeeper:2181",
+    "type": "kafka",
+    "kafka": {
+      "autoCommit": true,
+      "fetchMaxWaitMs" : 1000,
+      "fetchMaxBytes" : 1048576,
+      "groupId" : "iotagent",
+      "deviceNotificationTopic": [
+        { "topic": "dojot.device-manager.device" }
+      ]
+    }
+  },
+  "device_manager": {
+    "host": "device-manager:5000"
+  }
+}

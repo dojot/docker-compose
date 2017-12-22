@@ -46,7 +46,7 @@ services:
       - mongodb
       - mqtt
     volumes:
-      - ./iotagent/config.js:/opt/iotajson/config.js:Z
+      - ./iotagent/config.json:/opt/iotagent-json/config.json:Z
     networks:
       default:
         aliases:
