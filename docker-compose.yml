@@ -35,9 +35,11 @@ services:
 
   mqtt:
     image: ansi/mosquitto
+    # image: dojot/mqtt-manager   # for TLS support
     restart: always
     ports:
-      - "1883:1883"
+      - "1883:1883"   # for clear MQTT
+      #- "8883:8883"  # for MQTT over TLS
 
   iotagent:
     image: dojot/iotagent-json:latest
@@ -47,6 +49,8 @@ services:
       - mqtt
     volumes:
       - ./iotagent/config.json:/opt/iotagent-json/config.json:Z
+    environment:
+       MQTT_TLS: "false"
     networks:
       default:
         aliases:
@@ -79,6 +83,8 @@ services:
     restart: always
     depends_on:
       - mongodb
+      - orion
+      - kafka
     networks:
       default:
         aliases:
@@ -89,6 +95,7 @@ services:
     restart: always
     depends_on:
       - apigw
+      - postgres
       - redis
     depends_on:
       postgres:
@@ -193,6 +200,10 @@ services:
 
   cassandra:
     image: "cassandra:3.10"
+
+  ejbca:
+    image: "dojot/ejbca"
+
 
   ma_redis:
     image: "redis:3.2.8"
