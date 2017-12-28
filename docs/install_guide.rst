@@ -66,6 +66,21 @@ checking out the appropriate tag (do notice that the tagname has to be replaced)
   # Must be run from within the deployment repo
   git checkout [tag name]
 
+.. warning::
+  While it should be ok to use the tip of the master branch at dojot/docker-compose,
+  be aware that doing so will invariably use the latest versions of all services that
+  comprise the platform. As such some, services might still be incompatible with others,
+  leading to an unstable environment.
+
+  We strongly suggest new users to try out an stable release first. For a list
+  of such releases, please check https://github.com/dojot/docker-compose/releases
+
+After the repository is cloned, and a release (or branch) has been selected, there are still
+a few external modules that must be gathered before using the platform. These modules can 
+be retrieved by executing the following command: ::
+
+  git submodule update --init --recursive
+
 That done, the environment can be brought up by: ::
 
   # Must be run from the root of the deployment repo.
@@ -105,21 +120,3 @@ present at the root of the repository. ::
 
   ./kong.config.sh
 
-User creation
-^^^^^^^^^^^^^
-
-The `admin` user is automatically created and have complete access privilege.
-Admin default password is 'admin'. Change this password ASAP.
-One can easily change password and create new users using the web interface.
-Login as admin and navigate to the 'Auth' menu.
-
-
-Access policies
-^^^^^^^^^^^^^
-
-Dojot use a RBAC system to manage authorization.
-Two groups are created automatically:
-- Admin: full privilege group
-- User: Can access everything, except manage user and permissions.
-
-Soon, a interface to manage groups and permissions will be available.
