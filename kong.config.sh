@@ -161,28 +161,15 @@ PAYLOAD
 # no auth: used for middleware <-> device communication via HTTP(s)
 
 
-# CA certificate retrievemment
+# CA certificate retrievemment and certificate sign requests
 (curl -o /dev/null $kong/apis -sS -X POST \
     --header "Content-Type: application/json" \
     -d @- ) <<PAYLOAD
 {
-    "name": "ejbca-ca",
-    "uris": "/ca",
-    "strip_uri": true,
-    "upstream_url": "http://ejbca:5583/ca/"
-}
+     "name": "ejbca-paths",
+     "uris": [ "/sign", "/ca"],
+     "strip_uri": false,
+     "upstream_url": "http://ejbca:5583/"
+ }
 PAYLOAD
-authConfig "ejbca-ca"
-
-# certificate sign requests
-(curl -o /dev/null $kong/apis -sS -X POST \
-    --header "Content-Type: application/json" \
-    -d @- ) <<PAYLOAD
-{
-    "name": "ejbca-certs",
-    "uris": "/sign",
-    "strip_uri": true,
-    "upstream_url": "http://ejbca:5583/sign/"
-}
-PAYLOAD
-authConfig "ejbca-certs"
+authConfig "ejbca-paths"
