@@ -130,7 +130,7 @@ authConfig "flows"
     "name": "history",
     "uris": "/history",
     "strip_uri": true,
-    "upstream_url": "http://sth:8666"
+    "upstream_url": "http://persister:8666"
 }
 PAYLOAD
 authConfig "history"
@@ -159,3 +159,17 @@ PAYLOAD
 }
 PAYLOAD
 # no auth: used for middleware <-> device communication via HTTP(s)
+
+
+# CA certificate retrievemment and certificate sign requests
+(curl -o /dev/null $kong/apis -sS -X POST \
+    --header "Content-Type: application/json" \
+    -d @- ) <<PAYLOAD
+{
+     "name": "ejbca-paths",
+     "uris": [ "/sign", "/ca"],
+     "strip_uri": false,
+     "upstream_url": "http://ejbca:5583/"
+ }
+PAYLOAD
+authConfig "ejbca-paths"

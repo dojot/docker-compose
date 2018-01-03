@@ -33,19 +33,22 @@ services:
     user: "mongodb"
 
   mqtt:
-    image: ansi/mosquitto
+    image: dojot/mqtt-manager:0.2.0-nightly20171228
     restart: always
     ports:
-      - "1883:1883"
+      - "1883:1883"   # for clear MQTT
+      #- "8883:8883"  # for MQTT over TLS
 
   iotagent:
-    image: dojot/iotagent-json:0.2.0-nightly20171113
+    image: dojot/iotagent-json:0.2.0-nightly20171228
     restart: always
     depends_on:
       - mongodb
       - mqtt
     volumes:
-      - ./iotagent/config.js:/opt/iotajson/config.js:Z
+      - ./iotagent/config.json:/opt/iotagent-json/config.json:Z
+    environment:
+       MQTT_TLS: "false"
     networks:
       default:
         aliases:
@@ -61,11 +64,11 @@ services:
       - 5684:5684/udp
 
   gui:
-    image: dojot/gui:0.2.0-nightly20171113
+    image: dojot/gui:0.2.0-nightly20180103
     restart: always
 
   orion:
-    image: dojot/fiware-orion:0.2.0-nightly20171113
+    image: dojot/fiware-orion:0.2.0-nightly20171228
     restart: always
     depends_on:
       - mongodb
@@ -74,20 +77,24 @@ services:
     command: -dbhost mongodb
 
   device-manager:
-    image: dojot/device-manager:0.2.0-nightly20171113
+    image: dojot/device-manager:0.2.0-nightly20171228
     restart: always
     depends_on:
       - mongodb
+      - postgres
+      - orion
+      - kafka
     networks:
       default:
         aliases:
           - devm
 
   auth:
-    image: dojot/auth:0.2.0-nightly20171113
+    image: dojot/auth:0.2.0-nightly20171228
     restart: always
     depends_on:
       - apigw
+      - postgres
       - redis
     depends_on:
       postgres:
@@ -116,7 +123,7 @@ services:
       retries: 5
 
   kong-migration:
-    image: dojot/kong:0.2.0-nightly20171113
+    image: dojot/kong:0.2.0-nightly20171228
     depends_on:
       postgres:
         condition: service_healthy
@@ -126,7 +133,7 @@ services:
     command: kong migrations up
 
   apigw:
-    image: dojot/kong:0.2.0-nightly20171113
+    image: dojot/kong:0.2.0-nightly20171228
     restart: always
     depends_on:
       postgres:
@@ -156,7 +163,7 @@ services:
     command: -perseo_fe_url perseo-fe:9090
 
   perseo-fe:
-    image: dojot/perseo-fe:0.2.0-nightly20171113
+    image: dojot/perseo-fe:0.2.0-nightly20171228
     restart: always
     ports:
       - "127.0.0.1:9090:9090"
@@ -169,7 +176,7 @@ services:
       - PERSEO_ORION_URL=http://orion:1026/NGSI10/updateContext
 
   mashup:
-    image: dojot/mashup:0.2.0-nightly20171113
+    image: dojot/mashup:0.2.0-nightly20171228
     restart: always
 
   redis:
@@ -187,8 +194,11 @@ services:
       ZOOKEEPER_IP: zookeeper
       KAFKA_NUM_PARTITIONS: 10
 
-  cassandra:
-    image: "cassandra:3.10"
+#  cassandra:
+#    image: "cassandra:3.10"
+
+  ejbca:
+    image: "dojot/ejbca:0.2.0-nightly20171228"
 
   ma_redis:
     image: "redis:3.2.8"
@@ -198,16 +208,17 @@ services:
       - ./ma/redis_init.sh:/usr/local/etc/redis/redis_init.sh
     command: sh -c "chmod +x /usr/local/etc/redis/redis_init.sh && /usr/local/etc/redis/redis_init.sh"
 
-  kerberos:
-    image: "dojot/kerberos:0.2.0-nightly20171113"
-    environment:
-      - CASSANDRA_HOSTNAME=cassandra
-      - CASSANDRA_PORT=9042
-    volumes:
-      - ./ma/node.config:/opt/jboss/wildfly/standalone/configuration/node.config
-      - ./ma/kafka.brokers:/opt/jboss/wildfly/standalone/configuration/kafka.brokers
-      - ./ma/redis.sentinels:/opt/jboss/wildfly/standalone/configuration/redis.sentinels
-    depends_on:
-      - kafka
-      - redis
-      - cassandra
+#  kerberos:
+#    image: dojot/kerberos:0.2.0-nightly20171228
+#    environment:
+#      - CASSANDRA_HOSTNAME=cassandra
+#      - CASSANDRA_PORT=9042
+#    volumes:
+#      - ./ma/node.config:/opt/jboss/wildfly/standalone/configuration/node.config
+#      - ./ma/kafka.brokers:/opt/jboss/wildfly/standalone/configuration/kafka.brokers
+#      - ./ma/redis.sentinels:/opt/jboss/wildfly/standalone/configuration/redis.sentinels
+#    depends_on:
+#      - kafka
+#      - redis
+#      - cassandra
+
