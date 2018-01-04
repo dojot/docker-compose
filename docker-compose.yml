@@ -33,8 +33,12 @@ services:
     user: "mongodb"
 
   mqtt:
-    image: dojot/mqtt-manager:0.2.0-nightly20171228
+    image: ansi/mosquitto
+    # If TLS is needed, use the image below
+    #image: dojot/mqtt-manager:0.2.0-nightly20171228
     restart: always
+    volumes:
+      - ./mqtt/mosquitto.conf:/usr/local/src/mosquitto-1.4.13/mosquitto.conf:Z
     ports:
       - "1883:1883"   # for clear MQTT
       #- "8883:8883"  # for MQTT over TLS
@@ -194,19 +198,21 @@ services:
       ZOOKEEPER_IP: zookeeper
       KAFKA_NUM_PARTITIONS: 10
 
-#  cassandra:
-#    image: "cassandra:3.10"
-
   ejbca:
     image: "dojot/ejbca:0.2.0-nightly20171228"
 
-  ma_redis:
-    image: "redis:3.2.8"
-    volumes:
-      - ./ma/redis.conf:/usr/local/etc/redis/redis.conf
-      - ./ma/sentinel.conf:/usr/local/etc/redis/sentinel.conf
-      - ./ma/redis_init.sh:/usr/local/etc/redis/redis_init.sh
-    command: sh -c "chmod +x /usr/local/etc/redis/redis_init.sh && /usr/local/etc/redis/redis_init.sh"
+#  ma_redis:
+#    image: "redis:3.2.8"
+#    volumes:
+#      - ./ma/redis.conf:/usr/local/etc/redis/redis.conf
+#      - ./ma/sentinel.conf:/usr/local/etc/redis/sentinel.conf
+#      - ./ma/redis_init.sh:/usr/local/etc/redis/redis_init.sh
+#    command: sh -c "chmod +x /usr/local/etc/redis/redis_init.sh && /usr/local/etc/redis/redis_init.sh"
+
+
+###
+# If mutual authentication is needed, please uncomment these two components below
+###
 
 #  kerberos:
 #    image: dojot/kerberos:0.2.0-nightly20171228
@@ -222,3 +228,5 @@ services:
 #      - redis
 #      - cassandra
 
+#  cassandra:
+#    image: "cassandra:3.10"
