@@ -27,7 +27,6 @@ services:
       STH_HOST: "0.0.0.0"
       DB_URI: "mongodb:27017"
 
-
   mongodb:
     image: "mongo:3.2"
     restart: always
@@ -190,6 +189,19 @@ services:
     image: redis
     restart: always
 
+  rabbitmq:
+    image: rabbitmq
+    restart: always
+
+  alarm-manager:
+    image: dojot/alarm-manager:latest
+    restart: always
+    depends_on:
+      - mongodb
+      - rabbitmq
+    environment:
+      - MONGO_HOST=mongodb
+      - RABBIT_HOST=rabbitmq
 
   zookeeper:
     image: "zookeeper:3.4"
