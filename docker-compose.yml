@@ -49,6 +49,7 @@ services:
     depends_on:
       - mongodb
       - mqtt
+      - kafka
     volumes:
       - ./iotagent/config.json:/opt/iotagent-json/config.json:Z
     environment:
