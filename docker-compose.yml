@@ -93,6 +93,12 @@ services:
         aliases:
           - devm
 
+  image-manager:
+    image: dojot/image-manager:latest
+    restart: always
+    depends_on:
+      - postgres
+
   auth:
     image: dojot/auth
     restart: always

@@ -63,6 +63,20 @@ authConfig "template"
 PAYLOAD
 authConfig "device"
 
+
+(curl -o /dev/null $kong/apis -s -S -X POST \
+    --header "Content-Type: application/json" \
+    -d @- ) <<PAYLOAD
+{
+    "name": "image",
+    "uris": "/image",
+    "strip_uri": false,
+    "upstream_url": "http://image-manager:5000"
+}
+PAYLOAD
+authConfig "image"
+
+
 (curl -o /dev/null $kong/apis -s -S -X POST \
     --header "Content-Type: application/json" \
     -d @- ) <<PAYLOAD
