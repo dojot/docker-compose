@@ -35,7 +35,7 @@ services:
   mqtt:
     image: ansi/mosquitto
     # If TLS is needed, use the image below
-    #image: dojot/mqtt-manager:0.2.0-nightly20171228
+    #image: dojot/mqtt-manager:0.2.0-nightly20180119
     restart: always
     volumes:
       - ./mqtt/mosquitto.conf:/usr/local/src/mosquitto-1.4.13/mosquitto.conf:Z
@@ -44,11 +44,12 @@ services:
       #- "8883:8883"  # for MQTT over TLS
 
   iotagent:
-    image: dojot/iotagent-json:0.2.0-nightly20171228
+    image: dojot/iotagent-json:0.2.0-nightly20180119
     restart: always
     depends_on:
       - mongodb
       - mqtt
+      - kafka
     volumes:
       - ./iotagent/config.json:/opt/iotagent-json/config.json:Z
     environment:
@@ -68,7 +69,7 @@ services:
       - 5684:5684/udp
 
   gui:
-    image: dojot/gui:0.2.0-nightly20180103
+    image: dojot/gui:0.2.0-nightly20180119
     restart: always
 
   orion:
@@ -81,7 +82,7 @@ services:
     command: -dbhost mongodb
 
   device-manager:
-    image: dojot/device-manager:0.2.0-nightly20171228
+    image: dojot/device-manager:0.2.0-nightly20180119
     restart: always
     depends_on:
       - mongodb
@@ -94,7 +95,7 @@ services:
           - devm
 
   auth:
-    image: dojot/auth:0.2.0-nightly20171228
+    image: dojot/auth:0.2.0-nightly20180119
     restart: always
     depends_on:
       - apigw
@@ -127,7 +128,7 @@ services:
       retries: 5
 
   kong-migration:
-    image: dojot/kong:0.2.0-nightly20171228
+    image: dojot/kong:0.2.0-nightly20180119
     depends_on:
       postgres:
         condition: service_healthy
@@ -137,7 +138,7 @@ services:
     command: kong migrations up
 
   apigw:
-    image: dojot/kong:0.2.0-nightly20171228
+    image: dojot/kong:0.2.0-nightly20180119
     restart: always
     depends_on:
       postgres:
@@ -187,6 +188,20 @@ services:
     image: redis
     restart: always
 
+#  rabbitmq:
+#    image: rabbitmq
+#    restart: always
+
+#  alarm-manager:
+#    image: dojot/alarm-manager:latest
+#    restart: always
+#    depends_on:
+#      - mongodb
+#      - rabbitmq
+#    environment:
+#      - MONGO_HOST=mongodb
+#      - RABBIT_HOST=rabbitmq
+
   zookeeper:
     image: "zookeeper:3.4"
 
@@ -199,7 +214,7 @@ services:
       KAFKA_NUM_PARTITIONS: 10
 
   ejbca:
-    image: "dojot/ejbca:0.2.0-nightly20171228"
+    image: "dojot/ejbca:0.2.0-nightly20180119"
 
 #  ma_redis:
 #    image: "redis:3.2.8"
@@ -215,7 +230,7 @@ services:
 ###
 
 #  kerberos:
-#    image: dojot/kerberos:0.2.0-nightly20171228
+#    image: "dojot/kerberos:0.2.0-nightly20171228"
 #    environment:
 #      - CASSANDRA_HOSTNAME=cassandra
 #      - CASSANDRA_PORT=9042

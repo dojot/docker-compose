@@ -130,7 +130,7 @@ authConfig "flows"
     "name": "history",
     "uris": "/history",
     "strip_uri": true,
-    "upstream_url": "http://persister:8666"
+    "upstream_url": "http://sth:8666"
 }
 PAYLOAD
 authConfig "history"
@@ -173,3 +173,16 @@ PAYLOAD
  }
 PAYLOAD
 authConfig "ejbca-paths"
+
+# Alarm manager endpoints
+(curl -o /dev/null $kong/apis -sS -X POST \
+    --header "Content-Type: application/json" \
+    -d @- ) <<PAYLOAD
+{
+     "name": "alarm-manager-endpoints",
+     "uris": "/alarmmanager",
+     "strip_uri": false,
+     "upstream_url": "http://alarm-manager:8080/"
+ }
+PAYLOAD
+authConfig "alarm-manager-endpoints"
