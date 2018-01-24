@@ -136,6 +136,7 @@ services:
       - KONG_DATABASE=postgres
       - KONG_PG_HOST=postgres
     command: kong migrations up
+    restart: on-failure
 
   apigw:
     image: dojot/kong:latest
@@ -152,9 +153,10 @@ services:
       # - "7946:7946"
       # - "7946:7946/udp"  # cluster
     environment:
+      # The following environment variables could be set for usage with cassandra
       # KONG_DATABASE: "cassandra"
+      # KONG_CASSANDRA_CONTACT_POINTS: "cassandra"
       KONG_DATABASE: "postgres"
-      KONG_CASSANDRA_CONTACT_POINTS: "cassandra"
       KONG_PG_HOST: "postgres"
     volumes:
       - ./apigw/plugins/pep-kong:/plugins/pep-kong
@@ -206,17 +208,28 @@ services:
 
   zookeeper:
     image: "zookeeper:3.4"
+    restart: always
 
   kafka:
     image: "ches/kafka:0.10.1.1"
     depends_on:
       - zookeeper
+    restart: always
     environment:
       ZOOKEEPER_IP: zookeeper
       KAFKA_NUM_PARTITIONS: 10
 
+###
+# Currently this is only needed if MQTT over TLS is used.
+###
+
   ejbca:
     image: "dojot/ejbca"
+    restart: always
+
+###
+# If mutual authentication is needed, please uncomment these three components below
+###
 
 #  ma_redis:
 #    image: "redis:3.2.8"
@@ -225,12 +238,7 @@ services:
 #      - ./ma/sentinel.conf:/usr/local/etc/redis/sentinel.conf
 #      - ./ma/redis_init.sh:/usr/local/etc/redis/redis_init.sh
 #    command: sh -c "chmod +x /usr/local/etc/redis/redis_init.sh && /usr/local/etc/redis/redis_init.sh"
-
-
-###
-# If mutual authentication is needed, please uncomment these two components below
-###
-
+#
 #  kerberos:
 #    image: "dojot/kerberos"
 #    environment:
@@ -244,6 +252,6 @@ services:
 #      - kafka
 #      - redis
 #      - cassandra
-
+#
 #  cassandra:
 #    image: "cassandra:3.10"
