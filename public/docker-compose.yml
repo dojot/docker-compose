@@ -68,7 +68,7 @@ services:
       - 5684:5684/udp
 
   gui:
-    image: dojot/gui:0.2.0-nightly20180103
+    image: dojot/gui:0.2.0-nightly20180130
     restart: always
 
   orion:

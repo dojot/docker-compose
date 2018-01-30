@@ -69,7 +69,7 @@ services:
       - 5684:5684/udp
 
   gui:
-    image: dojot/gui:0.2.0-nightly20180119
+    image: dojot/gui:0.2.0-nightly20180130
     restart: always
 
   orion:
@@ -136,6 +136,7 @@ services:
       - KONG_DATABASE=postgres
       - KONG_PG_HOST=postgres
     command: kong migrations up
+    restart: on-failure
 
   apigw:
     image: dojot/kong:0.2.0-nightly20180119
@@ -202,13 +203,16 @@ services:
 #      - MONGO_HOST=mongodb
 #      - RABBIT_HOST=rabbitmq
 
+
   zookeeper:
     image: "zookeeper:3.4"
+    restart: always
 
   kafka:
     image: "ches/kafka:0.10.1.1"
     depends_on:
       - zookeeper
+    restart: always
     environment:
       ZOOKEEPER_IP: zookeeper
       KAFKA_NUM_PARTITIONS: 10
