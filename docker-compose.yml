@@ -50,6 +50,7 @@ services:
       - mongodb
       - mqtt
       - kafka
+      - data-broker
     volumes:
       - ./iotagent/config.json:/opt/iotagent-json/config.json:Z
     environment:
@@ -89,6 +90,7 @@ services:
       - postgres
       - orion
       - kafka
+      - data-broker
     networks:
       default:
         aliases:
@@ -101,6 +103,7 @@ services:
       - apigw
       - postgres
       - redis
+      - data-broker
     depends_on:
       postgres:
         condition: service_healthy
@@ -192,6 +195,10 @@ services:
     image: redis
     restart: always
 
+  data-broker-redis:
+    image: redis
+    restart: always
+
   rabbitmq:
     image: rabbitmq
     restart: always
@@ -218,6 +225,12 @@ services:
     environment:
       ZOOKEEPER_IP: zookeeper
       KAFKA_NUM_PARTITIONS: 10
+
+  data-broker:
+    image: "dojot/data-broker:latest"
+    depends_on:
+      - kafka
+      - data-broker-redis
 
 ###
 # Currently this is only needed if MQTT over TLS is used.
