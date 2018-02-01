@@ -13,19 +13,26 @@
     }
   },
   "broker": {
-    "host": "orion:1026",
-    "type": "orion"
+    "host": "zookeeper:2181",
+    "type": "kafka",
+    "subject": "device-data",
+    "contextBroker": "http://data-broker"
   },
   "device_manager": {
-    "kafkaHost" : "zookeeper:2181",
-    "kafkaOptions": {
-      "autoCommit": true,
-      "fetchMaxWaitMs" : 1000,
-      "fetchMaxBytes" : 1048576,
-      "groupId" : "iotagent"
+    "consumerOptions": {
+      "kafkaHost" : "kafka:9092",
+      "sessionTimeout": 15000,
+      "groupId": "iotagent"
     },
-    "kafkaTopics": [
-        { "topic": "dojot.device-manager.device" }
-      ]
+    "inputSubject": "dojot.device-manager.device"
+  },
+  "tenancy": {
+    "manager": "http://auth:5000",
+    "subject": "dojot.tenancy",
+    "consumerOptions": {
+      "kafkaHost" : "kafka:9092",
+      "sessionTimeout": 15000,
+      "groupId": "iotagent"
+    }
   }
 }
