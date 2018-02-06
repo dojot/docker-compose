@@ -208,12 +208,6 @@ services:
       ZOOKEEPER_IP: zookeeper
       KAFKA_NUM_PARTITIONS: 10
 
-  data-broker:
-    image: "dojot/data-broker:latest"
-    depends_on:
-      - kafka
-      - data-broker-redis
-
 ###
 # Currently this is only needed if MQTT over TLS is used.
 ###
