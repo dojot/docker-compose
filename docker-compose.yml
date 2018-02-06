@@ -1,31 +1,29 @@
 version: '2.1'
 services:
 
-#  certs:
-#    image: nginx
-#    restart: always
-#    depends_on:
-#      - apigw
-#    ports:
-#      - "80:80"
-#      - "443:443"
-#    volumes:
-#      - /etc/letsencrypt:/certs
-#      - ./certs/default.conf:/etc/nginx/conf.d/default.conf
+  # certs:
+  #   image: nginx
+  #   restart: always
+  #   depends_on:
+  #     - apigw
+  #   ports:
+  #     - "80:80"
+  #     - "443:443"
+  #   volumes:
+  #     - /etc/letsencrypt:/certs
+  #     - ./certs/default.conf:/etc/nginx/conf.d/default.conf
 
-  sth:
-    image: telefonicaiot/fiware-sth-comet
+  history:
+    image: dojot/history
     restart: always
-    depends_on:
-      - mongodb
-    networks:
-      default:
-        aliases:
-          - comet
-          - history
     environment:
-      STH_HOST: "0.0.0.0"
-      DB_URI: "mongodb:27017"
+      FALCON_SETTINGS_MODULE: 'history.settings.docker'
+
+  persister:
+    image: dojot/persister
+    restart: always
+    environment:
+      FALCON_SETTINGS_MODULE: 'history.settings.docker'
 
   mongodb:
     image: "mongo:3.2"
@@ -44,75 +42,75 @@ services:
       #- "8883:8883"  # for MQTT over TLS
 
   iotagent:
-    image: dojot/iotagent-json:latest
+    image: dojot/iotagent-json
     restart: always
     depends_on:
       - mongodb
       - mqtt
       - kafka
       - data-broker
-    volumes:
-      - ./iotagent/config.json:/opt/iotagent-json/config.json:Z
+    # volumes:
+    #   - ./iotagent/config.json:/opt/iotagent-json/config.json:Z
     environment:
        MQTT_TLS: "false"
-    networks:
-      default:
-        aliases:
-          - idas
 
-  coap:
-    image: "telefonicaiot/lightweightm2m-iotagent:latest"
-    restart: always
-    depends_on:
-      - mongodb
-    ports:
-      - "127.0.0.1:4041:4041"
-      - 5684:5684/udp
+  # coap:
+  #   image: "telefonicaiot/lightweightm2m-iotagent:latest"
+  #   restart: always
+  #   depends_on:
+  #     - mongodb
+  #   ports:
+  #     - "127.0.0.1:4041:4041"
+  #     - 5684:5684/udp
 
   gui:
     image: dojot/gui:latest
     restart: always
 
-  orion:
-    image: dojot/fiware-orion:latest
+  # orion replacement component
+  data-broker:
+    image: dojot/data-broker
     restart: always
     depends_on:
-      - mongodb
-    ports:
-      - "127.0.0.1:1026:1026"
-    command: -dbhost mongodb
-
-  device-manager:
-    image: dojot/device-manager:latest
-    restart: always
-    depends_on:
-      - mongodb
-      - postgres
-      - orion
       - kafka
-      - data-broker
+      - data-broker-redis
+
+  data-broker-redis:
+    image: redis
+    restart: always
     networks:
       default:
         aliases:
-          - devm
+          - dbmredis
 
-  auth:
-    image: dojot/auth
+  device-manager:
+    image: dojot/device-manager
     restart: always
     depends_on:
-      - apigw
       - postgres
-      - redis
-      - data-broker
+      - kafka
+
+  auth-redis:
+    image: redis
+    restart: always
+
+  auth:
+    image: dojot/auth:latest
+    restart: always
+    depends_on:
+      - "apigw"
+      - "postgres"
+      - "auth-redis"
     depends_on:
       postgres:
         condition: service_healthy
     environment:
       AUTH_DB_HOST: "postgres"
       AUTH_DB_USER: "kong"
-      AUTH_KONG_URL: "http://kong:8001"
+      AUTH_KONG_URL: "http://apigw:8001"
+      AUTH_CACHE_HOST: "auth-redis"
+      # This is used to select the type of cache to be used. Allowed values are "redis" or "nocache"
       AUTH_CACHE_NAME: "redis"
-      AUTH_CACHE_HOST: "redis"
 
   postgres:
     image: "postgres:9.4"
@@ -120,10 +118,6 @@ services:
     environment:
       POSTGRES_USER: "kong"
       POSTGRES_DB: "kong"
-    networks:
-      default:
-        aliases:
-          - kong-db
     healthcheck:
       test: ["CMD", "pg_isready", "-U", "postgres"]
       interval: 10s
@@ -164,40 +158,28 @@ services:
     volumes:
       - ./apigw/plugins/pep-kong:/plugins/pep-kong
       - ./apigw/plugins/mutualauthentication:/plugins/mutualauthentication
-    networks:
-      default:
-        aliases:
-          - kong
 
-  perseo-core:
-    image: telefonicaiot/perseo-core
-    restart: always
-    command: -perseo_fe_url perseo-fe:9090
-
-  perseo-fe:
-    image: dojot/perseo-fe:latest
-    restart: always
-    ports:
-      - "127.0.0.1:9090:9090"
-    depends_on:
-      - perseo-core
-      - mongodb
-    environment:
-      - PERSEO_MONGO_HOST=mongodb
-      - PERSEO_CORE_URL=http://perseo-core:8080
-      - PERSEO_ORION_URL=http://orion:1026/NGSI10/updateContext
-
-  mashup:
-    image: dojot/mashup:latest
-    restart: always
-
-  redis:
-    image: redis
-    restart: always
-
-  data-broker-redis:
-    image: redis
-    restart: always
+  # perseo-core:
+  #   image: telefonicaiot/perseo-core
+  #   restart: always
+  #   command: -perseo_fe_url perseo-fe:9090
+  #
+  # perseo-fe:
+  #   image: dojot/perseo-fe:latest
+  #   restart: always
+  #   ports:
+  #     - "127.0.0.1:9090:9090"
+  #   depends_on:
+  #     - perseo-core
+  #     - mongodb
+  #   environment:
+  #     - PERSEO_MONGO_HOST=mongodb
+  #     - PERSEO_CORE_URL=http://perseo-core:8080
+  #     - PERSEO_ORION_URL=http://orion:1026/NGSI10/updateContext
+  #
+  # mashup:
+  #   image: dojot/mashup:latest
+  #   restart: always
 
   rabbitmq:
     image: rabbitmq
@@ -226,24 +208,18 @@ services:
       ZOOKEEPER_IP: zookeeper
       KAFKA_NUM_PARTITIONS: 10
 
-  data-broker:
-    image: "dojot/data-broker:latest"
-    depends_on:
-      - kafka
-      - data-broker-redis
-
 ###
 # Currently this is only needed if MQTT over TLS is used.
 ###
-
-  ejbca:
-    image: "dojot/ejbca"
-    restart: always
+#
+#  ejbca:
+#    image: "dojot/ejbca"
+#    restart: always
 
 ###
 # If mutual authentication is needed, please uncomment these three components below
 ###
-
+#
 #  ma_redis:
 #    image: "redis:3.2.8"
 #    volumes:
