@@ -1,19 +1,19 @@
-#!/bin/bash
+#!/bin/sh -ex
 
 # ---  0.10.x
-kong="http://localhost:8001"
+kong="http://apigw:8001"
 
 authConfig() {
-  curl -o /dev/null -sS -X POST $kong/apis/$1/plugins -d "name=jwt" # -d "config.claims_to_verify=exp"
-  curl -o /dev/null -sS -X POST $kong/apis/$1/plugins -d "name=pepkong" -d "config.pdpUrl=http://auth:5000/pdp"
+  curl -o /dev/null -sS -X POST ${kong}/apis/${1}/plugins -d "name=jwt" # -d "config.claims_to_verify=exp"
+  curl -o /dev/null -sS -X POST ${kong}/apis/${1}/plugins -d "name=pepkong" -d "config.pdpUrl=http://auth:5000/pdp"
 }
 
 # remove all previously configured apis from gateway
-for i in $(curl -sS localhost:8001/apis  | grep -oP '(?<="id":")[a-f0-9-]+(?=")'); do
-  curl -o /dev/null -sS -X DELETE $kong/apis/$i
+for i in $(curl -sS ${kong}/apis  | grep -o -E '"id":"([a-f0-9-]+)"' | cut -f4 -d'"'); do
+  curl -o /dev/null -sS -X DELETE ${kong}/apis/${i}
 done
 
-(curl -o /dev/null $kong/apis -sS -X PUT \
+(curl -o /dev/null ${kong}/apis -sS -X PUT \
     --header "Content-Type: application/json" \
     -d @- ) <<PAYLOAD
 {
@@ -25,7 +25,7 @@ done
 PAYLOAD
 # no auth: serves only static front-end content
 
-(curl -o /dev/null $kong/apis -sS -X POST \
+(curl -o /dev/null ${kong}/apis -sS -X POST \
     --header "Content-Type: application/json" \
     -d @- ) <<PAYLOAD
 {
@@ -37,7 +37,7 @@ PAYLOAD
 PAYLOAD
 authConfig "data-broker"
 
-(curl -o /dev/null $kong/apis -s -S -X POST \
+(curl -o /dev/null ${kong}/apis -s -S -X POST \
     --header "Content-Type: application/json" \
     -d @- ) <<PAYLOAD
 {
@@ -51,7 +51,7 @@ authConfig "device-manager"
 
 # auth service configuration
 
-(curl -o /dev/null $kong/apis -s -S -X POST \
+(curl -o /dev/null ${kong}/apis -s -S -X POST \
     --header "Content-Type: application/json" \
     -d @- ) <<PAYLOAD
 {
@@ -63,7 +63,7 @@ authConfig "device-manager"
 PAYLOAD
 # no auth: this is actually the endpoint used to get a token
 # rate plugin limit to avoid brute-force atacks
-curl -o /dev/null -sS -X POST $kong/apis/auth-service/plugins \
+curl -o /dev/null -sS -X POST ${kong}/apis/auth-service/plugins \
     --data "name=rate-limiting" \
     --data "config.minute=5" \
     --data "config.hour=40" \
@@ -71,7 +71,7 @@ curl -o /dev/null -sS -X POST $kong/apis/auth-service/plugins \
 
 
 # revoke all tokens: maintence only API
-(curl -o /dev/null $kong/apis -s -S -X POST \
+(curl -o /dev/null ${kong}/apis -s -S -X POST \
     --header "Content-Type: application/json" \
     -d @- ) <<PAYLOAD
 {
@@ -81,13 +81,13 @@ curl -o /dev/null -sS -X POST $kong/apis/auth-service/plugins \
     "upstream_url": "http://auth:5000"
 }
 PAYLOAD
-curl -o /dev/null -sS -X POST  $kong/apis/auth-revoke/plugins \
+curl -o /dev/null -sS -X POST  ${kong}/apis/auth-revoke/plugins \
     --data "name=request-termination" \
     --data "config.status_code=403" \
     --data "config.message=Not authorized"
 
 
-(curl -o /dev/null $kong/apis -s -S -X POST \
+(curl -o /dev/null ${kong}/apis -s -S -X POST \
     --header "Content-Type: application/json" \
     -d @- ) <<PAYLOAD
 {
@@ -102,7 +102,7 @@ authConfig "user-service"
 # -- end auth service --
 # mashup/flows service configuration
 
-(curl -o /dev/null $kong/apis -s -S -X POST \
+(curl -o /dev/null ${kong}/apis -s -S -X POST \
     --header "Content-Type: application/json" \
     -d @- ) <<PAYLOAD
 {
@@ -115,7 +115,7 @@ PAYLOAD
 authConfig "flows"
 
 # TODO it might be a good idea to merge this with the orchestrator itself
-(curl -o /dev/null $kong/apis -s -S -X POST \
+(curl -o /dev/null ${kong}/apis -s -S -X POST \
     --header "Content-Type: application/json" \
     -d @- ) <<PAYLOAD
 {
@@ -129,7 +129,7 @@ PAYLOAD
 
 # -- end mashup/flows --
 
-(curl -o /dev/null $kong/apis -s -S -X POST \
+(curl -o /dev/null ${kong}/apis -s -S -X POST \
     --header "Content-Type: application/json" \
     -d @- ) <<PAYLOAD
 {
@@ -142,7 +142,7 @@ PAYLOAD
 authConfig "history"
 
 # CA certificate retrievemment and certificate sign requests
-(curl -o /dev/null $kong/apis -sS -X POST \
+(curl -o /dev/null ${kong}/apis -sS -X POST \
     --header "Content-Type: application/json" \
     -d @- ) <<PAYLOAD
 {
@@ -155,7 +155,7 @@ PAYLOAD
 authConfig "ejbca-paths"
 
 # Alarm manager endpoints
-(curl -o /dev/null $kong/apis -sS -X POST \
+(curl -o /dev/null ${kong}/apis -sS -X POST \
     --header "Content-Type: application/json" \
     -d @- ) <<PAYLOAD
 {
