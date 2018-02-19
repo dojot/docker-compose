@@ -1,0 +1,13 @@
+<alarm-metamodel>
+  <domain>AuthenticationError</domain>
+  <namespace>dojot.auth</namespace>
+  <primary-subject>
+    <primary-field type="alphanumeric">module_name</primary-field>
+    <primary-field type="alphanumeric">instance_id</primary-field>
+  </primary-subject>
+  <additional-data>
+    <additional-field type="alphanumeric">userid</additional-field>
+    <additional-field type="alphanumeric">username</additional-field>
+    <additional-field type="alphanumeric">reason</additional-field>
+  </additional-data>
+</alarm-metamodel>
