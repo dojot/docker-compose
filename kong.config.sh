@@ -30,12 +30,33 @@ PAYLOAD
     -d @- ) <<PAYLOAD
 {
     "name": "data-broker",
-    "uris": [/device/(.*)/latest", "/subscription"],
+    "uris": ["/device/(.*)/latest", "/subscription"],
     "strip_uri": false,
     "upstream_url": "http://data-broker:80"
 }
 PAYLOAD
 authConfig "data-broker"
+(curl -o /dev/null ${kong}/apis -sS -X POST \
+    --header "Content-Type: application/json" \
+    -d @- ) <<PAYLOAD
+{
+    "name": "data-streams",
+    "uris": ["/stream"],
+    "strip_uri": true,
+    "upstream_url": "http://data-broker:80"
+}
+PAYLOAD
+authConfig "data-streams"
+(curl -o /dev/null $kong/apis -s -S -X POST \
+    --header "Content-Type: application/json" \
+    -d @- ) <<PAYLOAD
+{
+    "name": "ws-http",
+    "uris": "/socket.io",
+    "strip_uri": false,
+    "upstream_url": "http://data-broker:80"
+}
+PAYLOAD
 
 (curl -o /dev/null ${kong}/apis -s -S -X POST \
     --header "Content-Type: application/json" \
