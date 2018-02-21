@@ -146,7 +146,7 @@ services:
     ports:
       - "8000:8000"
       - "8443:8443"
-      - "127.0.0.1:8001:8001"
+      # - "127.0.0.1:8001:8001"
       # - "7946:7946"
       # - "7946:7946/udp"  # cluster
     environment:
@@ -155,6 +155,15 @@ services:
     volumes:
       - ./apigw/plugins/pep-kong:/plugins/pep-kong
       - ./apigw/plugins/mutualauthentication:/plugins/mutualauthentication
+
+  kong-config:
+    image: appropriate/curl
+    entrypoint: /opt/kong.config.sh
+    restart: on-failure
+    depends_on:
+      - apigw
+    volumes:
+      - ./kong.config.sh:/opt/kong.config.sh
 
   # perseo-core:
   #   image: telefonicaiot/perseo-core
@@ -191,6 +200,8 @@ services:
     environment:
       - MONGO_HOST=mongodb
       - RABBIT_HOST=rabbitmq
+    volumes:
+      - ./alarms:/opt/jboss/dojot/alarms/metamodel
 
   zookeeper:
     image: "zookeeper:3.4"
