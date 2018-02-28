@@ -1,0 +1,12 @@
+<alarm-metamodel>
+  <domain>JsonParseError</domain>
+  <namespace>dojot.agent</namespace>
+  <primary-subject>
+    <primary-field type="alphanumeric">module_name</primary-field>
+    <primary-field type="alphanumeric">instance_id</primary-field>
+  </primary-subject>
+  <additional-data>
+    <additional-field type="alphanumeric">topic</additional-field>
+    <additional-field type="alphanumeric">content</additional-field>
+  </additional-data>
+</alarm-metamodel>
