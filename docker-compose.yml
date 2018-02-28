@@ -18,17 +18,29 @@ services:
     restart: always
     environment:
       FALCON_SETTINGS_MODULE: 'history.settings.docker'
+    logging:
+      driver: json-file
+      options:
+        max-size: 100m
 
   persister:
     image: dojot/persister
     restart: always
     environment:
       FALCON_SETTINGS_MODULE: 'history.settings.docker'
+    logging:
+      driver: json-file
+      options:
+        max-size: 100m
 
   mongodb:
     image: "mongo:3.2"
     restart: always
     user: "mongodb"
+    logging:
+      driver: json-file
+      options:
+        max-size: 100m
 
   mqtt:
     image: ansi/mosquitto
@@ -40,6 +52,10 @@ services:
     ports:
       - "1883:1883"   # for clear MQTT
       #- "8883:8883"  # for MQTT over TLS
+    logging:
+      driver: json-file
+      options:
+        max-size: 100m
 
   iotagent:
     image: dojot/iotagent-json
@@ -53,19 +69,18 @@ services:
     #   - ./iotagent/config.json:/opt/iotagent-json/config.json:Z
     environment:
        MQTT_TLS: "false"
-
-  # coap:
-  #   image: "telefonicaiot/lightweightm2m-iotagent:latest"
-  #   restart: always
-  #   depends_on:
-  #     - mongodb
-  #   ports:
-  #     - "127.0.0.1:4041:4041"
-  #     - 5684:5684/udp
+    logging:
+      driver: json-file
+      options:
+        max-size: 100m
 
   gui:
     image: dojot/gui:latest
     restart: always
+    logging:
+      driver: json-file
+      options:
+        max-size: 100m
 
   # orion replacement component
   data-broker:
@@ -74,6 +89,10 @@ services:
     depends_on:
       - kafka
       - data-broker-redis
+    logging:
+      driver: json-file
+      options:
+        max-size: 100m
 
   data-broker-redis:
     image: redis
@@ -82,6 +101,10 @@ services:
       default:
         aliases:
           - dbmredis
+    logging:
+      driver: json-file
+      options:
+        max-size: 100m
 
   device-manager:
     image: dojot/device-manager
@@ -89,10 +112,18 @@ services:
     depends_on:
       - postgres
       - kafka
+    logging:
+      driver: json-file
+      options:
+        max-size: 100m
 
   auth-redis:
     image: redis
     restart: always
+    logging:
+      driver: json-file
+      options:
+        max-size: 100m
 
   auth:
     image: dojot/auth:latest
@@ -111,6 +142,10 @@ services:
       AUTH_CACHE_HOST: "auth-redis"
       # This is used to select the type of cache to be used. Allowed values are "redis" or "nocache"
       AUTH_CACHE_NAME: "redis"
+    logging:
+      driver: json-file
+      options:
+        max-size: 100m
 
   postgres:
     image: "postgres:9.4"
@@ -123,6 +158,10 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    logging:
+      driver: json-file
+      options:
+        max-size: 100m
 
   kong-migration:
     image: dojot/kong:latest
@@ -158,6 +197,10 @@ services:
     volumes:
       - ./apigw/plugins/pep-kong:/plugins/pep-kong
       - ./apigw/plugins/mutualauthentication:/plugins/mutualauthentication
+    logging:
+      driver: json-file
+      options:
+        max-size: 100m
 
   kong-config:
     image: appropriate/curl
@@ -193,6 +236,10 @@ services:
   rabbitmq:
     image: rabbitmq
     restart: always
+    logging:
+      driver: json-file
+      options:
+        max-size: 100m
 
   alarm-manager:
     image: dojot/alarm-manager:latest
@@ -205,10 +252,18 @@ services:
       - RABBIT_HOST=rabbitmq
     volumes:
       - ./alarms:/opt/jboss/dojot/alarms/metamodel
+    logging:
+      driver: json-file
+      options:
+        max-size: 100m
 
   zookeeper:
     image: "zookeeper:3.4"
     restart: always
+    logging:
+      driver: json-file
+      options:
+        max-size: 100m
 
   kafka:
     image: "ches/kafka:0.10.1.1"
@@ -218,6 +273,10 @@ services:
     environment:
       ZOOKEEPER_IP: zookeeper
       KAFKA_NUM_PARTITIONS: 10
+    logging:
+      driver: json-file
+      options:
+        max-size: 100m
 
 ###
 # Currently this is only needed if MQTT over TLS is used.
@@ -226,6 +285,10 @@ services:
 #  ejbca:
 #    image: "dojot/ejbca"
 #    restart: always
+#    logging:
+#      driver: json-file
+#      options:
+#        max-size: 100m
 
 ###
 # If mutual authentication is needed, please uncomment these three components below
@@ -238,6 +301,10 @@ services:
 #      - ./ma/sentinel.conf:/usr/local/etc/redis/sentinel.conf
 #      - ./ma/redis_init.sh:/usr/local/etc/redis/redis_init.sh
 #    command: sh -c "chmod +x /usr/local/etc/redis/redis_init.sh && /usr/local/etc/redis/redis_init.sh"
+#    logging:
+#      driver: json-file
+#      options:
+#        max-size: 100m
 #
 #  kerberos:
 #    image: "dojot/kerberos"
@@ -252,6 +319,14 @@ services:
 #      - kafka
 #      - redis
 #      - cassandra
+#    logging:
+#      driver: json-file
+#      options:
+#        max-size: 100m
 #
 #  cassandra:
 #    image: "cassandra:3.10"
+#    logging:
+#      driver: json-file
+#      options:
+#        max-size: 100m
