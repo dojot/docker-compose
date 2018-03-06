@@ -30,12 +30,33 @@ PAYLOAD
     -d @- ) <<PAYLOAD
 {
     "name": "data-broker",
-    "uris": [/device/(.*)/latest", "/subscription"],
+    "uris": ["/device/(.*)/latest", "/subscription"],
     "strip_uri": false,
     "upstream_url": "http://data-broker:80"
 }
 PAYLOAD
 authConfig "data-broker"
+(curl -o /dev/null ${kong}/apis -sS -X POST \
+    --header "Content-Type: application/json" \
+    -d @- ) <<PAYLOAD
+{
+    "name": "data-streams",
+    "uris": ["/stream"],
+    "strip_uri": true,
+    "upstream_url": "http://data-broker:80"
+}
+PAYLOAD
+authConfig "data-streams"
+(curl -o /dev/null $kong/apis -s -S -X POST \
+    --header "Content-Type: application/json" \
+    -d @- ) <<PAYLOAD
+{
+    "name": "ws-http",
+    "uris": "/socket.io",
+    "strip_uri": false,
+    "upstream_url": "http://data-broker:80"
+}
+PAYLOAD
 
 (curl -o /dev/null ${kong}/apis -s -S -X POST \
     --header "Content-Type: application/json" \
@@ -107,25 +128,24 @@ authConfig "user-service"
     -d @- ) <<PAYLOAD
 {
     "name": "flows",
-    "uris": "/flows",
+    "uris": ["/flows"],
     "strip_uri": true,
-    "upstream_url": "http://mashup:3000"
+    "upstream_url": "http://flowbroker:80"
 }
 PAYLOAD
 authConfig "flows"
 
-# TODO it might be a good idea to merge this with the orchestrator itself
 (curl -o /dev/null ${kong}/apis -s -S -X POST \
     --header "Content-Type: application/json" \
     -d @- ) <<PAYLOAD
 {
     "name": "mashup",
-    "uris": "/mashup",
+    "uris": ["/mashup"],
     "strip_uri": true,
-    "upstream_url": "http://mashup:1880"
+    "upstream_url": "http://flowbroker:80"
 }
 PAYLOAD
-# no auth: serves only available types
+# authConfig "flows"
 
 # -- end mashup/flows --
 
