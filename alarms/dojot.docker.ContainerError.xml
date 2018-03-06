@@ -7,5 +7,6 @@
   </primary-subject>
   <additional-data>
     <additional-field type="alphanumeric">exitCode</additional-field>
+    <additional-field type="alphanumeric">imageId</additional-field>
   </additional-data>
 </alarm-metamodel>
