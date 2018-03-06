@@ -16,6 +16,8 @@ services:
   history:
     image: dojot/history
     restart: always
+    depends_on:
+      - mongodb
     environment:
       FALCON_SETTINGS_MODULE: 'history.settings.docker'
     logging:
@@ -26,6 +28,11 @@ services:
   persister:
     image: dojot/persister
     restart: always
+    depends_on:
+      - mongodb
+      - auth
+      - kafka
+      - data-broker
     environment:
       FALCON_SETTINGS_MODULE: 'history.settings.docker'
     logging:
@@ -61,7 +68,6 @@ services:
     image: dojot/iotagent-json
     restart: always
     depends_on:
-      - mongodb
       - mqtt
       - kafka
       - data-broker
@@ -97,10 +103,6 @@ services:
   data-broker-redis:
     image: redis
     restart: always
-    networks:
-      default:
-        aliases:
-          - dbmredis
     logging:
       driver: json-file
       options:
@@ -112,6 +114,7 @@ services:
     depends_on:
       - postgres
       - kafka
+      - data-broker
     logging:
       driver: json-file
       options:
@@ -129,9 +132,9 @@ services:
     image: dojot/auth:latest
     restart: always
     depends_on:
-      - "apigw"
-      - "postgres"
-      - "auth-redis"
+      - apigw
+      - postgres
+      - auth-redis
     depends_on:
       postgres:
         condition: service_healthy
@@ -211,27 +214,12 @@ services:
     volumes:
       - ./kong.config.sh:/opt/kong.config.sh
 
-  # perseo-core:
-  #   image: telefonicaiot/perseo-core
-  #   restart: always
-  #   command: -perseo_fe_url perseo-fe:9090
-  #
-  # perseo-fe:
-  #   image: dojot/perseo-fe:latest
-  #   restart: always
-  #   ports:
-  #     - "127.0.0.1:9090:9090"
-  #   depends_on:
-  #     - perseo-core
-  #     - mongodb
-  #   environment:
-  #     - PERSEO_MONGO_HOST=mongodb
-  #     - PERSEO_CORE_URL=http://perseo-core:8080
-  #     - PERSEO_ORION_URL=http://orion:1026/NGSI10/updateContext
-  #
-  # mashup:
-  #   image: dojot/mashup:latest
-  #   restart: always
+  flowbroker:
+    image: dojot/flowbroker
+    restart: always
+    depends_on:
+      - rabbitmq
+      - kafka
 
   rabbitmq:
     image: rabbitmq
