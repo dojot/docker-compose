@@ -1,0 +1,12 @@
+<alarm-metamodel>
+  <domain>ContainerError</domain>
+  <namespace>dojot.docker</namespace>
+  <primary-subject>
+    <primary-field type="alphanumeric">container</primary-field>
+    <primary-field type="alphanumeric">image</primary-field>
+  </primary-subject>
+  <additional-data>
+    <additional-field type="alphanumeric">exitCode</additional-field>
+    <additional-field type="alphanumeric">imageId</additional-field>
+  </additional-data>
+</alarm-metamodel>
