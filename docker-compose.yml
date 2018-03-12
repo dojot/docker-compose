@@ -133,6 +133,29 @@ services:
     restart: always
     depends_on:
       - postgres
+    logging:
+      driver: json-file
+      options:
+        max-size: 100m
+    environment:
+      # TODO: The following should be unique for each environment
+      S3ACCESSKEY: 9HEODSF6WQN5EZ39DM7Z
+      S3SECRETKEY: fT5nAgHR9pkj0yYsBdc4p+PPq6ArjshcPdz0HA6W
+
+
+  minio:
+    image:
+    restart: always
+    image: "minio/minio"
+    logging:
+      driver: json-file
+      options:
+        max-size: 100m
+    environment:
+      # TODO: The following should be unique for each environment
+      MINIO_ACCESS_KEY: 9HEODSF6WQN5EZ39DM7Z
+      MINIO_SECRET_KEY: fT5nAgHR9pkj0yYsBdc4p+PPq6ArjshcPdz0HA6W
+
 
   auth:
     image: dojot/auth:latest
