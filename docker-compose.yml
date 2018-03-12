@@ -133,6 +133,7 @@ services:
     restart: always
     depends_on:
       - postgres
+      - minio
     logging:
       driver: json-file
       options:
