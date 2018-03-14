@@ -49,32 +49,23 @@ services:
       options:
         max-size: 100m
 
-  mqtt:
-    image: ansi/mosquitto
-    # If TLS is needed, use the image below
-    #image: dojot/mqtt-manager
+  mosca-redis:
+    image: redis
     restart: always
-    volumes:
-      - ./mqtt/mosquitto.conf:/usr/local/src/mosquitto-1.4.13/mosquitto.conf:Z
-    ports:
-      - "1883:1883"   # for clear MQTT
-      #- "8883:8883"  # for MQTT over TLS
     logging:
       driver: json-file
       options:
         max-size: 100m
-
-  iotagent:
-    image: dojot/iotagent-json
-    restart: always
+  
+  iotagent-mqtt:
+    image: dojot/iotagent-mosca
     depends_on:
-      - mqtt
+      - mosca-redis
       - kafka
       - data-broker
-    # volumes:
-    #   - ./iotagent/config.json:/opt/iotagent-json/config.json:Z
-    environment:
-       MQTT_TLS: "false"
+    ports:
+      - 1883:1883
+      - 8883:8883
     logging:
       driver: json-file
       options:
@@ -187,14 +178,7 @@ services:
         condition: service_started
     ports:
       - "8000:8000"
-      - "8443:8443"
-      # - "127.0.0.1:8001:8001"
-      # - "7946:7946"
-      # - "7946:7946/udp"  # cluster
     environment:
-      # The following environment variables could be set for usage with cassandra
-      # KONG_DATABASE: "cassandra"
-      # KONG_CASSANDRA_CONTACT_POINTS: "cassandra"
       KONG_DATABASE: "postgres"
       KONG_PG_HOST: "postgres"
     volumes:
