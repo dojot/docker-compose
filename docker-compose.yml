@@ -56,7 +56,7 @@ services:
       driver: json-file
       options:
         max-size: 100m
-  
+
   iotagent-mqtt:
     image: dojot/iotagent-mosca
     depends_on:
@@ -112,14 +112,6 @@ services:
       options:
         max-size: 100m
 
-  auth-redis:
-    image: redis
-    restart: always
-    logging:
-      driver: json-file
-      options:
-        max-size: 100m
-
   image-manager:
     image: dojot/image-manager:latest
     restart: always
@@ -135,7 +127,6 @@ services:
       S3ACCESSKEY: 9HEODSF6WQN5EZ39DM7Z
       S3SECRETKEY: fT5nAgHR9pkj0yYsBdc4p+PPq6ArjshcPdz0HA6W
 
-
   minio:
     image:
     restart: always
@@ -148,7 +139,15 @@ services:
       # TODO: The following should be unique for each environment
       MINIO_ACCESS_KEY: 9HEODSF6WQN5EZ39DM7Z
       MINIO_SECRET_KEY: fT5nAgHR9pkj0yYsBdc4p+PPq6ArjshcPdz0HA6W
+    command: server /data
 
+  auth-redis:
+    image: redis
+    restart: always
+    logging:
+      driver: json-file
+      options:
+        max-size: 100m
 
   auth:
     image: dojot/auth:latest
