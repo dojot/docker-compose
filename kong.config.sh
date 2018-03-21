@@ -77,7 +77,7 @@ authConfig "device-manager"
 {
     "name": "image",
     "uris": "/fw-image",
-    "strip_uri": false,
+    "strip_uri": true,
     "upstream_url": "http://image-manager:5000"
 }
 PAYLOAD
