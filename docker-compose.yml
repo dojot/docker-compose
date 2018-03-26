@@ -62,6 +62,7 @@ services:
       - mosca-redis
       - kafka
       - data-broker
+      - auth
     ports:
       - 1883:1883
       - 8883:8883
@@ -233,6 +234,13 @@ services:
     depends_on:
       - rabbitmq
       - kafka
+      - mongodb
+      - auth
+    networks:
+      - default
+      - flowbroker
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
 
   rabbitmq:
     image: rabbitmq
@@ -331,3 +339,6 @@ services:
 #      driver: json-file
 #      options:
 #        max-size: 100m
+
+networks:
+  flowbroker:
