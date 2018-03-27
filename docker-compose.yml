@@ -213,8 +213,8 @@ services:
       KONG_DATABASE: "postgres"
       KONG_PG_HOST: "postgres"
     volumes:
-      - ./apigw/plugins/pep-kong:/plugins/pep-kong
-      - ./apigw/plugins/mutualauthentication:/plugins/mutualauthentication
+      - ./apigw/plugins/pep-kong:/plugins/pep-kong:Z
+      - ./apigw/plugins/mutualauthentication:/plugins/mutualauthentication:Z
     logging:
       driver: json-file
       options:
@@ -227,7 +227,7 @@ services:
     depends_on:
       - apigw
     volumes:
-      - ./kong.config.sh:/opt/kong.config.sh
+      - ./kong.config.sh:/opt/kong.config.sh:Z
 
   flowbroker:
     image: dojot/flowbroker:latest
@@ -241,7 +241,7 @@ services:
       - default
       - flowbroker
     volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
+      - /var/run/docker.sock:/var/run/docker.sock:Z
 
   rabbitmq:
     image: rabbitmq
@@ -261,7 +261,7 @@ services:
       - MONGO_HOST=mongodb
       - RABBIT_HOST=rabbitmq
     volumes:
-      - ./alarms:/opt/jboss/dojot/alarms/metamodel
+      - ./alarms:/opt/jboss/dojot/alarms/metamodel:Z
     logging:
       driver: json-file
       options:
