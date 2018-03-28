@@ -319,7 +319,7 @@ services:
 # If mutual authentication is needed, please uncomment these three components below
 ###
 #
-#  ma_redis:
+#  ma-redis:
 #    image: "redis:3.2.8"
 #    volumes:
 #      - ./ma/redis.conf:/usr/local/etc/redis/redis.conf
@@ -332,25 +332,12 @@ services:
 #        max-size: 100m
 #
 #  kerberos:
-#    image: "dojot/kerberos"
-#    environment:
-#      - CASSANDRA_HOSTNAME=cassandra
-#      - CASSANDRA_PORT=9042
-#    volumes:
-#      - ./ma/node.config:/opt/jboss/wildfly/standalone/configuration/node.config
-#      - ./ma/kafka.brokers:/opt/jboss/wildfly/standalone/configuration/kafka.brokers
-#      - ./ma/redis.sentinels:/opt/jboss/wildfly/standalone/configuration/redis.sentinels
+#    image: "dojot/kerberos:latest"
 #    depends_on:
 #      - kafka
 #      - redis
-#      - cassandra
-#    logging:
-#      driver: json-file
-#      options:
-#        max-size: 100m
-#
-#  cassandra:
-#    image: "cassandra:3.10"
+#    environment:
+#      - REDIS_ADDRESS: ma-redis
 #    logging:
 #      driver: json-file
 #      options:
