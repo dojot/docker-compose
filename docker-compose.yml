@@ -100,6 +100,14 @@ services:
       options:
         max-size: 100m
 
+  device-manager-redis:
+    image: redis
+    restart: always
+    logging:
+      driver: json-file
+      options:
+        max-size: 100m
+
   device-manager:
     image: dojot/device-manager:0.2.0-nightly20180326
     restart: always
@@ -107,6 +115,7 @@ services:
       - postgres
       - kafka
       - data-broker
+      - device-manager-redis
     logging:
       driver: json-file
       options:
@@ -212,8 +221,8 @@ services:
       KONG_DATABASE: "postgres"
       KONG_PG_HOST: "postgres"
     volumes:
-      - ./apigw/plugins/pep-kong:/plugins/pep-kong
-      - ./apigw/plugins/mutualauthentication:/plugins/mutualauthentication
+      - ./apigw/plugins/pep-kong:/plugins/pep-kong:Z
+      - ./apigw/plugins/mutualauthentication:/plugins/mutualauthentication:Z
     logging:
       driver: json-file
       options:
@@ -226,7 +235,7 @@ services:
     depends_on:
       - apigw
     volumes:
-      - ./kong.config.sh:/opt/kong.config.sh
+      - ./kong.config.sh:/opt/kong.config.sh:Z
 
   flowbroker:
     image: dojot/flowbroker:0.2.0-nightly20180326
@@ -240,7 +249,7 @@ services:
       - default
       - flowbroker
     volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
+      - /var/run/docker.sock:/var/run/docker.sock:Z
 
   rabbitmq:
     image: rabbitmq
@@ -260,7 +269,22 @@ services:
       - MONGO_HOST=mongodb
       - RABBIT_HOST=rabbitmq
     volumes:
-      - ./alarms:/opt/jboss/dojot/alarms/metamodel
+      - ./alarms:/opt/jboss/dojot/alarms/metamodel:Z
+    logging:
+      driver: json-file
+      options:
+        max-size: 100m
+
+  docker-monitor:
+    image: dojot/docker-monitor:latest
+    restart: always
+    depends_on:
+      - rabbitmq
+      - alarm-manager
+    environment:
+      - RABBITMQ_HOST=rabbitmq
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
     logging:
       driver: json-file
       options:
@@ -303,7 +327,7 @@ services:
 # If mutual authentication is needed, please uncomment these three components below
 ###
 #
-#  ma_redis:
+#  ma-redis:
 #    image: "redis:3.2.8"
 #    volumes:
 #      - ./ma/redis.conf:/usr/local/etc/redis/redis.conf
@@ -317,24 +341,11 @@ services:
 #
 #  kerberos:
 #    image: "dojot/kerberos:0.2.0-nightly20171228"
-#    environment:
-#      - CASSANDRA_HOSTNAME=cassandra
-#      - CASSANDRA_PORT=9042
-#    volumes:
-#      - ./ma/node.config:/opt/jboss/wildfly/standalone/configuration/node.config
-#      - ./ma/kafka.brokers:/opt/jboss/wildfly/standalone/configuration/kafka.brokers
-#      - ./ma/redis.sentinels:/opt/jboss/wildfly/standalone/configuration/redis.sentinels
 #    depends_on:
 #      - kafka
 #      - redis
-#      - cassandra
-#    logging:
-#      driver: json-file
-#      options:
-#        max-size: 100m
-#
-#  cassandra:
-#    image: "cassandra:3.10"
+#    environment:
+#      - REDIS_ADDRESS: ma-redis
 #    logging:
 #      driver: json-file
 #      options:
