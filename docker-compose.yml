@@ -101,6 +101,14 @@ services:
       options:
         max-size: 100m
 
+  device-manager-redis:
+    image: redis
+    restart: always
+    logging:
+      driver: json-file
+      options:
+        max-size: 100m
+
   device-manager:
     image: dojot/device-manager
     restart: always
@@ -108,6 +116,7 @@ services:
       - postgres
       - kafka
       - data-broker
+      - device-manager-redis
     logging:
       driver: json-file
       options:
