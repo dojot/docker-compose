@@ -14,7 +14,7 @@ services:
   #     - ./certs/default.conf:/etc/nginx/conf.d/default.conf
 
   history:
-    image: dojot/history:0.2.0
+    image: dojot/history:0.2.x
     restart: always
     depends_on:
       - mongodb
@@ -26,7 +26,7 @@ services:
         max-size: 100m
 
   persister:
-    image: dojot/persister:0.2.0
+    image: dojot/persister:0.2.x
     restart: always
     depends_on:
       - mongodb
@@ -58,7 +58,7 @@ services:
         max-size: 100m
 
   iotagent-mqtt:
-    image: dojot/iotagent-mosca:0.2.0
+    image: dojot/iotagent-mosca:0.2.x
     depends_on:
       - mosca-redis
       - kafka
@@ -74,7 +74,7 @@ services:
         max-size: 100m
 
   gui:
-    image: dojot/gui:0.2.0
+    image: dojot/gui:0.2.x
     restart: always
     logging:
       driver: json-file
@@ -83,7 +83,7 @@ services:
 
   # orion replacement component
   data-broker:
-    image: dojot/data-broker:0.2.0
+    image: dojot/data-broker:0.2.x
     restart: always
     depends_on:
       - kafka
@@ -110,7 +110,7 @@ services:
         max-size: 100m
 
   device-manager:
-    image: dojot/device-manager:0.2.0
+    image: dojot/device-manager:0.2.x
     restart: always
     depends_on:
       - postgres
@@ -123,7 +123,7 @@ services:
         max-size: 100m
 
   image-manager:
-    image: dojot/image-manager:0.2.0
+    image: dojot/image-manager:0.2.x
     restart: always
     depends_on:
       - postgres
@@ -160,7 +160,7 @@ services:
         max-size: 100m
 
   auth:
-    image: dojot/auth:0.2.0
+    image: dojot/auth:0.2.x
     restart: always
     depends_on:
       - apigw
@@ -198,7 +198,7 @@ services:
         max-size: 100m
 
   kong-migration:
-    image: dojot/kong:0.2.0
+    image: dojot/kong:0.2.x
     depends_on:
       postgres:
         condition: service_healthy
@@ -209,7 +209,7 @@ services:
     restart: on-failure
 
   apigw:
-    image: dojot/kong:0.2.0
+    image: dojot/kong:0.2.x
     restart: always
     depends_on:
       postgres:
@@ -239,7 +239,7 @@ services:
       - ./kong.config.sh:/opt/kong.config.sh:Z
 
   flowbroker:
-    image: dojot/flowbroker:0.2.0
+    image: dojot/flowbroker:0.2.x
     restart: always
     depends_on:
       - rabbitmq
@@ -261,7 +261,7 @@ services:
         max-size: 100m
 
   alarm-manager:
-    image: dojot/alarm-manager:0.2.0
+    image: dojot/alarm-manager:0.2.x
     restart: always
     depends_on:
       - mongodb
@@ -277,7 +277,7 @@ services:
         max-size: 100m
 
   docker-monitor:
-    image: dojot/docker-monitor:0.2.0
+    image: dojot/docker-monitor:0.2.x
     restart: always
     depends_on:
       - rabbitmq
