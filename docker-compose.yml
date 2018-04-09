@@ -344,13 +344,23 @@ services:
 #    image: "dojot/kerberos:latest"
 #    depends_on:
 #      - kafka
-#      - redis
+#      - ma-redis
 #    environment:
-#      - REDIS_ADDRESS: ma-redis
+#      REDIS_ADDRESS: ma-redis
 #    logging:
 #      driver: json-file
 #      options:
 #        max-size: 100m
+#        
+#  kong-ma-config:
+#    image: appropriate/curl
+#    entrypoint: /opt/kong-ma.config.sh
+#    restart: on-failure
+#    depends_on:
+#      - apigw
+#      - kong-config
+#    volumes:
+#      - ./ma/kong-ma.config.sh:/opt/kong-ma.config.sh:Z
 
 networks:
   flowbroker:
