@@ -112,6 +112,11 @@ services:
   device-manager:
     image: dojot/device-manager
     restart: always
+    environment:
+      # TODO: Fill these env variables with suitable values
+      - DEV_MNGR_CRYPTO_PASS="kamehameHA"
+      - DEV_MNGR_CRYPTO_IV=1234567890123456
+      - DEV_MNGR_CRYPTO_SALT="shuriken"
     depends_on:
       - postgres
       - kafka
