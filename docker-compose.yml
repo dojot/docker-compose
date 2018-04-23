@@ -50,7 +50,7 @@ services:
         max-size: 100m
 
   mosca-redis:
-    image: redis
+    image: redis:alpine
     restart: always
     logging:
       driver: json-file
@@ -94,7 +94,7 @@ services:
         max-size: 100m
 
   data-broker-redis:
-    image: redis
+    image: redis:alpine
     restart: always
     logging:
       driver: json-file
@@ -102,7 +102,7 @@ services:
         max-size: 100m
 
   device-manager-redis:
-    image: redis
+    image: redis:alpine
     restart: always
     logging:
       driver: json-file
@@ -157,7 +157,7 @@ services:
     command: server /data
 
   auth-redis:
-    image: redis
+    image: redis:alpine
     restart: always
     logging:
       driver: json-file
@@ -187,7 +187,7 @@ services:
         max-size: 100m
 
   postgres:
-    image: "postgres:9.4"
+    image: "postgres:9.4-alpine"
     restart: always
     environment:
       POSTGRES_USER: "kong"
@@ -258,7 +258,7 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock:Z
 
   rabbitmq:
-    image: rabbitmq
+    image: rabbitmq:3.7-alpine
     restart: always
     logging:
       driver: json-file
@@ -356,7 +356,7 @@ services:
 #      driver: json-file
 #      options:
 #        max-size: 100m
-#        
+#
 #  kong-ma-config:
 #    image: appropriate/curl
 #    entrypoint: /opt/kong-ma.config.sh
