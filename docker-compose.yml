@@ -235,21 +235,6 @@ services:
       options:
         max-size: 100m
 
-  docker-monitor:
-    image: dojot/docker-monitor:latest
-    restart: always
-    depends_on:
-      - rabbitmq
-      - alarm-manager
-    environment:
-      - RABBITMQ_HOST=rabbitmq
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-    logging:
-      driver: json-file
-      options:
-        max-size: 100m
-
   zookeeper:
     image: "zookeeper:3.4"
     restart: always
