@@ -81,7 +81,6 @@ services:
       options:
         max-size: 100m
 
-  # orion replacement component
   data-broker:
     image: dojot/data-broker
     restart: always
@@ -126,35 +125,6 @@ services:
       driver: json-file
       options:
         max-size: 100m
-
-  image-manager:
-    image: dojot/image-manager:latest
-    restart: always
-    depends_on:
-      - postgres
-      - minio
-    logging:
-      driver: json-file
-      options:
-        max-size: 100m
-    environment:
-      # TODO: The following should be unique for each environment
-      S3ACCESSKEY: 9HEODSF6WQN5EZ39DM7Z
-      S3SECRETKEY: fT5nAgHR9pkj0yYsBdc4p+PPq6ArjshcPdz0HA6W
-
-  minio:
-    image:
-    restart: always
-    image: "minio/minio"
-    logging:
-      driver: json-file
-      options:
-        max-size: 100m
-    environment:
-      # TODO: The following should be unique for each environment
-      MINIO_ACCESS_KEY: 9HEODSF6WQN5EZ39DM7Z
-      MINIO_SECRET_KEY: fT5nAgHR9pkj0yYsBdc4p+PPq6ArjshcPdz0HA6W
-    command: server /data
 
   auth-redis:
     image: redis:alpine
@@ -265,37 +235,6 @@ services:
       options:
         max-size: 100m
 
-  alarm-manager:
-    image: dojot/alarm-manager:latest
-    restart: always
-    depends_on:
-      - mongodb
-      - rabbitmq
-    environment:
-      - MONGO_HOST=mongodb
-      - RABBIT_HOST=rabbitmq
-    volumes:
-      - ./alarms:/opt/jboss/dojot/alarms/metamodel:Z
-    logging:
-      driver: json-file
-      options:
-        max-size: 100m
-
-  docker-monitor:
-    image: dojot/docker-monitor:latest
-    restart: always
-    depends_on:
-      - rabbitmq
-      - alarm-manager
-    environment:
-      - RABBITMQ_HOST=rabbitmq
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-    logging:
-      driver: json-file
-      options:
-        max-size: 100m
-
   zookeeper:
     image: "zookeeper:3.4"
     restart: always
@@ -316,56 +255,6 @@ services:
       driver: json-file
       options:
         max-size: 100m
-
-###
-# Currently this is only needed if MQTT over TLS is used.
-###
-#
-#  ejbca:
-#    image: "dojot/ejbca"
-#    restart: always
-#    logging:
-#      driver: json-file
-#      options:
-#        max-size: 100m
-
-###
-# If mutual authentication is needed, please uncomment these three components below
-###
-#
-#  ma-redis:
-#    image: "redis:3.2.8"
-#    volumes:
-#      - ./ma/redis.conf:/usr/local/etc/redis/redis.conf
-#      - ./ma/sentinel.conf:/usr/local/etc/redis/sentinel.conf
-#      - ./ma/redis_init.sh:/usr/local/etc/redis/redis_init.sh
-#    command: sh -c "chmod +x /usr/local/etc/redis/redis_init.sh && /usr/local/etc/redis/redis_init.sh"
-#    logging:
-#      driver: json-file
-#      options:
-#        max-size: 100m
-#
-#  kerberos:
-#    image: "dojot/kerberos:latest"
-#    depends_on:
-#      - kafka
-#      - ma-redis
-#    environment:
-#      REDIS_ADDRESS: ma-redis
-#    logging:
-#      driver: json-file
-#      options:
-#        max-size: 100m
-#
-#  kong-ma-config:
-#    image: appropriate/curl
-#    entrypoint: /opt/kong-ma.config.sh
-#    restart: on-failure
-#    depends_on:
-#      - apigw
-#      - kong-config
-#    volumes:
-#      - ./ma/kong-ma.config.sh:/opt/kong-ma.config.sh:Z
 
 networks:
   flowbroker:
