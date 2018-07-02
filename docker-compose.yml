@@ -64,6 +64,7 @@ services:
       - kafka
       - data-broker
       - auth
+      - ejbca
     ports:
       - 1883:1883
       - 8883:8883
@@ -251,6 +252,14 @@ services:
     environment:
       ZOOKEEPER_IP: zookeeper
       KAFKA_NUM_PARTITIONS: 10
+    logging:
+      driver: json-file
+      options:
+        max-size: 100m
+
+  ejbca:
+    image: "dojot/ejbca"
+    restart: always
     logging:
       driver: json-file
       options:
