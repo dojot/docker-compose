@@ -217,16 +217,34 @@ services:
   flowbroker:
     image: dojot/flowbroker:latest
     restart: always
+    environment:
+      DEPLOY_ENGINE: "docker"
     depends_on:
       - rabbitmq
       - kafka
       - mongodb
       - auth
+      - flowbroker-context-manager
     networks:
       - default
       - flowbroker
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:Z
+
+  flowbroker-context-manager:
+    image: dojot/context-manager:latest
+    restart: always
+    environment:
+      ZOOKEEPER_HOST: zookeeper
+      ZOOKEEPER_PORT: 2181
+      ZEROMQ_PORT: 5556
+      HOLD_LOCK_TIMEOUT: 10000
+      WAIT_LOCK_TIMEOUT: 30000
+    depends_on:
+      - zookeeper
+    networks:
+      - default
+      - flowbroker
 
   rabbitmq:
     image: rabbitmq:3.7-alpine
