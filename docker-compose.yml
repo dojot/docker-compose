@@ -232,7 +232,7 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock:Z
 
   flowbroker-context-manager:
-    image: dojot/context-manager:latest
+    image: dojot/flowbroker-context-manager:latest
     restart: always
     environment:
       ZOOKEEPER_HOST: zookeeper
