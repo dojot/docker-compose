@@ -160,14 +160,24 @@ services:
   postgres:
     image: "postgres:9.4-alpine"
     restart: always
-    environment:
-      POSTGRES_USER: "kong"
-      POSTGRES_DB: "kong"
     healthcheck:
       test: ["CMD", "pg_isready", "-U", "postgres"]
       interval: 10s
       timeout: 5s
       retries: 5
+    logging:
+      driver: json-file
+      options:
+        max-size: 100m
+
+  postgres-users:
+    image: "postgres:9.4-alpine"
+    restart: on-failure
+    command: >
+      bash -c "createuser kong -d -h postgres -U postgres && createdb kong -U kong -h postgres"
+    depends_on:
+      postgres:
+        condition: service_healthy
     logging:
       driver: json-file
       options:
