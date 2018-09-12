@@ -159,14 +159,24 @@ services:
   postgres:
     image: "postgres:9.4-alpine"
     restart: always
-    environment:
-      POSTGRES_USER: "kong"
-      POSTGRES_DB: "kong"
     healthcheck:
       test: ["CMD", "pg_isready", "-U", "postgres"]
       interval: 10s
       timeout: 5s
       retries: 5
+    logging:
+      driver: json-file
+      options:
+        max-size: 100m
+
+  postgres-users:
+    image: "postgres:9.4-alpine"
+    restart: on-failure
+    command: >
+      bash -c "createuser kong -d -h postgres -U postgres && createdb kong -U kong -h postgres"
+    depends_on:
+      postgres:
+        condition: service_healthy
     logging:
       driver: json-file
       options:
@@ -216,16 +226,34 @@ services:
   flowbroker:
     image: dojot/flowbroker:0.3.0-nightly20180712
     restart: always
+    environment:
+      DEPLOY_ENGINE: "docker"
     depends_on:
       - rabbitmq
       - kafka
       - mongodb
       - auth
+      - flowbroker-context-manager
     networks:
       - default
       - flowbroker
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:Z
+
+  flowbroker-context-manager:
+    image: dojot/flowbroker-context-manager:latest
+    restart: always
+    environment:
+      ZOOKEEPER_HOST: zookeeper
+      ZOOKEEPER_PORT: 2181
+      ZEROMQ_PORT: 5556
+      HOLD_LOCK_TIMEOUT: 10000
+      WAIT_LOCK_TIMEOUT: 30000
+    depends_on:
+      - zookeeper
+    networks:
+      - default
+      - flowbroker
 
   rabbitmq:
     image: rabbitmq:3.7-alpine
