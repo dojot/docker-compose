@@ -229,6 +229,7 @@ services:
     restart: always
     environment:
       DEPLOY_ENGINE: "docker"
+      FLOWBROKER_NETWORK: ${FLOWBROKER_NETWORK}
     depends_on:
       - rabbitmq
       - kafka
@@ -295,3 +296,4 @@ services:
 
 networks:
   flowbroker:
+    name: ${FLOWBROKER_NETWORK}
