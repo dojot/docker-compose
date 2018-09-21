@@ -10,7 +10,7 @@ To use this docker-compose.yml, you will need:
 - Docker engine > 17.12
 - docker-compose > 1.18
 
-Both are available in the (Docker official site)[https://docs.docker.com/install/]. All tests were performed with Docker CE.
+Both are available in the [Docker official site](https://docs.docker.com/install/). All tests were performed with Docker CE.
 
 
 Disclaimer
