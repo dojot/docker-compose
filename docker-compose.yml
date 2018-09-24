@@ -224,6 +224,14 @@ services:
     volumes:
       - ./kong.config.sh:/opt/kong.config.sh:Z
 
+  flowbroker-redis:
+    image: redis:alpine
+    restart: always
+    logging:
+      driver: json-file
+      options:
+        max-size: 100m
+
   flowbroker:
     image: dojot/flowbroker:latest
     restart: always
@@ -235,6 +243,7 @@ services:
       - mongodb
       - auth
       - flowbroker-context-manager
+      - flowbroker-redis
     networks:
       - default
       - flowbroker
