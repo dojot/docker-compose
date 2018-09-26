@@ -20,6 +20,7 @@ services:
       - mongodb
     environment:
       FALCON_SETTINGS_MODULE: 'history.settings.docker'
+      DOJOT_SERVICE_MANAGEMENT: 'internal'
     logging:
       driver: json-file
       options:
@@ -35,6 +36,7 @@ services:
       - data-broker
     environment:
       FALCON_SETTINGS_MODULE: 'history.settings.docker'
+      DOJOT_SERVICE_MANAGEMENT: 'internal'
     logging:
       driver: json-file
       options:
@@ -69,6 +71,8 @@ services:
       - 1883:1883
       - 8883:8883
     restart: always
+    environment:
+      DOJOT_SERVICE_MANAGEMENT: 'internal'
     logging:
       driver: json-file
       options:
