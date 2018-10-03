@@ -14,30 +14,36 @@ services:
   #     - ./certs/default.conf:/etc/nginx/conf.d/default.conf
 
   history:
-    image: dojot/history:v1.0.0-beta.1
+    image: dojot/history:v1.0.0
     restart: always
     depends_on:
       - mongodb
+    environment:
+      FALCON_SETTINGS_MODULE: 'history.settings.docker'
+      DOJOT_SERVICE_MANAGEMENT: 'internal'
     logging:
       driver: json-file
       options:
         max-size: 100m
 
   persister:
-    image: dojot/persister:v1.0.0-beta.1
+    image: dojot/persister:v1.0.0
     restart: always
     depends_on:
       - mongodb
       - auth
       - kafka
       - data-broker
+    environment:
+      FALCON_SETTINGS_MODULE: 'history.settings.docker'
+      DOJOT_SERVICE_MANAGEMENT: 'internal'
     logging:
       driver: json-file
       options:
         max-size: 100m
 
   mongodb:
-    image: "mongo:3.2"
+    image: mongo:3.2
     restart: always
     user: "mongodb"
     logging:
@@ -54,7 +60,7 @@ services:
         max-size: 100m
 
   iotagent-mqtt:
-    image: dojot/iotagent-mosca:v0.3.0-beta.1
+    image: dojot/iotagent-mosca:v0.3.0
     depends_on:
       - mosca-redis
       - kafka
@@ -65,13 +71,15 @@ services:
       - 1883:1883
       - 8883:8883
     restart: always
+    environment:
+      DOJOT_SERVICE_MANAGEMENT: 'internal'
     logging:
       driver: json-file
       options:
         max-size: 100m
 
   gui:
-    image: dojot/gui:v0.3.0-beta.1
+    image: dojot/gui:v0.3.0
     restart: always
     logging:
       driver: json-file
@@ -79,7 +87,7 @@ services:
         max-size: 100m
 
   data-broker:
-    image: dojot/data-broker:v0.2.1
+    image: dojot/data-broker:v0.3.0
     restart: always
     depends_on:
       - kafka
@@ -106,7 +114,7 @@ services:
         max-size: 100m
 
   device-manager:
-    image: dojot/device-manager:v0.3.0-beta.1
+    image: dojot/device-manager:v0.3.0
     restart: always
     environment:
       # TODO: Fill these env variables with suitable values
@@ -132,7 +140,7 @@ services:
         max-size: 100m
 
   auth:
-    image: dojot/auth:v0.3.0-beta.1
+    image: dojot/auth:v0.3.0
     restart: always
     depends_on:
       - apigw
@@ -154,16 +162,26 @@ services:
         max-size: 100m
 
   postgres:
-    image: "postgres:9.4-alpine"
+    image: postgres:9.4-alpine
     restart: always
-    environment:
-      POSTGRES_USER: "kong"
-      POSTGRES_DB: "kong"
     healthcheck:
       test: ["CMD", "pg_isready", "-U", "postgres"]
       interval: 10s
       timeout: 5s
       retries: 5
+    logging:
+      driver: json-file
+      options:
+        max-size: 100m
+
+  postgres-users:
+    image: postgres:9.4-alpine
+    restart: on-failure
+    command: >
+      bash -c "createuser kong -d -h postgres -U postgres && createdb kong -U kong -h postgres"
+    depends_on:
+      postgres:
+        condition: service_healthy
     logging:
       driver: json-file
       options:
@@ -210,19 +228,47 @@ services:
     volumes:
       - ./kong.config.sh:/opt/kong.config.sh:Z
 
-  flowbroker:
-    image: dojot/flowbroker:v0.3.0-beta.1
+  flowbroker-redis:
+    image: redis:alpine
     restart: always
+    logging:
+      driver: json-file
+      options:
+        max-size: 100m
+
+  flowbroker:
+    image: dojot/flowbroker:v0.3.0
+    restart: always
+    environment:
+      DEPLOY_ENGINE: "docker"
+      FLOWBROKER_NETWORK: ${FLOWBROKER_NETWORK}
     depends_on:
       - rabbitmq
       - kafka
       - mongodb
       - auth
+      - flowbroker-context-manager
+      - flowbroker-redis
     networks:
       - default
       - flowbroker
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:Z
+
+  flowbroker-context-manager:
+    image: dojot/flowbroker-context-manager:v0.3.0
+    restart: always
+    environment:
+      ZOOKEEPER_HOST: zookeeper
+      ZOOKEEPER_PORT: 2181
+      ZEROMQ_PORT: 5556
+      HOLD_LOCK_TIMEOUT: 10000
+      WAIT_LOCK_TIMEOUT: 30000
+    depends_on:
+      - zookeeper
+    networks:
+      - default
+      - flowbroker
 
   rabbitmq:
     image: rabbitmq:3.7-alpine
@@ -233,7 +279,7 @@ services:
         max-size: 100m
 
   zookeeper:
-    image: "zookeeper:3.4"
+    image: zookeeper:3.4
     restart: always
     logging:
       driver: json-file
@@ -241,7 +287,7 @@ services:
         max-size: 100m
 
   kafka:
-    image: "ches/kafka:0.10.1.1"
+    image: ches/kafka:0.10.1.1
     depends_on:
       - zookeeper
     restart: always
@@ -254,7 +300,7 @@ services:
         max-size: 100m
 
   ejbca:
-    image: "dojot/ejbca-rest:v0.1.0-beta.1"
+    image: dojot/ejbca-rest:v0.1.0
     restart: always
     logging:
       driver: json-file
@@ -263,3 +309,4 @@ services:
 
 networks:
   flowbroker:
+    name: ${FLOWBROKER_NETWORK}
