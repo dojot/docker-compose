@@ -181,14 +181,14 @@ services:
       bash -c "if ! psql -h postgres -U postgres -t -c '\du' | cut -d \| -f 1 | grep -qw kong; then
                    echo 'creating user kong'
                    createuser kong -d -h postgres -U postgres
-                   if ! psql -h postgres -U postgres -lqt | cut -d \| -f 1 | grep -qw kong; then
-                       echo 'creating database kong'
-                       createdb kong -U kong -h postgres
-                   else
-                       echo 'database kong exists'
-                   fi
                else
                    echo 'user kong exists'
+               fi
+               if ! psql -h postgres -U postgres -lqt | cut -d \| -f 1 | grep -qw kong; then
+                   echo 'creating database kong'
+                   createdb kong -U kong -h postgres
+               else
+                   echo 'database kong exists'
                fi"
     depends_on:
       postgres:
