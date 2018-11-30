@@ -14,7 +14,7 @@ services:
   #     - ./certs/default.conf:/etc/nginx/conf.d/default.conf
 
   history:
-    image: dojot/history:0.3.0-nightly20181010
+    image: dojot/history:0.3.0-nightly20181129
     restart: always
     depends_on:
       - mongodb
@@ -27,7 +27,7 @@ services:
         max-size: 100m
 
   persister:
-    image: dojot/persister:0.3.0-nightly20181010
+    image: dojot/persister:0.3.0-nightly20181129
     restart: always
     depends_on:
       - mongodb
@@ -59,7 +59,7 @@ services:
         max-size: 100m
 
   iotagent-mqtt:
-    image: dojot/iotagent-mosca:0.3.0-nightly20181010
+    image: dojot/iotagent-mosca:0.3.0-nightly20181129
     depends_on:
       - mosca-redis
       - kafka
@@ -78,7 +78,7 @@ services:
         max-size: 100m
 
   gui:
-    image: dojot/gui:0.3.0-nightly20181010
+    image: dojot/gui:0.3.0-nightly20181129
     restart: always
     logging:
       driver: json-file
@@ -86,7 +86,7 @@ services:
         max-size: 100m
 
   data-broker:
-    image: dojot/data-broker:0.3.0-nightly20181010
+    image: dojot/data-broker:0.3.0-nightly20181129
     restart: always
     depends_on:
       - kafka
@@ -113,7 +113,7 @@ services:
         max-size: 100m
 
   device-manager:
-    image: dojot/device-manager:0.3.0-nightly20181010
+    image: dojot/device-manager:0.3.0-nightly20181129
     restart: always
     environment:
       # TODO: Fill these env variables with suitable values
@@ -139,7 +139,7 @@ services:
         max-size: 100m
 
   auth:
-    image: dojot/auth:0.3.0-nightly20181010
+    image: dojot/auth:0.3.0-nightly20181129
     restart: always
     depends_on:
       - apigw
@@ -187,7 +187,7 @@ services:
         max-size: 100m
 
   kong-migration:
-    image: dojot/kong:0.3.0-nightly20181010
+    image: dojot/kong:0.3.0-nightly20181129
     depends_on:
       postgres:
         condition: service_healthy
@@ -198,7 +198,7 @@ services:
     restart: on-failure
 
   apigw:
-    image: dojot/kong:0.3.0-nightly20181010
+    image: dojot/kong:0.3.0-nightly20181129
     restart: always
     depends_on:
       postgres:
@@ -236,7 +236,7 @@ services:
         max-size: 100m
 
   flowbroker:
-    image: dojot/flowbroker:0.3.0-nightly20181010
+    image: dojot/flowbroker:0.3.0-nightly20181129
     restart: always
     environment:
       DEPLOY_ENGINE: "docker"
@@ -299,7 +299,7 @@ services:
         max-size: 100m
 
   ejbca:
-    image: "dojot/ejbca-rest:0.3.0-nightly20181010"
+    image: "dojot/ejbca-rest:0.3.0-nightly20181129"
     restart: always
     logging:
       driver: json-file
