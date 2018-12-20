@@ -253,6 +253,7 @@ services:
     environment:
       DEPLOY_ENGINE: "docker"
       FLOWBROKER_NETWORK: ${FLOWBROKER_NETWORK}
+      DOJOT_SERVICE_MANAGEMENT: 'internal'
     depends_on:
       - rabbitmq
       - kafka
