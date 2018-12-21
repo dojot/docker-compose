@@ -198,3 +198,16 @@ authConfig "ejbca-paths"
  }
 PAYLOAD
 authConfig "alarm-manager-endpoints"
+
+# Configure a import and export endpoint
+(curl -o /dev/null ${kong}/apis -sS -X POST \
+    --header "Content-Type: application/json" \
+    -d @- ) <<PAYLOAD
+{
+     "name": "data-manager",
+     "uris": [ "/export", "/import"],
+     "strip_uri": false,
+     "upstream_url": "http://data-manager:3000/"
+ }
+PAYLOAD
+authConfig "data-manager"

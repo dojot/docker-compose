@@ -319,6 +319,15 @@ services:
       options:
         max-size: 100m
 
+
+  data-manager:
+    image: "dojot/data-manager"
+    restart: always
+    depends_on:
+      - flowbroker
+      - device-manager
+
+
 networks:
   flowbroker:
     name: ${FLOWBROKER_NETWORK}
