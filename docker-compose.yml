@@ -20,7 +20,8 @@ services:
       - mongodb
     environment:
       FALCON_SETTINGS_MODULE: 'history.settings.docker'
-      DOJOT_SERVICE_MANAGEMENT: 'internal'
+      DOJOT_MANAGEMENT_USER: 'history'
+      DOJOT_MANAGEMENT_TENANT: 'internal'
     logging:
       driver: json-file
       options:
@@ -36,7 +37,8 @@ services:
       - data-broker
     environment:
       FALCON_SETTINGS_MODULE: 'history.settings.docker'
-      DOJOT_SERVICE_MANAGEMENT: 'internal'
+      DOJOT_MANAGEMENT_USER: 'persister'
+      DOJOT_MANAGEMENT_TENANT: 'internal'
     logging:
       driver: json-file
       options:
@@ -96,6 +98,8 @@ services:
       driver: json-file
       options:
         max-size: 100m
+    environment:
+      DOJOT_SERVICE_MANAGEMENT: 'internal'
 
   data-broker-redis:
     image: redis:alpine
