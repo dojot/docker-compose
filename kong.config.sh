@@ -83,6 +83,17 @@ authConfig "device-manager"
 PAYLOAD
 authConfig "image"
 
+(curl -o /dev/null ${kong}/apis -s -S -X POST \
+    --header "Content-Type: application/json" \
+    -d @- ) <<PAYLOAD
+{
+    "name": "auth-permissions-service",
+    "uris": "/auth/pap",
+    "strip_uri": true,
+    "upstream_url": "http://auth:5000/pap"
+}
+PAYLOAD
+authConfig  "auth-permissions-service"
 
 (curl -o /dev/null ${kong}/apis -s -S -X POST \
     --header "Content-Type: application/json" \
