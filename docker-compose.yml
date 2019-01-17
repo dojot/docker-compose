@@ -75,6 +75,7 @@ services:
     restart: always
     environment:
       DOJOT_SERVICE_MANAGEMENT: 'internal'
+      ALLOW_UNSECURED_MODE: 'false'
     logging:
       driver: json-file
       options:
