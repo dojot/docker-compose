@@ -235,3 +235,14 @@ authConfig "data-manager"
  }
 PAYLOAD
 authConfig "backstage"
+
+(curl -o /dev/null ${kong}/apis -sS -X POST \
+    --header "Content-Type: application/json" \
+    -d @- ) <<PAYLOAD
+{
+     "name": "backstage_graphql",
+     "uris": [ "/graphql/auth/","/graphql/permissions"],
+     "strip_uri": false,
+     "upstream_url": "http://backstage:3005/"
+ }
+PAYLOAD
