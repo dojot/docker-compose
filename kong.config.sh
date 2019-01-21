@@ -222,3 +222,16 @@ authConfig "alarm-manager-endpoints"
  }
 PAYLOAD
 authConfig "data-manager"
+
+# Configure a Backstage service
+(curl -o /dev/null ${kong}/apis -sS -X POST \
+    --header "Content-Type: application/json" \
+    -d @- ) <<PAYLOAD
+{
+     "name": "backstage",
+     "uris": [ "/checkconflicts"],
+     "strip_uri": false,
+     "upstream_url": "http://backstage:3005/"
+ }
+PAYLOAD
+authConfig "backstage"
