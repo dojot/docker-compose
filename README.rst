@@ -4,7 +4,7 @@ dojot Deploy - Docker compose
 This repository contains the necessary configuration files
 for quick deployment of the dojot platform using docker-compose.
 
-For instructions on how to get it up and running, please check `the docs <docs/install_guide.rst>`_
+For instructions on how to get it up and running, please check `Installation Guide <https://dojotdocs.readthedocs.io/en/latest/installation-guide.html#docker-compose>`_
 
 To use this docker-compose.yml, you will need:
 
