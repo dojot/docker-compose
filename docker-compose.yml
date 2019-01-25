@@ -332,6 +332,12 @@ services:
       - flowbroker
       - device-manager
 
+  backstage:
+    image: "dojot/backstage"
+    restart: always
+    depends_on:
+      - postgres
+
 
 networks:
   flowbroker:
