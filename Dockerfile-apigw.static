@@ -2,7 +2,6 @@ FROM dojot/kong:v0.2.1
 
 RUN yum -y update && yum -y install git && mkdir /plugins
 
-RUN cd /plugins; git clone https://github.com/dojot/ma-kong-plugin.git mutualauthentication
 RUN cd /plugins; git clone https://github.com/dojot/pep-kong pep-kong
 
 RUN \
