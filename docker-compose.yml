@@ -21,7 +21,6 @@ services:
     environment:
       FALCON_SETTINGS_MODULE: 'history.settings.docker'
       DOJOT_MANAGEMENT_USER: 'history'
-      DOJOT_MANAGEMENT_TENANT: 'internal'
     logging:
       driver: json-file
       options:
@@ -38,7 +37,7 @@ services:
     environment:
       FALCON_SETTINGS_MODULE: 'history.settings.docker'
       DOJOT_MANAGEMENT_USER: 'persister'
-      DOJOT_MANAGEMENT_TENANT: 'internal'
+      KAFKA_GROUP_ID: 'persister-group'
     logging:
       driver: json-file
       options:
@@ -74,7 +73,8 @@ services:
       - 8883:8883
     restart: always
     environment:
-      DOJOT_SERVICE_MANAGEMENT: 'internal'
+      DOJOT_MANAGEMENT_USER: 'iotagent-mqtt'
+      KAFKA_GROUP_ID: 'iotagent-mqtt-group'
       ALLOW_UNSECURED_MODE: 'false'
     logging:
       driver: json-file
@@ -95,6 +95,9 @@ services:
     depends_on:
       - kafka
       - data-broker-redis
+    environment:
+      DOJOT_MANAGEMENT_USER: 'data-broker'
+      KAFKA_GROUP_ID: 'data-broker-group'
     logging:
       driver: json-file
       options:
@@ -161,6 +164,8 @@ services:
       AUTH_CACHE_HOST: "auth-redis"
       # This is used to select the type of cache to be used. Allowed values are "redis" or "nocache"
       AUTH_CACHE_NAME: "redis"
+      DOJOT_MANAGEMENT_USER: 'auth'
+      KAFKA_GROUP_ID: 'auth-group'
     logging:
       driver: json-file
       options:
@@ -257,7 +262,8 @@ services:
     environment:
       DEPLOY_ENGINE: "docker"
       FLOWBROKER_NETWORK: ${FLOWBROKER_NETWORK}
-      DOJOT_SERVICE_MANAGEMENT: 'internal'
+      DOJOT_MANAGEMENT_USER: 'flowbroker'
+      KAFKA_GROUP_ID: 'flowbroker-group'
     depends_on:
       - rabbitmq
       - kafka
