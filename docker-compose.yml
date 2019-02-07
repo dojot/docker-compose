@@ -119,6 +119,34 @@ services:
       options:
         max-size: 100m
 
+  image-manager:
+    image: dojot/image-manager:latest
+    restart: always
+    depends_on:
+      - postgres
+      - minio
+    logging:
+      driver: json-file
+      options:
+        max-size: 100m
+    environment:
+      # TODO: The following should be unique for each environment
+      S3ACCESSKEY: 9HEODSF6WQN5EZ39DM7Z
+      S3SECRETKEY: fT5nAgHR9pkj0yYsBdc4p+PPq6ArjshcPdz0HA6W
+
+  minio:
+    image: "minio/minio"
+    restart: always
+    logging:
+      driver: json-file
+      options:
+        max-size: 100m
+    environment:
+      # TODO: The following should be unique for each environment
+      MINIO_ACCESS_KEY: 9HEODSF6WQN5EZ39DM7Z
+      MINIO_SECRET_KEY: fT5nAgHR9pkj0yYsBdc4p+PPq6ArjshcPdz0HA6W
+    command: server /data
+
   device-manager:
     image: dojot/device-manager
     restart: always
