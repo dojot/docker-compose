@@ -70,6 +70,17 @@ PAYLOAD
 PAYLOAD
 authConfig "device-manager"
 
+(curl -o /dev/null ${kong}/apis -s -S -X POST \
+    --header "Content-Type: application/json" \
+    -d @- ) <<PAYLOAD
+{
+    "name": "image",
+    "uris": "/fw-image",
+    "strip_uri": true,
+    "upstream_url": "http://image-manager:5000"
+}
+PAYLOAD
+authConfig "image"
 
 (curl -o /dev/null ${kong}/apis -s -S -X POST \
     --header "Content-Type: application/json" \
