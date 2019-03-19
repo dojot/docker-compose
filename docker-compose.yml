@@ -349,6 +349,9 @@ services:
 
   ejbca:
     image: "dojot/ejbca-rest"
+    environment:
+      DOJOT_MANAGEMENT_USER: 'ejbca'
+      KAFKA_GROUP_ID: 'ejbca-group'
     restart: always
     logging:
       driver: json-file
