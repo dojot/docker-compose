@@ -219,3 +219,16 @@ authConfig "backstage"
      "upstream_url": "http://backstage:3005/"
  }
 PAYLOAD
+
+# cron
+(curl -o /dev/null ${kong}/apis -s -S -X POST \
+    --header "Content-Type: application/json" \
+    -d @- ) <<PAYLOAD
+{
+    "name": "cron",
+    "uris": ["/cron"],
+    "strip_uri": false,
+    "upstream_url": "http://cron:5000/"
+}
+PAYLOAD
+authConfig "cron"

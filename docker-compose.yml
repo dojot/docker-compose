@@ -372,6 +372,16 @@ services:
     depends_on:
       - postgres
 
+  cron:
+    image: dojot/cron
+    depends_on:
+      - kafka
+      - data-broker
+      - auth
+      - mongodb
+    ports:
+      - 5000:5000
+    restart: always
 
 networks:
   flowbroker:
