@@ -157,6 +157,17 @@ authConfig "user-service"
 PAYLOAD
 authConfig "flows"
 
+(curl -o /dev/null ${kong}/apis -s -S -X POST \
+    --header "Content-Type: application/json" \
+    -d @- ) <<PAYLOAD
+{
+    "name": "flowsIcons",
+    "uris": ["/flows/icons"],
+    "strip_uri": true,
+    "upstream_url": "http://flowbroker:80/icons"
+}
+PAYLOAD
+
 # History
 (curl -o /dev/null ${kong}/apis -s -S -X POST \
     --header "Content-Type: application/json" \
