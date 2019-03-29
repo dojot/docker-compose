@@ -335,13 +335,15 @@ services:
         max-size: 100m
 
   kafka:
-    image: "ches/kafka:0.10.1.1"
+    image: "wurstmeister/kafka:2.12-2.1.1"
     depends_on:
       - zookeeper
     restart: always
     environment:
-      ZOOKEEPER_IP: zookeeper
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_HOST_NAME: kafka
       KAFKA_NUM_PARTITIONS: 10
+      JMX_PORT: 1099
     logging:
       driver: json-file
       options:
