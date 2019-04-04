@@ -1,0 +1,20 @@
+version: '3.1'
+
+services:
+
+  https-nginx:
+    container_name: 'https-nginx'
+    image: nginx:latest
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx-dojot-https.conf:/etc/nginx/conf.d/default.conf
+      - /dojot/etc/letsencrypt/live/<YOUR DOMAIN>/fullchain.pem:/etc/letsencrypt/live/<YOUR DOMAIN>/fullchain.pem
+      - /dojot/etc/letsencrypt/live/<YOUR DOMAIN>/privkey.pem:/etc/letsencrypt/live/<YOUR DOMAIN>/privkey.pem
+
+networks:
+  default:
+    external:
+      name: dojot_default
