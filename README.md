@@ -14,8 +14,8 @@ Both are available in the [Docker official site](https://docs.docker.com/install
 
 ## How to secure dojot with Nginx and Let's Encrypt
 
-To get dojot running with https, at least for the purposes of this guide, you MUST ensure
-**you have set up a static public IP address for your server and registered a domain for it**. Then
+To get dojot running with https, at least for the purposes of this guide, you **MUST** ensure
+you have set up a static public IP address for your server and registered a domain for it. Then
 just follow the next steps.
 
 Firstly, configure a temporary [Nginx](https://www.nginx.com/) server that only runs
@@ -26,7 +26,7 @@ for your server.
 
 To make the things easier, there is a docker-compose configuration file in
 letsencrypt-nginx/docker-compose-challenge.yml. **But, before starting it, change the
-file letsencrypt-nginx/nginx-challenge.conf, replacing <YOUR DOMAIN> tag by your registered domain**.
+file letsencrypt-nginx/nginx-challenge.conf, replacing **<YOUR DOMAIN>** tag by your registered domain**.
 Then spin up Nginx:
 
 ``` sh
@@ -64,7 +64,7 @@ Nginx to receive the https requests and redirect the traffic to dojot's api gate
 This Nginx service is specified in the docker-compose file
 letsencrypt-nginx/docker-compose-dojot-https.yml. It MUST run in the same network of
 other dojot's services. So before starting it, change the network in the configuration
-if necessary and replace the tag <YOUR DOMAIN> by the your registered domain
+if necessary and replace the tag **<YOUR DOMAIN>** by the your registered domain
 in the files: letsencrypt-nginx/docker-compose-dojot-https.yml and letsencrypt-nginx/nginx-dojot-https.conf.
 Then spin up Nginx:
 
