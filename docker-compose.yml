@@ -119,6 +119,32 @@ services:
       options:
         max-size: 100m
 
+################
+# iot-agent lwm2m
+################
+  iotagent-lwm2m:
+    image: dojot/iotagent-leshan
+    depends_on:
+      - kafka
+      - data-broker
+      - auth
+      - image-manager
+    environment:
+      DOJOT_MANAGEMENT_USER: 'iotagent-lwm2m'
+      KAFKA_GROUP_ID: "iotagent-lwm2m-group"
+      # The FILE_SERVER_ADDRESS should be filled with an address accesible to the devices that want to update the firmware
+      FILE_SERVER_ADDRESS: 127.0.0.1
+    ports:
+      - 5683:5683/udp # configuration coap port
+      - 5684:5684/udp # configuration dtls port
+      - 5693:5693/udp # file server coap port
+      - 5694:5694/udp # file server dtls port
+    restart: always
+    logging:
+      driver: json-file
+      options:
+        max-size: 100m
+
   image-manager:
     image: dojot/image-manager:latest
     restart: always
