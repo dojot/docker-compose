@@ -1,18 +1,6 @@
 version: '2.1'
 services:
 
-  # certs:
-  #   image: nginx
-  #   restart: always
-  #   depends_on:
-  #     - apigw
-  #   ports:
-  #     - "80:80"
-  #     - "443:443"
-  #   volumes:
-  #     - /etc/letsencrypt:/certs
-  #     - ./certs/default.conf:/etc/nginx/conf.d/default.conf
-
   history:
     image: dojot/history
     restart: always
