@@ -2,7 +2,7 @@ version: '2.1'
 services:
 
   history:
-    image: dojot/history
+    image: dojot/history:development
     restart: always
     depends_on:
       - mongodb
@@ -15,7 +15,7 @@ services:
         max-size: 100m
 
   persister:
-    image: dojot/persister
+    image: dojot/persister:development
     restart: always
     depends_on:
       - mongodb
@@ -49,7 +49,7 @@ services:
         max-size: 100m
 
   iotagent-mqtt:
-    image: dojot/iotagent-mosca
+    image: dojot/iotagent-mosca:development
     depends_on:
       - mosca-redis
       - kafka
@@ -70,7 +70,7 @@ services:
         max-size: 100m
 
   gui:
-    image: dojot/gui:latest
+    image: dojot/gui:development
     restart: always
     logging:
       driver: json-file
@@ -78,7 +78,7 @@ services:
         max-size: 100m
 
   data-broker:
-    image: dojot/data-broker
+    image: dojot/data-broker:development
     restart: always
     depends_on:
       - kafka
@@ -111,7 +111,7 @@ services:
 # iot-agent lwm2m
 ################
   iotagent-lwm2m:
-    image: dojot/iotagent-leshan
+    image: dojot/iotagent-leshan:development
     depends_on:
       - kafka
       - data-broker
@@ -134,7 +134,7 @@ services:
         max-size: 100m
 
   image-manager:
-    image: dojot/image-manager:latest
+    image: dojot/image-manager:development
     restart: always
     depends_on:
       - postgres
@@ -162,7 +162,7 @@ services:
     command: server /data
 
   device-manager:
-    image: dojot/device-manager
+    image: dojot/device-manager:development
     restart: always
     environment:
       # TODO: Fill these env variables with suitable values
@@ -188,7 +188,7 @@ services:
         max-size: 100m
 
   auth:
-    image: dojot/auth:latest
+    image: dojot/auth:development
     restart: always
     depends_on:
       - apigw
@@ -249,7 +249,7 @@ services:
         max-size: 100m
 
   kong-migration:
-    image: dojot/kong:latest
+    image: dojot/kong:development
     depends_on:
       postgres:
         condition: service_healthy
@@ -260,7 +260,7 @@ services:
     restart: on-failure
 
   apigw:
-    image: dojot/kong:latest
+    image: dojot/kong:development
     restart: always
     depends_on:
       postgres:
@@ -297,7 +297,7 @@ services:
         max-size: 100m
 
   flowbroker:
-    image: dojot/flowbroker:latest
+    image: dojot/flowbroker:development
     restart: always
     environment:
       DEPLOY_ENGINE: "docker"
@@ -318,7 +318,7 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock:Z
 
   flowbroker-context-manager:
-    image: dojot/flowbroker-context-manager:latest
+    image: dojot/flowbroker-context-manager:development
     restart: always
     environment:
       ZOOKEEPER_HOST: zookeeper
@@ -364,7 +364,7 @@ services:
         max-size: 100m
 
   ejbca:
-    image: "dojot/ejbca-rest"
+    image: "dojot/ejbca-rest:development"
     environment:
       DOJOT_MANAGEMENT_USER: 'ejbca'
       KAFKA_GROUP_ID: 'ejbca-group'
@@ -376,20 +376,20 @@ services:
 
 
   data-manager:
-    image: "dojot/data-manager"
+    image: "dojot/data-manager:development"
     restart: always
     depends_on:
       - flowbroker
       - device-manager
 
   backstage:
-    image: "dojot/backstage"
+    image: "dojot/backstage:development"
     restart: always
     depends_on:
       - postgres
 
   cron:
-    image: dojot/cron
+    image: dojot/cron:development
     depends_on:
       - kafka
       - data-broker
