@@ -169,13 +169,13 @@ authConfig "flows"
 PAYLOAD
 
 (curl -o /dev/null ${kong}/apis -s -S -X POST \
---header "Content-Type: application/json" \
--d @- ) <<PAYLOAD
+    --header "Content-Type: application/json" \
+    -d @- ) <<PAYLOAD
 {
-"name": "flowsRedImages",
-"uris": ["/flows/red/images"],
-"strip_uri": true,
-"upstream_url": "http://flowbroker:80/red/images"
+    "name": "flowsRedImages",
+    "uris": ["/flows/red/images"],
+    "strip_uri": true,
+    "upstream_url": "http://flowbroker:80/red/images"
 }
 PAYLOAD
 
