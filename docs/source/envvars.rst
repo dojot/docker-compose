@@ -91,12 +91,13 @@ IoT agent MQTT
 
     # Enable or disable unsecured mode
     # Encrypted communication is always enabled.
-    export ALLOW_UNSECURED_MODE=false
+    export ALLOW_UNSECURED_MODE="false"
 
     # Mosca TLS configuration
     export MOSCA_TLS_SECURE_CERT="/opt/iot-agent/mosca/certs/mosca.crt"
     export MOSCA_TLS_SECURE_KEY="/opt/iot-agent/mosca/certs/mosca.key"
     export MOSCA_TLS_CA_CERT="/opt/iot-agent/mosca/certs/ca.crt"
+    export MOSCA_TLS_DNS_LIST="mqtt,mosca,localhost"
 
     # IoT agent healthcheck configuration
     # All values are in miliseconds and indicate how much time it will
@@ -292,7 +293,7 @@ Auth
 
     # Flag indicating whether there should be an e-mail or not. If this var
     # is anything but "NOEMAIL", then an email is sent to the user whenever
-    she/he needs to opeate the password.
+    # she/he needs to opeate the password.
     export AUTH_EMAIL_HOST="NOEMAIL"
 
     # Port which Auth will listen to.
@@ -312,7 +313,7 @@ Auth
 
     # If not using an email, then the default password will be this one.
     export AUTH_USER_TMP_PWD="temppwd"
-    # Period of time which the password request is deeemed valid.
+    # Period of time which the password request is deeemed valid (minutes).
     export AUTH_PASSWD_REQUEST_EXP=30
     # Number of itens to keep in password history (to check whether the user
     # has already set that password before)
@@ -434,11 +435,11 @@ Flow Broker - Context Manager:
     export ZEROMQ_PORT=5556
 
     # Timeout value for locked variables. After this period, the variable
-    # will be automatically unlocked
+    # will be automatically unlocked (time in ms)
     export HOLD_LOCK_TIMEOUT=10000
 
     # Timeout value for wait operations for locks. After this period, the client
-    # will be automatically freed, but with no data.
+    # will be automatically freed, but with no data. (time in ms)
     export WAIT_LOCK_TIMEOUT=30000
 
 
