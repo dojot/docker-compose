@@ -86,6 +86,7 @@ services:
     environment:
       DOJOT_MANAGEMENT_USER: 'data-broker'
       KAFKA_GROUP_ID: 'data-broker-group'
+      LOG_LEVEL: 'info'
     logging:
       driver: json-file
       options:
