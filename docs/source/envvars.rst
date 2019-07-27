@@ -144,7 +144,6 @@ IoT agent MQTT
     export DOJOT_SUBJECT_DEVICE_DATA="device-data"
 
 
-
 Data Broker
 -----------
 
@@ -157,7 +156,10 @@ Data Broker
     export DATABROKER_KAFKA_ADDRESS="kafka"
     export DATABROKER_KAFKA_PORT=9092
     export DATABROKER_ZOOKEEPER_HOST="zookeeper:2181"
-
+    # Service Port. Change SERV_PORT in .env file for consistency.
+    export SERVICE_PORT=80
+    # Log level. Accepted values: info, warn, error and debug.
+    export LOG_LEVEL="info"
 
     # Data Broker healthcheck configuration
     # All values are in miliseconds and indicate how much time it will
@@ -183,7 +185,7 @@ Data Broker
     export DOJOT_KAFKA_SUBSCRIPTION_HOLDOFF="2"
     # Time between each poll
     export DOJOT_KAFKA_POLL_TIMEOUT="2000"
-    # Where Data Broker is
+    # Where Data Broker is. Changing SERV_PORT in .env file will affect this.
     export DATA_BROKER_URL="http://data-broker"
     # Where Device Manager is
     export DEVICE_MANAGER_URL="http://device-manager:5000"
@@ -493,3 +495,4 @@ Backstage
     export POSTGRES_DATABASE="dojot_devm"
     export POSTGRES_PASSWORD="postgres"
     export POSTGRES_PORT=5432
+
