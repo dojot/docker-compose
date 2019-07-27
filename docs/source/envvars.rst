@@ -93,6 +93,9 @@ IoT agent MQTT
     # Encrypted communication is always enabled.
     export ALLOW_UNSECURED_MODE="false"
 
+    # Log level. Accepted values: info, warn, error and debug.
+    export LOG_LEVEL="info"
+
     # Mosca TLS configuration
     export MOSCA_TLS_SECURE_CERT="/opt/iot-agent/mosca/certs/mosca.crt"
     export MOSCA_TLS_SECURE_KEY="/opt/iot-agent/mosca/certs/mosca.key"
