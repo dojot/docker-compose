@@ -86,8 +86,8 @@ services:
     environment:
       DOJOT_MANAGEMENT_USER: 'data-broker'
       KAFKA_GROUP_ID: 'data-broker-group'
-      SERVICE_PORT: ${SERV_PORT}
-      DATA_BROKER_URL: 'http://data-broker:${SERV_PORT}'
+      SERVICE_PORT: ${DATA_BROKER_SERVICE_PORT}
+      DATA_BROKER_URL: 'http://data-broker:${DATA_BROKER_SERVICE_PORT}'
     logging:
       driver: json-file
       options:
