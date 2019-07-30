@@ -64,6 +64,7 @@ services:
       DOJOT_MANAGEMENT_USER: 'iotagent-mqtt'
       KAFKA_GROUP_ID: 'iotagent-mqtt-group'
       ALLOW_UNSECURED_MODE: 'false'
+      LOG_LEVEL: 'info'
     logging:
       driver: json-file
       options:
