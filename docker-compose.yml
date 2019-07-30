@@ -65,6 +65,8 @@ services:
       KAFKA_GROUP_ID: 'iotagent-mqtt-group'
       ALLOW_UNSECURED_MODE: 'false'
       LOG_LEVEL: 'info'
+      DEV_TO_DOJOT_PAYLOAD_MAX_SIZE: 256000000
+      DOJOT_TO_DEV_PAYLOAD_MAX_SIZE: 256000000
     logging:
       driver: json-file
       options:
