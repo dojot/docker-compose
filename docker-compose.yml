@@ -64,6 +64,7 @@ services:
       DOJOT_MANAGEMENT_USER: 'iotagent-mqtt'
       KAFKA_GROUP_ID: 'iotagent-mqtt-group'
       ALLOW_UNSECURED_MODE: 'false'
+      LOG_LEVEL: 'info'
     logging:
       driver: json-file
       options:
@@ -88,6 +89,7 @@ services:
       KAFKA_GROUP_ID: 'data-broker-group'
       SERVICE_PORT: ${DATA_BROKER_SERVICE_PORT}
       DATA_BROKER_URL: 'http://data-broker:${DATA_BROKER_SERVICE_PORT}'
+      LOG_LEVEL: 'info'
     logging:
       driver: json-file
       options:
