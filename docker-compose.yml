@@ -93,7 +93,7 @@ services:
         max-size: 100m
 
   data-broker-redis:
-    image: redis:alpine
+    image: redis:5.0.5-alpine3.10
     restart: always
     logging:
       driver: json-file
