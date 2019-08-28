@@ -101,6 +101,10 @@ IoT agent MQTT
     export MOSCA_TLS_SECURE_KEY="/opt/iot-agent/mosca/certs/mosca.key"
     export MOSCA_TLS_CA_CERT="/opt/iot-agent/mosca/certs/ca.crt"
     export MOSCA_TLS_DNS_LIST="mqtt,mosca,localhost"
+    #Maximum lifetime of a connection in ms 
+    export MOSCA_TLS_CON_MAX_LIFETIME=7200000
+    #The idle timeout for a connection in ms
+    export MOSCA_TLS_CON_IDLE_TIMEOUT=1800000
 
     # IoT agent healthcheck configuration
     # All values are in miliseconds and indicate how much time it will
