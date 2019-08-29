@@ -84,6 +84,7 @@ services:
     depends_on:
       - kafka
       - data-broker-redis
+      - auth
     environment:
       DOJOT_MANAGEMENT_USER: 'data-broker'
       KAFKA_GROUP_ID: 'data-broker-group'
