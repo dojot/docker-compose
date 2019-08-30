@@ -54,9 +54,9 @@ Persister
     # Kafka group ID for consumers. It is advisible that this is the same
     # for instances of the same service and different for each service.
     export KAFKA_GROUP_ID="kafka"
-    # Amount of time (in seconds) that the service will wait before attempting
+    # Amount of time (in milissecond) that the service will wait before attempting
     # to subscribe to a set of Kafka topics.
-    export DOJOT_KAFKA_SUBSCRIPTION_HOLDOFF="2"
+    export DOJOT_SUBSCRIPTION_HOLDOFF="2500"
     # Time between each poll
     export DOJOT_KAFKA_POLL_TIMEOUT="2000"
     # Where Data Broker is
@@ -125,9 +125,9 @@ IoT agent MQTT
     # Kafka group ID for consumers. It is advisible that this is the same
     # for instances of the same service and different for each service.
     export KAFKA_GROUP_ID="kafka"
-    # Amount of time (in seconds) that the service will wait before attempting
+    # Amount of time (in milissecond) that the service will wait before attempting
     # to subscribe to a set of Kafka topics.
-    export DOJOT_KAFKA_SUBSCRIPTION_HOLDOFF="2"
+    export DOJOT_SUBSCRIPTION_HOLDOFF="2500"
     # Time between each poll
     export DOJOT_KAFKA_POLL_TIMEOUT="2000"
     # Where Data Broker is
@@ -162,7 +162,6 @@ Data Broker
     # Kafka configuration. These are used for topic creation.
     export DATABROKER_KAFKA_ADDRESS="kafka"
     export DATABROKER_KAFKA_PORT=9092
-    export DATABROKER_ZOOKEEPER_HOST="zookeeper:2181"
     # Service Port. Change SERV_PORT in .env file for consistency.
     export SERVICE_PORT=80
     # Log level. Accepted values: info, warn, error and debug.
@@ -174,7 +173,6 @@ Data Broker
     export HC_UPTIME_TIMEOUT=300000
     export HC_MEMORY_USAGE_TIMEOUT=300000
     export HC_CPU_USAGE_TIMEOUT=300000
-    export HC_MONGODB_TIMEOUT=30000
     export HC_KAFKA_TIMEOUT=30000
 
     #
@@ -187,9 +185,9 @@ Data Broker
     # Kafka group ID for consumers. It is advisible that this is the same
     # for instances of the same service and different for each service.
     export KAFKA_GROUP_ID="kafka"
-    # Amount of time (in seconds) that the service will wait before attempting
+    # Amount of time (in milissecond) that the service will wait before attempting
     # to subscribe to a set of Kafka topics.
-    export DOJOT_KAFKA_SUBSCRIPTION_HOLDOFF="2"
+    export DOJOT_SUBSCRIPTION_HOLDOFF="2500"
     # Time between each poll
     export DOJOT_KAFKA_POLL_TIMEOUT="2000"
     # Where Data Broker is. Changing SERV_PORT in .env file will affect this.
@@ -395,9 +393,9 @@ Flow Broker
     # Kafka group ID for consumers. It is advisible that this is the same
     # for instances of the same service and different for each service.
     export KAFKA_GROUP_ID="flowbroker"
-    # Amount of time (in seconds) that the service will wait before attempting
+    # Amount of time (in milissecond) that the service will wait before attempting
     # to subscribe to a set of Kafka topics.
-    export DOJOT_KAFKA_SUBSCRIPTION_HOLDOFF="2"
+    export DOJOT_SUBSCRIPTION_HOLDOFF="2500"
     # Time between each poll
     export DOJOT_KAFKA_POLL_TIMEOUT="2000"
     # Where Data Broker is
