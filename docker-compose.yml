@@ -1,4 +1,4 @@
-version: '2.1'
+version: '3.0'
 services:
 
   history:
@@ -197,11 +197,8 @@ services:
     restart: always
     depends_on:
       - apigw
-      - postgres
       - auth-redis
-    depends_on:
-      postgres:
-        condition: service_healthy
+      - postgres
     environment:
       AUTH_DB_HOST: "postgres"
       AUTH_DB_USER: "kong"
@@ -246,8 +243,7 @@ services:
                    echo 'database kong exists'
                fi"
     depends_on:
-      postgres:
-        condition: service_healthy
+      - postgres
     logging:
       driver: json-file
       options:
@@ -256,8 +252,7 @@ services:
   kong-migration:
     image: dojot/kong:development
     depends_on:
-      postgres:
-        condition: service_healthy
+      - postgres
     environment:
       - KONG_DATABASE=postgres
       - KONG_PG_HOST=postgres
@@ -268,10 +263,8 @@ services:
     image: dojot/kong:development
     restart: always
     depends_on:
-      postgres:
-        condition: service_healthy
-      kong-migration:
-        condition: service_started
+      - postgres
+      - kong-migration
     ports:
       - "8000:8000"
     environment:
@@ -406,4 +399,3 @@ services:
 
 networks:
   flowbroker:
-    name: ${FLOWBROKER_NETWORK}
