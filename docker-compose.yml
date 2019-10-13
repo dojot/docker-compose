@@ -33,6 +33,8 @@ services:
 
   mongodb:
     image: "mongo:3.2"
+    volumes:
+        - mongodb:/data/db
     restart: always
     user: "mongodb"
     logging:
@@ -42,6 +44,8 @@ services:
 
   mosca-redis:
     image: redis:alpine
+    volumes:
+        - redis_mosca:/data
     restart: always
     logging:
       driver: json-file
@@ -93,6 +97,8 @@ services:
 
   data-broker-redis:
     image: redis:alpine
+    volumes:
+        - redis_data_broker:/data
     restart: always
     logging:
       driver: json-file
@@ -101,6 +107,8 @@ services:
 
   device-manager-redis:
     image: redis:alpine
+    volumes:
+        - redis_device_manager:/data
     restart: always
     logging:
       driver: json-file
@@ -181,6 +189,8 @@ services:
 
   auth-redis:
     image: redis:alpine
+    volumes:
+        - redis_auth:/data
     restart: always
     logging:
       driver: json-file
@@ -213,6 +223,8 @@ services:
 
   postgres:
     image: "postgres:9.4-alpine"
+    volumes:
+        - postgres:/var/lib/postgresql/data
     restart: always
     healthcheck:
       test: ["CMD", "pg_isready", "-U", "postgres"]
@@ -226,6 +238,8 @@ services:
 
   postgres-users:
     image: "postgres:9.4-alpine"
+    volumes:
+        - postgres_users:/var/lib/postgresql/data
     restart: on-failure
     command: >
       bash -c "if ! psql -h postgres -U postgres -t -c '\du' | cut -d \| -f 1 | grep -qw kong; then
@@ -290,6 +304,8 @@ services:
 
   flowbroker-redis:
     image: redis:alpine
+    volumes:
+        - redis_flowbroker:/data
     restart: always
     logging:
       driver: json-file
@@ -398,6 +414,16 @@ services:
     ports:
       - 5000:5000
     restart: always
+
+volumes:
+  postgres:
+  postgres_users:
+  redis_flowbroker:
+  redis_mosca:
+  redis_data_broker:
+  redis_auth:
+  redis_device_manager:
+  mongodb:    
 
 networks:
   flowbroker:
