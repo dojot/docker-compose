@@ -154,7 +154,7 @@ services:
       S3SECRETKEY: fT5nAgHR9pkj0yYsBdc4p+PPq6ArjshcPdz0HA6W
 
   minio:
-    image: "minio/minio"
+    image: "dojot/minio:2019.09.20"
     restart: always
     logging:
       driver: json-file
