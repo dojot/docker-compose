@@ -1,20 +1,8 @@
 version: '2.1'
 services:
 
-  # certs:
-  #   image: nginx
-  #   restart: always
-  #   depends_on:
-  #     - apigw
-  #   ports:
-  #     - "80:80"
-  #     - "443:443"
-  #   volumes:
-  #     - /etc/letsencrypt:/certs
-  #     - ./certs/default.conf:/etc/nginx/conf.d/default.conf
-
   history:
-    image: dojot/history
+    image: dojot/history:v0.4.0
     restart: always
     depends_on:
       - mongodb
@@ -27,7 +15,7 @@ services:
         max-size: 100m
 
   persister:
-    image: dojot/persister
+    image: dojot/persister:v0.4.0
     restart: always
     depends_on:
       - mongodb
@@ -61,7 +49,7 @@ services:
         max-size: 100m
 
   iotagent-mqtt:
-    image: dojot/iotagent-mosca
+    image: dojot/iotagent-mosca:v0.4.0
     depends_on:
       - mosca-redis
       - kafka
@@ -82,7 +70,7 @@ services:
         max-size: 100m
 
   gui:
-    image: dojot/gui:latest
+    image: dojot/gui:v0.4.0
     restart: always
     logging:
       driver: json-file
@@ -90,7 +78,7 @@ services:
         max-size: 100m
 
   data-broker:
-    image: dojot/data-broker
+    image: dojot/data-broker:v0.4.0
     restart: always
     depends_on:
       - kafka
@@ -119,8 +107,34 @@ services:
       options:
         max-size: 100m
 
+################
+# iot-agent lwm2m
+################
+  iotagent-lwm2m:
+    image: dojot/iotagent-leshan:v0.4.0
+    depends_on:
+      - kafka
+      - data-broker
+      - auth
+      - image-manager
+    environment:
+      DOJOT_MANAGEMENT_USER: 'iotagent-lwm2m'
+      KAFKA_GROUP_ID: "iotagent-lwm2m-group"
+      # The FILE_SERVER_ADDRESS should be filled with an address accesible to the devices that want to update the firmware
+      FILE_SERVER_ADDRESS: 127.0.0.1
+    ports:
+      - 5683:5683/udp # configuration coap port
+      - 5684:5684/udp # configuration dtls port
+      - 5693:5693/udp # file server coap port
+      - 5694:5694/udp # file server dtls port
+    restart: always
+    logging:
+      driver: json-file
+      options:
+        max-size: 100m
+
   image-manager:
-    image: dojot/image-manager:latest
+    image: dojot/image-manager:v0.4.0
     restart: always
     depends_on:
       - postgres
@@ -148,7 +162,7 @@ services:
     command: server /data
 
   device-manager:
-    image: dojot/device-manager
+    image: dojot/device-manager:v0.4.0
     restart: always
     environment:
       # TODO: Fill these env variables with suitable values
@@ -174,7 +188,7 @@ services:
         max-size: 100m
 
   auth:
-    image: dojot/auth:latest
+    image: dojot/auth:v0.4.0
     restart: always
     depends_on:
       - apigw
@@ -235,7 +249,7 @@ services:
         max-size: 100m
 
   kong-migration:
-    image: dojot/kong:latest
+    image: dojot/kong:v0.4.0
     depends_on:
       postgres:
         condition: service_healthy
@@ -246,7 +260,7 @@ services:
     restart: on-failure
 
   apigw:
-    image: dojot/kong:latest
+    image: dojot/kong:v0.4.0
     restart: always
     depends_on:
       postgres:
@@ -283,7 +297,7 @@ services:
         max-size: 100m
 
   flowbroker:
-    image: dojot/flowbroker:latest
+    image: dojot/flowbroker:v0.4.0
     restart: always
     environment:
       DEPLOY_ENGINE: "docker"
@@ -304,7 +318,7 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock:Z
 
   flowbroker-context-manager:
-    image: dojot/flowbroker-context-manager:latest
+    image: dojot/flowbroker-context-manager:v0.4.0
     restart: always
     environment:
       ZOOKEEPER_HOST: zookeeper
@@ -335,20 +349,22 @@ services:
         max-size: 100m
 
   kafka:
-    image: "ches/kafka:0.10.1.1"
+    image: "wurstmeister/kafka:2.12-2.1.1"
     depends_on:
       - zookeeper
     restart: always
     environment:
-      ZOOKEEPER_IP: zookeeper
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_HOST_NAME: kafka
       KAFKA_NUM_PARTITIONS: 10
+      JMX_PORT: 1099
     logging:
       driver: json-file
       options:
         max-size: 100m
 
   ejbca:
-    image: "dojot/ejbca-rest"
+    image: "dojot/ejbca-rest:v0.4.0"
     environment:
       DOJOT_MANAGEMENT_USER: 'ejbca'
       KAFKA_GROUP_ID: 'ejbca-group'
@@ -360,20 +376,20 @@ services:
 
 
   data-manager:
-    image: "dojot/data-manager"
+    image: "dojot/data-manager:v0.4.0"
     restart: always
     depends_on:
       - flowbroker
       - device-manager
 
   backstage:
-    image: "dojot/backstage"
+    image: "dojot/backstage:v0.4.0"
     restart: always
     depends_on:
       - postgres
 
   cron:
-    image: dojot/cron
+    image: dojot/cron:v0.4.0
     depends_on:
       - kafka
       - data-broker
