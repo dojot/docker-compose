@@ -272,8 +272,6 @@ services:
     environment:
       KONG_DATABASE: "postgres"
       KONG_PG_HOST: "postgres"
-    volumes:
-      - ./apigw/plugins/pep-kong:/plugins/pep-kong:Z
     logging:
       driver: json-file
       options:
