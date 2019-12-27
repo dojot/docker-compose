@@ -65,6 +65,7 @@ services:
       KAFKA_GROUP_ID: 'iotagent-mqtt-group'
       ALLOW_UNSECURED_MODE: 'false'
       LOG_LEVEL: 'info'
+      MOSCA_TLS_DNS_LIST: 'localhost'
     logging:
       driver: json-file
       options:
