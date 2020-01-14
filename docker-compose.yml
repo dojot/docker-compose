@@ -2,7 +2,7 @@ version: '2.1'
 services:
 
   history:
-    image: dojot/history:v0.4.1
+    image: dojot/history:development
     restart: always
     depends_on:
       - mongodb
@@ -15,7 +15,7 @@ services:
         max-size: 100m
 
   persister:
-    image: dojot/persister:v0.4.1
+    image: dojot/persister:development
     restart: always
     depends_on:
       - mongodb
@@ -41,7 +41,7 @@ services:
         max-size: 100m
 
   mosca-redis:
-    image: redis:alpine
+    image: "redis:5.0.5-alpine3.10"
     restart: always
     logging:
       driver: json-file
@@ -49,7 +49,7 @@ services:
         max-size: 100m
 
   iotagent-mqtt:
-    image: dojot/iotagent-mosca:v0.4.1
+    image: dojot/iotagent-mosca:development
     depends_on:
       - mosca-redis
       - kafka
@@ -64,6 +64,7 @@ services:
       DOJOT_MANAGEMENT_USER: 'iotagent-mqtt'
       KAFKA_GROUP_ID: 'iotagent-mqtt-group'
       ALLOW_UNSECURED_MODE: 'false'
+      LOG_LEVEL: 'info'
       MOSCA_TLS_DNS_LIST: 'localhost'
     logging:
       driver: json-file
@@ -71,7 +72,7 @@ services:
         max-size: 100m
 
   gui:
-    image: dojot/gui:v0.4.1
+    image: dojot/gui:development
     restart: always
     logging:
       driver: json-file
@@ -79,21 +80,25 @@ services:
         max-size: 100m
 
   data-broker:
-    image: dojot/data-broker:v0.4.1
+    image: dojot/data-broker:development
     restart: always
     depends_on:
       - kafka
       - data-broker-redis
+      - auth
     environment:
       DOJOT_MANAGEMENT_USER: 'data-broker'
       KAFKA_GROUP_ID: 'data-broker-group'
+      SERVICE_PORT: ${DATA_BROKER_SERVICE_PORT}
+      DATA_BROKER_URL: 'http://data-broker:${DATA_BROKER_SERVICE_PORT}'
+      LOG_LEVEL: 'info'
     logging:
       driver: json-file
       options:
         max-size: 100m
 
   data-broker-redis:
-    image: redis:alpine
+    image: "redis:5.0.5-alpine3.10"
     restart: always
     logging:
       driver: json-file
@@ -101,7 +106,7 @@ services:
         max-size: 100m
 
   device-manager-redis:
-    image: redis:alpine
+    image: "redis:5.0.5-alpine3.10"
     restart: always
     logging:
       driver: json-file
@@ -112,7 +117,7 @@ services:
 # iot-agent lwm2m
 ################
   iotagent-lwm2m:
-    image: dojot/iotagent-leshan:v0.4.1
+    image: dojot/iotagent-leshan:development
     depends_on:
       - kafka
       - data-broker
@@ -135,7 +140,7 @@ services:
         max-size: 100m
 
   image-manager:
-    image: dojot/image-manager:v0.4.1
+    image: dojot/image-manager:development
     restart: always
     depends_on:
       - postgres
@@ -150,7 +155,7 @@ services:
       S3SECRETKEY: fT5nAgHR9pkj0yYsBdc4p+PPq6ArjshcPdz0HA6W
 
   minio:
-    image: "minio/minio"
+    image: "dojot/minio:2019.09.20"
     restart: always
     logging:
       driver: json-file
@@ -163,7 +168,7 @@ services:
     command: server /data
 
   device-manager:
-    image: dojot/device-manager:v0.4.1
+    image: dojot/device-manager:development
     restart: always
     environment:
       # TODO: Fill these env variables with suitable values
@@ -181,7 +186,7 @@ services:
         max-size: 100m
 
   auth-redis:
-    image: redis:alpine
+    image: "redis:5.0.5-alpine3.10"
     restart: always
     logging:
       driver: json-file
@@ -189,7 +194,7 @@ services:
         max-size: 100m
 
   auth:
-    image: dojot/auth:v0.4.1
+    image: dojot/auth:development
     restart: always
     depends_on:
       - apigw
@@ -213,7 +218,7 @@ services:
         max-size: 100m
 
   postgres:
-    image: "postgres:9.4-alpine"
+    image: "postgres:9.4.24-alpine"
     restart: always
     healthcheck:
       test: ["CMD", "pg_isready", "-U", "postgres"]
@@ -226,7 +231,7 @@ services:
         max-size: 100m
 
   postgres-users:
-    image: "postgres:9.4-alpine"
+    image: "postgres:9.4.24-alpine"
     restart: on-failure
     command: >
       bash -c "if ! psql -h postgres -U postgres -t -c '\du' | cut -d \| -f 1 | grep -qw kong; then
@@ -250,7 +255,7 @@ services:
         max-size: 100m
 
   kong-migration:
-    image: dojot/kong:v0.4.1
+    image: dojot/kong:development
     depends_on:
       postgres:
         condition: service_healthy
@@ -261,7 +266,7 @@ services:
     restart: on-failure
 
   apigw:
-    image: dojot/kong:v0.4.1
+    image: dojot/kong:development
     restart: always
     depends_on:
       postgres:
@@ -288,7 +293,7 @@ services:
       - ./kong.config.sh:/opt/kong.config.sh:Z
 
   flowbroker-redis:
-    image: redis:alpine
+    image: "redis:5.0.5-alpine3.10"
     restart: always
     logging:
       driver: json-file
@@ -296,7 +301,7 @@ services:
         max-size: 100m
 
   flowbroker:
-    image: dojot/flowbroker:v0.4.1
+    image: dojot/flowbroker:development
     restart: always
     environment:
       DEPLOY_ENGINE: "docker"
@@ -317,7 +322,7 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock:Z
 
   flowbroker-context-manager:
-    image: dojot/flowbroker-context-manager:v0.4.1
+    image: dojot/flowbroker-context-manager:development
     restart: always
     environment:
       ZOOKEEPER_HOST: zookeeper
@@ -332,7 +337,7 @@ services:
       - flowbroker
 
   rabbitmq:
-    image: rabbitmq:3.7-alpine
+    image: "rabbitmq:3.7.17-alpine"
     restart: always
     logging:
       driver: json-file
@@ -340,7 +345,7 @@ services:
         max-size: 100m
 
   zookeeper:
-    image: "zookeeper:3.4"
+    image: "zookeeper:3.4.14"
     restart: always
     logging:
       driver: json-file
@@ -363,7 +368,7 @@ services:
         max-size: 100m
 
   ejbca:
-    image: "dojot/ejbca-rest:v0.4.1"
+    image: "dojot/ejbca-rest:development"
     environment:
       DOJOT_MANAGEMENT_USER: 'ejbca'
       KAFKA_GROUP_ID: 'ejbca-group'
@@ -375,20 +380,20 @@ services:
 
 
   data-manager:
-    image: "dojot/data-manager:v0.4.1"
+    image: "dojot/data-manager:development"
     restart: always
     depends_on:
       - flowbroker
       - device-manager
 
   backstage:
-    image: "dojot/backstage:v0.4.1"
+    image: "dojot/backstage:development"
     restart: always
     depends_on:
       - postgres
 
   cron:
-    image: dojot/cron:v0.4.1
+    image: dojot/cron:development
     depends_on:
       - kafka
       - data-broker
