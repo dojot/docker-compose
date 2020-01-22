@@ -198,7 +198,7 @@ authConfig "history"
     -d @- ) <<PAYLOAD
 {
      "name": "ejbca-paths",
-     "uris": [ "/sign", "/ca"],
+     "uris": [ "/sign", "/ca", "/user"],
      "strip_uri": false,
      "upstream_url": "http://ejbca:5583/"
  }
