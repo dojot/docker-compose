@@ -41,7 +41,7 @@ services:
         max-size: 100m
 
   mosca-redis:
-    image: redis:alpine
+    image: redis:5.0.5-alpine3.10
     restart: always
     logging:
       driver: json-file
@@ -93,7 +93,7 @@ services:
         max-size: 100m
 
   data-broker-redis:
-    image: redis:alpine
+    image: redis:5.0.5-alpine3.10
     restart: always
     logging:
       driver: json-file
@@ -150,7 +150,7 @@ services:
       S3SECRETKEY: fT5nAgHR9pkj0yYsBdc4p+PPq6ArjshcPdz0HA6W
 
   minio:
-    image: "minio/minio"
+    image: "dojot/minio:2019.09.20"
     restart: always
     logging:
       driver: json-file
@@ -213,7 +213,7 @@ services:
         max-size: 100m
 
   postgres:
-    image: "postgres:9.4-alpine"
+    image: "postgres:9.4.24-alpine"
     restart: always
     healthcheck:
       test: ["CMD", "pg_isready", "-U", "postgres"]
@@ -226,7 +226,7 @@ services:
         max-size: 100m
 
   postgres-users:
-    image: "postgres:9.4-alpine"
+    image: "postgres:9.4.24-alpine"
     restart: on-failure
     command: >
       bash -c "if ! psql -h postgres -U postgres -t -c '\du' | cut -d \| -f 1 | grep -qw kong; then
@@ -288,7 +288,7 @@ services:
       - ./kong.config.sh:/opt/kong.config.sh:Z
 
   flowbroker-redis:
-    image: redis:alpine
+    image: redis:5.0.5-alpine3.10
     restart: always
     logging:
       driver: json-file
