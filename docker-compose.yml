@@ -32,7 +32,7 @@ services:
         max-size: 100m
 
   mongodb:
-    image: "mongo:3.2"
+    image: dojot/mongo:3.2
     restart: always
     user: "mongodb"
     logging:
@@ -41,7 +41,7 @@ services:
         max-size: 100m
 
   mosca-redis:
-    image: "redis:5.0.5-alpine3.10"
+    image: dojot/redis:5.0.5-alpine3.10
     restart: always
     logging:
       driver: json-file
@@ -98,7 +98,7 @@ services:
         max-size: 100m
 
   data-broker-redis:
-    image: "redis:5.0.5-alpine3.10"
+    image: dojot/redis:5.0.5-alpine3.10
     restart: always
     logging:
       driver: json-file
@@ -106,7 +106,7 @@ services:
         max-size: 100m
 
   device-manager-redis:
-    image: "redis:5.0.5-alpine3.10"
+    image: dojot/redis:5.0.5-alpine3.10
     restart: always
     logging:
       driver: json-file
@@ -155,7 +155,7 @@ services:
       S3SECRETKEY: fT5nAgHR9pkj0yYsBdc4p+PPq6ArjshcPdz0HA6W
 
   minio:
-    image: "dojot/minio:2019.09.20"
+    image: dojot/minio:2019.09.20
     restart: always
     logging:
       driver: json-file
@@ -186,7 +186,7 @@ services:
         max-size: 100m
 
   auth-redis:
-    image: "redis:5.0.5-alpine3.10"
+    image: dojot/redis:5.0.5-alpine3.10
     restart: always
     logging:
       driver: json-file
@@ -218,7 +218,7 @@ services:
         max-size: 100m
 
   postgres:
-    image: "postgres:9.4.24-alpine"
+    image: dojot/postgres:9.4.24-alpine
     restart: always
     healthcheck:
       test: ["CMD", "pg_isready", "-U", "postgres"]
@@ -231,7 +231,7 @@ services:
         max-size: 100m
 
   postgres-users:
-    image: "postgres:9.4.24-alpine"
+    image: dojot/postgres:9.4.24-alpine
     restart: on-failure
     command: >
       bash -c "if ! psql -h postgres -U postgres -t -c '\du' | cut -d \| -f 1 | grep -qw kong; then
@@ -284,7 +284,7 @@ services:
         max-size: 100m
 
   kong-config:
-    image: appropriate/curl
+    image: dojot/appropriate-curl
     entrypoint: /opt/kong.config.sh
     restart: on-failure
     depends_on:
@@ -293,7 +293,7 @@ services:
       - ./kong.config.sh:/opt/kong.config.sh:Z
 
   flowbroker-redis:
-    image: "redis:5.0.5-alpine3.10"
+    image: dojot/redis:5.0.5-alpine3.10
     restart: always
     logging:
       driver: json-file
@@ -337,7 +337,7 @@ services:
       - flowbroker
 
   rabbitmq:
-    image: "rabbitmq:3.7.17-alpine"
+    image: dojot/rabbitmq:3.7-alpine
     restart: always
     logging:
       driver: json-file
@@ -345,7 +345,7 @@ services:
         max-size: 100m
 
   zookeeper:
-    image: "zookeeper:3.4.14"
+    image: dojot/zookeeper:3.4
     restart: always
     logging:
       driver: json-file
@@ -353,7 +353,7 @@ services:
         max-size: 100m
 
   kafka:
-    image: "wurstmeister/kafka:2.12-2.1.1"
+    image: dojot/wurstmeister-kafka:2.12-2.1.1
     depends_on:
       - zookeeper
     restart: always
@@ -368,7 +368,7 @@ services:
         max-size: 100m
 
   ejbca:
-    image: "dojot/ejbca-rest:development"
+    image: dojot/ejbca-rest:development
     environment:
       DOJOT_MANAGEMENT_USER: 'ejbca'
       KAFKA_GROUP_ID: 'ejbca-group'
@@ -380,14 +380,14 @@ services:
 
 
   data-manager:
-    image: "dojot/data-manager:development"
+    image: dojot/data-manager:development
     restart: always
     depends_on:
       - flowbroker
       - device-manager
 
   backstage:
-    image: "dojot/backstage:development"
+    image: dojot/backstage:development
     restart: always
     depends_on:
       - postgres
