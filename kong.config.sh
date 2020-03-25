@@ -168,6 +168,17 @@ authConfig "flows"
 }
 PAYLOAD
 
+(curl -o /dev/null ${kong}/apis -s -S -X POST \
+    --header "Content-Type: application/json" \
+    -d @- ) <<PAYLOAD
+{
+    "name": "flowsRedImages",
+    "uris": ["/flows/red/images"],
+    "strip_uri": true,
+    "upstream_url": "http://flowbroker:80/red/images"
+}
+PAYLOAD
+
 # History
 (curl -o /dev/null ${kong}/apis -s -S -X POST \
     --header "Content-Type: application/json" \
@@ -187,7 +198,7 @@ authConfig "history"
     -d @- ) <<PAYLOAD
 {
      "name": "ejbca-paths",
-     "uris": [ "/sign", "/ca"],
+     "uris": [ "/sign", "/ca", "/user"],
      "strip_uri": false,
      "upstream_url": "http://ejbca:5583/"
  }
@@ -243,3 +254,16 @@ PAYLOAD
 }
 PAYLOAD
 authConfig "cron"
+
+# iotagent-mqtt
+(curl -o /dev/null ${kong}/apis -s -S -X POST \
+    --header "Content-Type: application/json" \
+    -d @- ) <<PAYLOAD
+{
+    "name": "iotagent-mqtt",
+    "uris": ["/iotagent-mqtt/metrics"],
+    "strip_uri": false,
+    "upstream_url": "http://iotagent-mqtt:10001/"
+}
+PAYLOAD
+authConfig "iotagent-mqtt"
