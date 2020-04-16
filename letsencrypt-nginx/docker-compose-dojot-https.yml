@@ -13,7 +13,7 @@ services:
       - ./nginx-dojot-https.conf:/etc/nginx/conf.d/default.conf
       - /dojot/etc/letsencrypt/live/<YOUR DOMAIN>/fullchain.pem:/etc/letsencrypt/live/<YOUR DOMAIN>/fullchain.pem
       - /dojot/etc/letsencrypt/live/<YOUR DOMAIN>/privkey.pem:/etc/letsencrypt/live/<YOUR DOMAIN>/privkey.pem
-
+      - /dojot/data/letsencrypt:/data/letsencrypt
 networks:
   default:
     external:
