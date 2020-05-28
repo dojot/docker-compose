@@ -264,7 +264,6 @@ services:
 
   apigw:
     image: dojot/kong:development
-    user: "kong"
     depends_on:
       postgres:
         condition: service_healthy
