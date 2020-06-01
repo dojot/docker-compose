@@ -153,6 +153,9 @@ services:
       # TODO: The following should be unique for each environment
       S3ACCESSKEY: 9HEODSF6WQN5EZ39DM7Z
       S3SECRETKEY: fT5nAgHR9pkj0yYsBdc4p+PPq6ArjshcPdz0HA6W
+      DBHOST: postgres
+      DBUSER: imgm
+      DBPASS: imgm
 
   minio:
     image: dojot/minio:2019.09.20
@@ -172,14 +175,21 @@ services:
     restart: always
     environment:
       # TODO: Fill these env variables with suitable values
-      - DEV_MNGR_CRYPTO_PASS="kamehameHA"
-      - DEV_MNGR_CRYPTO_IV=1234567890123456
-      - DEV_MNGR_CRYPTO_SALT="shuriken"
+      DEV_MNGR_CRYPTO_PASS: kamehameHA
+      DEV_MNGR_CRYPTO_IV: 1234567890123456
+      DEV_MNGR_CRYPTO_SALT: shuriken
+      DBHOST: postgres
+      DBUSER: devm
+      DBPASS: devm
+      LOG_LEVEL: INFO
     depends_on:
       - postgres
       - kafka
       - data-broker
       - device-manager-redis
+    depends_on:
+      postgres:
+        condition: service_healthy
     logging:
       driver: json-file
       options:
@@ -193,91 +203,89 @@ services:
       options:
         max-size: 100m
 
-  auth:
-    image: dojot/auth:development
-    restart: always
-    depends_on:
-      - apigw
-      - postgres
-      - auth-redis
-    depends_on:
-      postgres:
-        condition: service_healthy
-    environment:
-      AUTH_DB_HOST: "postgres"
-      AUTH_DB_USER: "kong"
-      AUTH_KONG_URL: "http://apigw:8001"
-      AUTH_CACHE_HOST: "auth-redis"
-      # This is used to select the type of cache to be used. Allowed values are "redis" or "nocache"
-      AUTH_CACHE_NAME: "redis"
-      DOJOT_MANAGEMENT_USER: 'auth'
-      KAFKA_GROUP_ID: 'auth-group'
-    logging:
-      driver: json-file
-      options:
-        max-size: 100m
-
   postgres:
-    image: dojot/postgres:9.4.24-alpine
-    restart: always
+    image: dojot/postgres:9.5.21-alpine
+    environment:
+      POSTGRES_DB: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
     healthcheck:
       test: ["CMD", "pg_isready", "-U", "postgres"]
       interval: 10s
       timeout: 5s
       retries: 5
+    restart: always
+    volumes:
+      - ./postgres/init-db.sh:/docker-entrypoint-initdb.d/init-db.sh:Z
     logging:
       driver: json-file
       options:
         max-size: 100m
 
-  postgres-users:
-    image: dojot/postgres:9.4.24-alpine
-    restart: on-failure
-    command: >
-      bash -c "if ! psql -h postgres -U postgres -t -c '\du' | cut -d \| -f 1 | grep -qw kong; then
-                   echo 'creating user kong'
-                   createuser kong -d -h postgres -U postgres
-               else
-                   echo 'user kong exists'
-               fi
-               if ! psql -h postgres -U postgres -lqt | cut -d \| -f 1 | grep -qw kong; then
-                   echo 'creating database kong'
-                   createdb kong -U kong -h postgres
-               else
-                   echo 'database kong exists'
-               fi"
-    depends_on:
-      postgres:
-        condition: service_healthy
-    logging:
-      driver: json-file
-      options:
-        max-size: 100m
-
-  kong-migration:
+  # Prepare database, Bootstrap the database
+  kong-migrations:
     image: dojot/kong:development
+    command: kong migrations bootstrap
     depends_on:
       postgres:
         condition: service_healthy
     environment:
-      - KONG_DATABASE=postgres
-      - KONG_PG_HOST=postgres
-    command: kong migrations up
+      KONG_DATABASE: postgres
+      KONG_PG_HOST: postgres
+      KONG_PG_USER: kong
+      KONG_PG_PASSWORD: "kong"
+      KONG_PG_DATABASE: kong
+      KONG_LOG_LEVEL: info
     restart: on-failure
+    logging:
+      driver: json-file
+      options:
+        max-size: 100m
+
+  # Run any new migrations and Finish running any pending migrations after 'up'.
+  kong-migrations-up:
+    image:  dojot/kong:development
+    command: kong migrations up && kong migrations finish
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      KONG_DATABASE: postgres
+      KONG_PG_HOST: postgres
+      KONG_PG_USER: kong
+      KONG_PG_PASSWORD: "kong"
+      KONG_PG_DATABASE: kong
+      KONG_LOG_LEVEL: info
+    restart: on-failure
+    logging:
+      driver: json-file
+      options:
+        max-size: 100m
 
   apigw:
     image: dojot/kong:development
-    restart: always
     depends_on:
       postgres:
         condition: service_healthy
-      kong-migration:
+      kong-migrations:
         condition: service_started
-    ports:
-      - "8000:8000"
+      kong-migrations-up:
+        condition: service_started
     environment:
-      KONG_DATABASE: "postgres"
-      KONG_PG_HOST: "postgres"
+      KONG_DATABASE: postgres
+      KONG_PG_HOST: postgres
+      KONG_PG_USER: kong
+      KONG_PG_DATABASE: kong
+      KONG_PG_PASSWORD: kong
+      KONG_LOG_LEVEL: info
+    ports:
+      - "8000:8000/tcp"
+    healthcheck:
+      test: ["CMD", "kong", "health"]
+      interval: 10s
+      timeout: 10s
+      retries: 10
+    restart: on-failure
     logging:
       driver: json-file
       options:
@@ -290,7 +298,30 @@ services:
     depends_on:
       - apigw
     volumes:
-      - ./kong.config.sh:/opt/kong.config.sh:Z
+      - ./kong/kong.config.sh:/opt/kong.config.sh:Z
+
+  auth:
+    image: dojot/auth:development
+    restart: always
+    depends_on:
+      - apigw
+      - postgres
+      - auth-redis
+    environment:
+      AUTH_DB_HOST: "postgres"
+      AUTH_DB_USER: "auth"
+      AUTH_DB_PWD:  "auth"
+      AUTH_KONG_URL: "http://apigw:8001"
+      AUTH_CACHE_HOST: "auth-redis"
+      # This is used to select the type of cache to be used.
+      # Allowed values are "redis" or "nocache"
+      AUTH_CACHE_NAME: "redis"
+      DOJOT_MANAGEMENT_USER: 'auth'
+      KAFKA_GROUP_ID: 'auth-group'
+    logging:
+      driver: json-file
+      options:
+        max-size: 100m
 
   flowbroker-redis:
     image: dojot/redis:5.0.5-alpine3.10
@@ -378,7 +409,6 @@ services:
       options:
         max-size: 100m
 
-
   data-manager:
     image: dojot/data-manager:development
     restart: always
@@ -399,9 +429,36 @@ services:
       - data-broker
       - auth
       - mongodb
-    ports:
-      - 5000:5000
     restart: always
+
+# GUI to Kong Admin API - BEGIN
+# Konga GUI will be available at http://localhost:1337
+#
+# konga:
+#   image: dojot/pantsel_konga:0.14.7
+#   depends_on:
+#     - apigw
+#     - mongodb
+#   ports:
+#     - 1337:1337
+#   environment:
+#     DB_ADAPTER: mongo
+#     DB_DATABASE: konga
+#     DB_HOST: mongodb
+#     KONGA_LOG_LEVEL: info
+#     NO_AUTH: "true"
+#     KONGA_SEED_KONG_NODE_DATA_SOURCE_FILE: /konga.js
+#     NODE_ENV: production
+#     BASE_URL: localhost
+#   volumes:
+#     - ./kong/konga.config.js:/konga.js:ro
+#   restart: on-failure
+#   logging:
+#     driver: json-file
+#     options:
+#       max-size: 100m
+#
+# GUI to Kong Admin API - END
 
 networks:
   flowbroker:
