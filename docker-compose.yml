@@ -214,7 +214,7 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
-    restart: on-failure
+    restart: always
     volumes:
       - ./postgres/init-db.sh:/docker-entrypoint-initdb.d/init-db.sh:Z
     logging:
@@ -264,7 +264,6 @@ services:
 
   apigw:
     image: dojot/kong:development
-    user: "kong"
     depends_on:
       postgres:
         condition: service_healthy
