@@ -235,12 +235,24 @@ authConfig "backstage"
     --header "Content-Type: application/json" \
     -d @- ) <<PAYLOAD
 {
-     "name": "backstage_graphql",
-     "uris": [ "/graphql(.*)"],
+     "name": "backstage_graphql_auth",
+     "uris": [ "/graphql/auth/","/graphql/permissions"],
      "strip_uri": false,
      "upstream_url": "http://backstage:3005/"
  }
 PAYLOAD
+
+(curl -o /dev/null ${kong}/apis -sS -X POST \
+    --header "Content-Type: application/json" \
+    -d @- ) <<PAYLOAD
+{
+     "name": "backstage_graphql",
+     "uris": [ "/graphql/"],
+     "strip_uri": false,
+     "upstream_url": "http://backstage:3005/"
+ }
+PAYLOAD
+authConfig "backstage_graphql"
 
 # cron
 (curl -o /dev/null ${kong}/apis -s -S -X POST \
