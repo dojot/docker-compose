@@ -237,7 +237,7 @@ authConfig "backstage"
 {
      "name": "backstage_graphql_auth",
      "uris": [ "/graphql/auth","/graphql/permissions"],
-     "strip_uri": false,
+     "strip_uri": true,
      "upstream_url": "http://backstage:3005/"
  }
 PAYLOAD
@@ -248,7 +248,7 @@ PAYLOAD
 {
      "name": "backstage_graphql",
      "uris": [ "/graphql"],
-     "strip_uri": false,
+     "strip_uri": true,
      "upstream_url": "http://backstage:3005/"
  }
 PAYLOAD
