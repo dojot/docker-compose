@@ -39,6 +39,9 @@ services:
       driver: json-file
       options:
         max-size: 100m
+    volumes:
+      - "mongodb-volume:/data/db"
+      - "mongodb-cfg-volume:/data/configdb"
 
   mosca-redis:
     image: dojot/redis:5.0.5-alpine3.10
@@ -55,7 +58,7 @@ services:
       - kafka
       - data-broker
       - auth
-      - ejbca
+      - x509-identity-mgmt
     ports:
       - 1883:1883
       - 8883:8883
@@ -217,6 +220,7 @@ services:
     restart: always
     volumes:
       - ./postgres/init-db.sh:/docker-entrypoint-initdb.d/init-db.sh:Z
+      - "postgres-volume:/var/lib/postgresql/data"
     logging:
       driver: json-file
       options:
@@ -427,6 +431,24 @@ services:
       options:
         max-size: 100m
 
+  x509-identity-mgmt:
+    image: dojot/x509-identity-mgmt:development
+    depends_on:
+      - postgres
+      - mongodb
+    restart: always
+    hostname: "x509-identity-mgmt"
+    domainname: "dojot.iot"
+    environment:
+      DATABASE_JDBC_URL: jdbc:postgresql://postgres:5432/ejbca?characterEncoding=UTF-8
+      DATABASE_USER: ejbca
+      DATABASE_PASSWORD: ejbca
+      EJBCA_PERFORM_DOJOT_SETUP: "true"
+      NODE_ENV: production
+      MONGO_URI: "mongodb://mongodb:27017/x509-identity-mgmt"
+    volumes:
+      - "ejbca-volume:/mnt/persistent"
+
   data-manager:
     image: dojot/data-manager:development
     restart: always
@@ -477,6 +499,12 @@ services:
 #       max-size: 100m
 #
 # GUI to Kong Admin API - END
+
+volumes:
+  ejbca-volume:
+  postgres-volume:
+  mongodb-volume:
+  mongodb-cfg-volume:
 
 networks:
   flowbroker:
