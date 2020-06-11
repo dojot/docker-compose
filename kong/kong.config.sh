@@ -157,7 +157,7 @@ addAuthToEndpoint "data-manager"
 
 # service: backstage
 
-createEndpoint "backstage_graphql_auth" "http://backstage:3005/"  '"/graphql/auth","/graphql/permissions"' "false"
+createEndpoint "backstage_graphql_auth" "http://backstage:3005/"  '"/graphql-auth"' "false"
 
 
 createEndpoint "backstage_graphql" "http://backstage:3005/"  '"/graphql"' "false"
