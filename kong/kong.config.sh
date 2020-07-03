@@ -169,6 +169,6 @@ createEndpoint "x509-identity-mgmt" "http://x509-identity-mgmt:3000/api"  '"/x50
 addAuthToEndpoint "x509-identity-mgmt"
 
 # service: kafka-ws
-createEndpoint "kafka-ws" "http://kafka-ws:8080/api"  '"/kafka-ws"' "true"
-createEndpoint "kafka-ws-ticket" "http://kafka-ws:8080/api/v1/ticket"  '"/kafka-ws/v1/ticket"' "true"
+createEndpoint "kafka-ws" "http://kafka-ws:8080/"  '"/kafka-ws"' "false"
+createEndpoint "kafka-ws-ticket" "http://kafka-ws:8080/"  '"/kafka-ws/v[0-9]+/ticket"' "false"
 addAuthToEndpoint "kafka-ws-ticket"
