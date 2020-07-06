@@ -263,7 +263,7 @@ services:
         max-size: 100m
 
   apigw:
-    image: dojot/kong:development
+    image: local/kong:development
     depends_on:
       postgres:
         condition: service_healthy
@@ -277,7 +277,7 @@ services:
       KONG_PG_USER: kong
       KONG_PG_DATABASE: kong
       KONG_PG_PASSWORD: kong
-      KONG_LOG_LEVEL: info
+      KONG_LOG_LEVEL: debug
       # To enable HTTPs external, it is necessary to configure public certificates
       # issued by a public CA, such as lets encrypt in KONG_SSL_CERT.
       # KONG_SSL_CERT_KEY: /certs/example-external.key
@@ -317,6 +317,22 @@ services:
       - apigw
     volumes:
       - ./kong/kong.config.sh:/opt/kong.config.sh:Z
+  
+  keycloak:
+    image: local/keycloak:development
+    depends_on:
+      - postgres
+      - kafka
+    ports:
+      - "8180:8080"
+    environment:
+      DB_VENDOR: POSTGRES
+      DB_ADDR: postgres
+      DB_DATABASE: keycloak
+      DB_USER: keycloak
+      DB_PASSWORD: keycloak
+      KEYCLOAK_USER: admin
+      KEYCLOAK_PASSWORD: admin
 
   auth:
     image: dojot/auth:development

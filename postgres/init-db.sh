@@ -15,4 +15,6 @@ psql -v ON_ERROR_STOP=1 --dbname postgres --username  postgres  <<-EOSQL
     CREATE database imgm;
     CREATE USER imgm WITH UNENCRYPTED PASSWORD 'imgm';
     ALTER ROLE imgm WITH CREATEDB;
+    CREATE database keycloak;
+    CREATE USER keycloak WITH UNENCRYPTED PASSWORD 'keycloak';
 EOSQL

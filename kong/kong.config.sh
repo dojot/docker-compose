@@ -18,14 +18,10 @@ addAuthToEndpoint() {
 echo ""
 echo ""
 echo "- addAuthToEndpoint: ServiceName=${1}"
-curl  -sS  -X POST \
---url ${kong}/services/"${1}"/plugins/ \
---data "name=pepkong" \
---data "config.pdpUrl=http://auth:5000/pdp"
 
-curl  -sS  -X POST \
---url ${kong}/services/"${1}"/plugins/ \
---data "name=jwt"
+curl -X POST ${kong}/services/"${1}"/plugins \
+    --data "name=jwt-keycloak" \
+    --data "config.allowed_iss=http://keycloak:8080/auth/realms/master"
 }
 
 # add a Service
