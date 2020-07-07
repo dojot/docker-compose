@@ -99,10 +99,7 @@ addAuthToEndpoint "image"
 
 # service: auth
 
-createEndpoint "auth-permissions-service" "http://auth:5000/pap"  '"/auth/pap"' "true"
-addAuthToEndpoint "auth-permissions-service"
-
-createEndpoint "auth-service" "http://auth:5000"  '"/auth"' "true"
+createEndpoint "auth-service" "http://keycloak:8080/auth"  '"/auth"' "true"
 echo ""
 echo ""
 echo "- add plugin rate-limiting in auth-service"
@@ -112,20 +109,6 @@ curl  -s  -sS -X POST \
 --data "config.minute=5" \
 --data "config.hour=40" \
 --data "config.policy=local"
-
-createEndpoint "auth-revoke" "http://auth:5000"  '"/auth/revoke"' "false"
-# rate plugin limit to avoid brute-force atacks
-echo ""
-echo ""
-echo "- add plugin request-termination in auth-revoke"
-curl  -s  -sS -X POST \
---url ${kong}/services/auth-revoke/plugins/ \
-    --data "name=request-termination" \
-    --data "config.status_code=403" \
-    --data "config.message=Not authorized"
-
-createEndpoint "user-service" "http://auth:5000/user"  '"/auth/user"' "true"
-addAuthToEndpoint "user-service"
 
 # service: flowbroker
 
