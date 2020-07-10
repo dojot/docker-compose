@@ -17,11 +17,13 @@ addAuthToEndpoint() {
 # $1 = Service Name
 echo ""
 echo ""
-echo "- addAuthToEndpoint: ServiceName=${1}"
+echo "- addAuthToEndpoint: ServiceName=${1}, Permission=${2}"
 
 curl -X POST ${kong}/services/"${1}"/plugins \
     --data "name=jwt-keycloak" \
-    --data "config.allowed_iss=http://keycloak:8080/auth/realms/master"
+    --data "config.allowed_iss=http://keycloak:8080/auth/realms/master" \
+    --data "config.client_roles=${1}:black-belt" \
+    --data "config.client_roles=${1}:${2}"
 }
 
 # add a Service
@@ -80,22 +82,22 @@ createEndpoint "gui" "http://gui:80"  '"/"' "false"
 # service: data-broker
 
 createEndpoint  "data-broker" "http://data-broker:80"  '"/device/(.*)/latest", "/subscription"' "false"
-addAuthToEndpoint "data-broker"
+addAuthToEndpoint "data-broker" "white-belt"
 
 createEndpoint "data-streams" "http://data-broker:80"  '"/stream"' "true"
-addAuthToEndpoint "data-streams"
+addAuthToEndpoint "data-streams" "white-belt"
 
 createEndpoint "ws-http" "http://data-broker:80"  '"/socket.io"' "false"
 
 # service: device-manager
 
 createEndpoint "device-manager" "http://device-manager:5000"  '"/device", "/template"' "false"
-addAuthToEndpoint "device-manager"
+addAuthToEndpoint "device-manager" "white-belt"
 
 # service: image-manager
 
 createEndpoint "image" "http://image-manager:5000"  '"/fw-image"' "true"
-addAuthToEndpoint "image"
+addAuthToEndpoint "image" "white-belt"
 
 # service: auth
 
@@ -113,7 +115,7 @@ curl  -s  -sS -X POST \
 # service: flowbroker
 
 createEndpoint "flows" "http://flowbroker:80"  '"/flows"' "true"
-addAuthToEndpoint "flows"
+addAuthToEndpoint "flows" "white-belt"
 
 createEndpoint "flowsIcons" "http://flowbroker:80/icons"  '"/flows/icons"' "true"
 
@@ -122,17 +124,17 @@ createEndpoint "flowsRedImages" "http://flowbroker:80/red/images"  '"/flows/red/
 # service: history
 
 createEndpoint "history" "http://history:8000"  '"/history"' "true"
-addAuthToEndpoint "history"
+addAuthToEndpoint "history" "white-belt"
 
 # service: ejbca
 
 createEndpoint "ejbca-paths" "http://ejbca:5583/"  '"/sign", "/ca", "/user"' "false"
-addAuthToEndpoint "ejbca-paths"
+addAuthToEndpoint "ejbca-paths" "white-belt"
 
 # service: data-manager
 
 createEndpoint "data-manager" "http://data-manager:3000/"  '"/export", "/import"' "false"
-addAuthToEndpoint "data-manager"
+addAuthToEndpoint "data-manager" "white-belt"
 
 # service: backstage
 
@@ -141,5 +143,5 @@ createEndpoint "backstage_graphql" "http://backstage:3005/"  '"/graphql(.*)"' "f
 # service: cron
 
 createEndpoint "cron" "http://cron:5000/"  '"/cron"' "false"
-addAuthToEndpoint "cron"
+addAuthToEndpoint "cron" "white-belt"
 
