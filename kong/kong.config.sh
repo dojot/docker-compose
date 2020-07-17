@@ -170,8 +170,17 @@ addAuthToEndpoint "cron"
 # service: x509-identity-mgmt
 createEndpoint "x509-identity-mgmt" "http://x509-identity-mgmt:3000/api"  '"/x509"' "true"
 addAuthToEndpoint "x509-identity-mgmt"
-
+   
 # service: kafka-ws
 createEndpoint "kafka-ws" "http://kafka-ws:8080/"  '"/kafka-ws"' "false"
+
+curl -sS -X PATCH \
+    --url ${kong}/services/kafka-ws \
+    --data "read_timeout=300000" \
+    --data "write_timeout=300000" \
+    --data "connect_timeout=300000"
+    
 createEndpoint "kafka-ws-ticket" "http://kafka-ws:8080/"  '"/kafka-ws/v[0-9]+/ticket"' "false"
 addAuthToEndpoint "kafka-ws-ticket"
+    
+
