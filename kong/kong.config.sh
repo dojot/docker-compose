@@ -171,6 +171,9 @@ addAuthToEndpoint "x509-identity-mgmt"
 # service: kafka-ws
 createEndpoint "kafka-ws" "http://kafka-ws:8080/"  '"/kafka-ws"' "false"
 
+echo ""
+echo ""
+echo "- add timeout to kafka-ws"
 curl -sS -X PATCH \
     --url ${kong}/services/kafka-ws \
     --data "read_timeout=300000" \
