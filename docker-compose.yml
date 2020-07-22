@@ -63,7 +63,7 @@ services:
     environment:
       DOJOT_MANAGEMENT_USER: 'iotagent-mqtt'
       KAFKA_GROUP_ID: 'iotagent-mqtt-group'
-      ALLOW_UNSECURED_MODE: 'false'
+      ALLOW_UNSECURED_MODE: 'true'
       MOSCA_TLS_DNS_LIST: 'localhost'
     logging:
       driver: json-file
