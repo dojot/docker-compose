@@ -17,21 +17,20 @@ addAuthToEndpoint() {
 # $1 = Service Name
 echo ""
 echo ""
-echo "- addAuthToEndpoint: ServiceName=${1}, RoleRequiredToAccess=${2}"
+echo "- addAuthToEndpoint: ServiceName=${1}"
 
-if [ "$2" != "" ]; then
-  curl -X POST ${kong}/services/"${1}"/plugins \
-    --data "name=jwt-keycloak" \
-    --data "config.allowed_iss=http://keycloak:8080/auth/realms/master" \
-    --data "config.client_roles=${1}:admin" \
-    --data "config.client_roles=${1}:${2}"
-else
-  curl -X POST ${kong}/services/"${1}"/plugins \
-    --data "name=jwt-keycloak" \
-    --data "config.allowed_iss=http://keycloak:8080/auth/realms/master" \
-    --data "config.client_roles=${1}:admin"
-fi
+curl -X POST ${kong}/services/"${1}"/plugins \
+  --data "name=jwt-keycloak" \
+  --data "config.allowed_iss=http://keycloak:8080/auth/realms/master"
 
+curl  -sS  -X POST \
+--url ${kong}/services/"${1}"/plugins/ \
+--data "name=pepkong" \
+--data "config.resource_server_id=${1}"
+
+# curl  -sS  -X POST \
+# --url ${kong}/services/"${1}"/plugins/ \
+# --data "name=jwt"
 }
 
 
