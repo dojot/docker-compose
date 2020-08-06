@@ -39,10 +39,15 @@ services:
       driver: json-file
       options:
         max-size: 100m
+    volumes:
+      - mongodb-volume:/data/db
+      - mongodb-cfg-volume:/data/configdb
 
   mosca-redis:
     image: dojot/redis:5.0.5-alpine3.10
     restart: always
+    volumes:
+      - mosca-redis-volume:/data
     logging:
       driver: json-file
       options:
@@ -95,6 +100,8 @@ services:
   data-broker-redis:
     image: dojot/redis:5.0.5-alpine3.10
     restart: always
+    volumes:
+      - data-broker-redis-volume:/data
     logging:
       driver: json-file
       options:
@@ -103,6 +110,8 @@ services:
   device-manager-redis:
     image: dojot/redis:5.0.5-alpine3.10
     restart: always
+    volumes:
+      - device-manager-redis-volume:/data
     logging:
       driver: json-file
       options:
@@ -161,6 +170,8 @@ services:
       MINIO_ACCESS_KEY: 9HEODSF6WQN5EZ39DM7Z
       MINIO_SECRET_KEY: fT5nAgHR9pkj0yYsBdc4p+PPq6ArjshcPdz0HA6W
     command: server /data
+    volumes:
+      - minio-volume:/data
 
   device-manager:
     image: dojot/device-manager:v0.4.2
@@ -183,6 +194,8 @@ services:
   auth-redis:
     image: dojot/redis:5.0.5-alpine3.10
     restart: always
+    volumes:
+      - auth-redis-volume:/data
     logging:
       driver: json-file
       options:
@@ -220,6 +233,8 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    volumes:
+      - postgres-volume:/var/lib/postgresql/data
     logging:
       driver: json-file
       options:
@@ -244,6 +259,8 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+    volumes:
+      - postgres-users-volume:/var/lib/postgresql/data
     logging:
       driver: json-file
       options:
@@ -290,6 +307,8 @@ services:
   flowbroker-redis:
     image: dojot/redis:5.0.5-alpine3.10
     restart: always
+    volumes:
+      - flowbroker-redis-volume:/data
     logging:
       driver: json-file
       options:
@@ -314,6 +333,7 @@ services:
       - default
       - flowbroker
     volumes:
+      - flowbroker-volume:/data
       - /var/run/docker.sock:/var/run/docker.sock:Z
 
   flowbroker-context-manager:
@@ -334,6 +354,8 @@ services:
   rabbitmq:
     image: dojot/rabbitmq:3.7-alpine
     restart: always
+    volumes:
+      - rabbitmq-volume:/var/lib/rabbitmq
     logging:
       driver: json-file
       options:
@@ -342,6 +364,10 @@ services:
   zookeeper:
     image: dojot/zookeeper:3.4
     restart: always
+    volumes:
+      - zookeeper-volume:/datalog
+      - zookeeper-volume:/logs
+      - zookeeper-volume:/data
     logging:
       driver: json-file
       options:
@@ -357,6 +383,8 @@ services:
       KAFKA_ADVERTISED_HOST_NAME: kafka
       KAFKA_NUM_PARTITIONS: 10
       JMX_PORT: 1099
+    volumes:
+      - kafka-volume:/kafka
     logging:
       driver: json-file
       options:
@@ -368,6 +396,8 @@ services:
       DOJOT_MANAGEMENT_USER: 'ejbca'
       KAFKA_GROUP_ID: 'ejbca-group'
     restart: always
+    volumes:
+      - ejbca-volume:/data
     logging:
       driver: json-file
       options:
@@ -397,6 +427,23 @@ services:
     ports:
       - 5000:5000
     restart: always
+
+volumes:
+  postgres-volume:
+  postgres-users-volume:
+  mongodb-volume:
+  mongodb-cfg-volume:
+  ejbca-volume:
+  minio-volume:
+  rabbitmq-volume:
+  zookeeper-volume:
+  kafka-volume:
+  auth-redis-volume:
+  flowbroker-volume:
+  flowbroker-redis-volume:
+  data-broker-redis-volume:
+  device-manager-redis-volume:
+  mosca-redis-volume:
 
 networks:
   flowbroker:
