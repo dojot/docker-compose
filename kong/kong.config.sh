@@ -26,7 +26,7 @@ curl -X POST ${kong}/services/"${1}"/plugins \
 curl  -sS  -X POST \
 --url ${kong}/services/"${1}"/plugins/ \
 --data "name=pepkong" \
---data "config.resource_server_id=${1}"
+--data "config.resource=${1}"
 
 # curl  -sS  -X POST \
 # --url ${kong}/services/"${1}"/plugins/ \
