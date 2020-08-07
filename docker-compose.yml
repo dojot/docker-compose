@@ -2,7 +2,7 @@ version: '2.1'
 services:
 
   history:
-    image: dojot/history:development
+    image: dojot/history:v0.5.0-alpha.3
     restart: always
     depends_on:
       - mongodb
@@ -15,7 +15,7 @@ services:
         max-size: 100m
 
   persister:
-    image: dojot/persister:development
+    image: dojot/persister:v0.5.0-alpha.3
     restart: always
     depends_on:
       - mongodb
@@ -39,17 +39,22 @@ services:
       driver: json-file
       options:
         max-size: 100m
+    volumes:
+      - mongodb-volume:/data/db
+      - mongodb-cfg-volume:/data/configdb
 
   mosca-redis:
     image: dojot/redis:5.0.5-alpine3.10
     restart: always
+    volumes:
+      - mosca-redis-volume:/data
     logging:
       driver: json-file
       options:
         max-size: 100m
 
   iotagent-mqtt:
-    image: dojot/iotagent-mosca:development
+    image: dojot/iotagent-mosca:v0.5.0-alpha.3
     depends_on:
       - mosca-redis
       - kafka
@@ -72,7 +77,7 @@ services:
         max-size: 100m
 
   gui:
-    image: dojot/gui:development
+    image: dojot/gui:v0.5.0-alpha.3
     restart: always
     logging:
       driver: json-file
@@ -80,7 +85,7 @@ services:
         max-size: 100m
 
   data-broker:
-    image: dojot/data-broker:development
+    image: dojot/data-broker:v0.5.0-alpha.3
     restart: always
     depends_on:
       - kafka
@@ -100,6 +105,8 @@ services:
   data-broker-redis:
     image: dojot/redis:5.0.5-alpine3.10
     restart: always
+    volumes:
+      - data-broker-redis-volume:/data
     logging:
       driver: json-file
       options:
@@ -108,6 +115,8 @@ services:
   device-manager-redis:
     image: dojot/redis:5.0.5-alpine3.10
     restart: always
+    volumes:
+      - device-manager-redis-volume:/data
     logging:
       driver: json-file
       options:
@@ -117,7 +126,7 @@ services:
 # iot-agent lwm2m
 ################
   iotagent-lwm2m:
-    image: dojot/iotagent-leshan:development
+    image: dojot/iotagent-leshan:v0.5.0-alpha.3
     depends_on:
       - kafka
       - data-broker
@@ -140,7 +149,7 @@ services:
         max-size: 100m
 
   image-manager:
-    image: dojot/image-manager:development
+    image: dojot/image-manager:v0.5.0-alpha.3
     restart: always
     depends_on:
       - postgres
@@ -169,9 +178,11 @@ services:
       MINIO_ACCESS_KEY: 9HEODSF6WQN5EZ39DM7Z
       MINIO_SECRET_KEY: fT5nAgHR9pkj0yYsBdc4p+PPq6ArjshcPdz0HA6W
     command: server /data
+    volumes:
+      - minio-volume:/data
 
   device-manager:
-    image: dojot/device-manager:development
+    image: dojot/device-manager:v0.5.0-alpha.3
     restart: always
     environment:
       # TODO: Fill these env variables with suitable values
@@ -198,6 +209,8 @@ services:
   auth-redis:
     image: dojot/redis:5.0.5-alpine3.10
     restart: always
+    volumes:
+      - auth-redis-volume:/data
     logging:
       driver: json-file
       options:
@@ -217,6 +230,7 @@ services:
     restart: always
     volumes:
       - ./postgres/init-db.sh:/docker-entrypoint-initdb.d/init-db.sh:Z
+      - postgres-volume:/var/lib/postgresql/data
     logging:
       driver: json-file
       options:
@@ -224,7 +238,7 @@ services:
 
   # Prepare database, Bootstrap the database
   kong-migrations:
-    image: dojot/kong:development
+    image: dojot/kong:v0.5.0-alpha.3
     command: kong migrations bootstrap
     depends_on:
       postgres:
@@ -244,7 +258,7 @@ services:
 
   # Run any new migrations and Finish running any pending migrations after 'up'.
   kong-migrations-up:
-    image:  dojot/kong:development
+    image:  dojot/kong:v0.5.0-alpha.3
     command: kong migrations up && kong migrations finish
     depends_on:
       postgres:
@@ -263,7 +277,7 @@ services:
         max-size: 100m
 
   apigw:
-    image: dojot/kong:development
+    image: dojot/kong:v0.5.0-alpha.3
     depends_on:
       postgres:
         condition: service_healthy
@@ -319,7 +333,7 @@ services:
       - ./kong/kong.config.sh:/opt/kong.config.sh:Z
 
   auth:
-    image: dojot/auth:development
+    image: dojot/auth:v0.5.0-alpha.3
     restart: always
     depends_on:
       - apigw
@@ -344,13 +358,15 @@ services:
   flowbroker-redis:
     image: dojot/redis:5.0.5-alpine3.10
     restart: always
+    volumes:
+      - flowbroker-redis-volume:/data
     logging:
       driver: json-file
       options:
         max-size: 100m
 
   flowbroker:
-    image: dojot/flowbroker:development
+    image: dojot/flowbroker:v0.5.0-alpha.3
     restart: always
     environment:
       DEPLOY_ENGINE: "docker"
@@ -368,10 +384,11 @@ services:
       - default
       - flowbroker
     volumes:
+      - flowbroker-volume:/data
       - /var/run/docker.sock:/var/run/docker.sock:Z
 
   flowbroker-context-manager:
-    image: dojot/flowbroker-context-manager:development
+    image: dojot/flowbroker-context-manager:v0.5.0-alpha.3
     restart: always
     environment:
       ZOOKEEPER_HOST: zookeeper
@@ -388,6 +405,8 @@ services:
   rabbitmq:
     image: dojot/rabbitmq:3.7-alpine
     restart: always
+    volumes:
+      - rabbitmq-volume:/var/lib/rabbitmq
     logging:
       driver: json-file
       options:
@@ -396,6 +415,10 @@ services:
   zookeeper:
     image: dojot/zookeeper:3.4
     restart: always
+    volumes:
+      - zookeeper-volume:/data
+      - zookeeper-logs-volume:/logs
+      - zookeeper-datalog-volume:/datalog
     logging:
       driver: json-file
       options:
@@ -411,37 +434,87 @@ services:
       KAFKA_ADVERTISED_HOST_NAME: kafka
       KAFKA_NUM_PARTITIONS: 10
       JMX_PORT: 1099
+    volumes:
+      - kafka-volume:/kafka
     logging:
       driver: json-file
       options:
         max-size: 100m
 
   ejbca:
-    image: dojot/ejbca-rest:development
+    image: dojot/ejbca-rest:v0.5.0-alpha.1
     environment:
       DOJOT_MANAGEMENT_USER: 'ejbca'
       KAFKA_GROUP_ID: 'ejbca-group'
+    restart: always
+    volumes:
+      - old-ejbca-volume:/data
+    logging:
+      driver: json-file
+      options:
+        max-size: 100m
+
+  x509-identity-mgmt:
+    image: dojot/x509-identity-mgmt:v0.5.0-alpha.3
+    depends_on:
+      - postgres
+      - mongodb
+    restart: always
+    hostname: "x509-identity-mgmt"
+    domainname: "dojot.iot"
+    environment:
+      DATABASE_JDBC_URL: jdbc:postgresql://postgres:5432/ejbca?characterEncoding=UTF-8
+      DATABASE_USER: ejbca
+      DATABASE_PASSWORD: ejbca
+      EJBCA_PERFORM_DOJOT_SETUP: "true"
+      NODE_ENV: production
+      MONGO_URI: "mongodb://mongodb:27017/x509-identity-mgmt"
+    volumes:
+      - ejbca-volume:/mnt/persistent
+    logging:
+      driver: json-file
+      options:
+        max-size: 100m
+
+  kafka-ws:
+    image: dojot/kafka-ws:v0.5.0-alpha.3
+    depends_on:
+      - kafka
+      - kafka-ws-redis
+    environment:
+      KAFKA_WS_JWT_EXP_TIME: "true"
+      REDIS_HOST: kafka-ws-redis
     restart: always
     logging:
       driver: json-file
       options:
         max-size: 100m
 
+  kafka-ws-redis:
+    image: dojot/redis:6.0.4-alpine3.11
+    restart: always
+    volumes:
+      - kafka-ws-redis-volume:/data
+    logging:
+      driver: json-file
+      options:
+        max-size: 100m
+
   data-manager:
-    image: dojot/data-manager:development
+    image: dojot/data-manager:v0.5.0-alpha.3
     restart: always
     depends_on:
       - flowbroker
       - device-manager
 
   backstage:
-    image: dojot/backstage:development
+    image: dojot/backstage:v0.5.0-alpha.3
     restart: always
     depends_on:
       - postgres
 
   cron:
-    image: dojot/cron:development
+    image: dojot/cron:v0.5.0-alpha.3
     depends_on:
       - kafka
       - data-broker
@@ -477,6 +550,26 @@ services:
 #       max-size: 100m
 #
 # GUI to Kong Admin API - END
+
+volumes:
+  ejbca-volume:
+  postgres-volume:
+  mongodb-volume:
+  mongodb-cfg-volume:
+  old-ejbca-volume:
+  minio-volume:
+  rabbitmq-volume:
+  zookeeper-volume:
+  zookeeper-logs-volume:
+  zookeeper-datalog-volume:
+  kafka-volume:
+  auth-redis-volume:
+  flowbroker-volume:
+  flowbroker-redis-volume:
+  data-broker-redis-volume:
+  device-manager-redis-volume:
+  kafka-ws-redis-volume:
+  mosca-redis-volume:
 
 networks:
   flowbroker:
