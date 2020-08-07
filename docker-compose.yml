@@ -53,14 +53,14 @@ services:
       options:
         max-size: 100m
 
-  iotagent-mqtt:
+  iotagent-mqtt-mosca:
     image: dojot/iotagent-mosca:v0.5.0-alpha.3
     depends_on:
       - mosca-redis
       - kafka
       - data-broker
       - auth
-      - ejbca
+      - x509-identity-mgmt
     ports:
       - 1883:1883
       - 8883:8883
@@ -71,6 +71,10 @@ services:
       ALLOW_UNSECURED_MODE: 'true'
       LOG_LEVEL: 'info'
       MOSCA_TLS_DNS_LIST: 'localhost'
+      MOSCA_TLS_CRL_UPDATE_TIME: '0 */2 * * *' # Updated CRL Every 2 hours
+      MOSCA_TLS_CON_MAX_LIFETIME: 7200000 # Maximum lifetime of a connection in ms (If is 0 then is disabled)
+      MOSCA_TLS_CON_IDLE_TIMEOUT: 1800000 #  The idle timeout for a connection in ms (If is 0 then is disabled)
+      MOSCA_TLS_CNAME: "iotagent-mqtt-mosca"
     logging:
       driver: json-file
       options:
@@ -441,19 +445,6 @@ services:
       options:
         max-size: 100m
 
-  ejbca:
-    image: dojot/ejbca-rest:v0.5.0-alpha.1
-    environment:
-      DOJOT_MANAGEMENT_USER: 'ejbca'
-      KAFKA_GROUP_ID: 'ejbca-group'
-    restart: always
-    volumes:
-      - old-ejbca-volume:/data
-    logging:
-      driver: json-file
-      options:
-        max-size: 100m
-
   x509-identity-mgmt:
     image: dojot/x509-identity-mgmt:v0.5.0-alpha.3
     depends_on:
@@ -556,7 +547,6 @@ volumes:
   postgres-volume:
   mongodb-volume:
   mongodb-cfg-volume:
-  old-ejbca-volume:
   minio-volume:
   rabbitmq-volume:
   zookeeper-volume:
