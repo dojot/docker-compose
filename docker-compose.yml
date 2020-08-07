@@ -279,7 +279,6 @@ services:
       DB_PASSWORD: keycloak
       KEYCLOAK_USER: admin
       KEYCLOAK_PASSWORD: admin
-      KEYCLOAK_LOGLEVEL: DEBUG
       KEYCLOAK_FRONTEND_URL: http://keycloak:8080/auth
 
   zookeeper:
