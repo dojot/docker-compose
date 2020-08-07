@@ -416,9 +416,9 @@ services:
     image: dojot/zookeeper:3.4
     restart: always
     volumes:
-      - zookeeper-volume:/datalog
-      - zookeeper-volume:/logs
       - zookeeper-volume:/data
+      - zookeeper-logs-volume:/logs
+      - zookeeper-datalog-volume:/datalog
     logging:
       driver: json-file
       options:
@@ -560,6 +560,8 @@ volumes:
   minio-volume:
   rabbitmq-volume:
   zookeeper-volume:
+  zookeeper-logs-volume:
+  zookeeper-datalog-volume:
   kafka-volume:
   auth-redis-volume:
   flowbroker-volume:
