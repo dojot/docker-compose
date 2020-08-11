@@ -473,8 +473,8 @@ services:
     domainname: dojot.iot
     volumes:
       - iotagent-mqtt-volume:/vernemq/data
-      - iotagent-mqtt-volume:/vernemq/log
-      - iotagent-mqtt-volume:/vernemq/etc
+      - iotagent-mqtt-log-volume:/vernemq/log
+      - iotagent-mqtt-etc-volume:/vernemq/etc
     logging:
       driver: json-file
       options:
@@ -579,6 +579,8 @@ volumes:
   zookeeper-datalog-volume:
   kafka-volume:
   iotagent-mqtt-volume:
+  iotagent-mqtt-log-volume:
+  iotagent-mqtt-etc-volume:
   auth-redis-volume:
   flowbroker-volume:
   flowbroker-redis-volume:
