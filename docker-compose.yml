@@ -454,7 +454,7 @@ services:
         max-size: 100m
 
   iotagent-mqtt:
-    image: dojot/vernemq-dojot:development
+    image: dojot/vernemq-dojot:v0.5.0-alpha.3
     command: ["/bin/bash", "-c", "echo $$VERNEMQ_CONF | base64 -d > /etc/vernemq/vernemq.conf; echo $$VM_ARGS | base64 -d > /etc/vernemq/vm.args; /vernemq/vmq_dojot.sh"]
     depends_on:
       - x509-identity-mgmt
@@ -481,7 +481,7 @@ services:
         max-size: 100m
 
   v2k-bridge:
-    image: dojot/v2k-bridge:development
+    image: dojot/v2k-bridge:v0.5.0-alpha.3
     depends_on:
       - iotagent-mqtt
       - kafka
@@ -499,7 +499,7 @@ services:
         max-size: 100m
 
   k2v-bridge:
-    image: dojot/k2v-bridge:development
+    image: dojot/k2v-bridge:v0.5.0-alpha.3
     depends_on:
       - iotagent-mqtt
       - kafka
