@@ -157,7 +157,10 @@ addAuthToEndpoint "data-manager"
 
 # service: backstage
 
-createEndpoint "backstage_graphql" "http://backstage:3005/"  '"/graphql(.*)"' "false"
+createEndpoint "backstage_graphql_auth" "http://backstage:3005/"  '"/graphql-auth"' "false"
+
+createEndpoint "backstage_graphql" "http://backstage:3005/"  '"/graphql"' "false"
+addAuthToEndpoint "backstage_graphql"
 
 # service: cron
 
@@ -167,13 +170,14 @@ addAuthToEndpoint "cron"
 # service: x509-identity-mgmt
 createEndpoint "x509-identity-mgmt" "http://x509-identity-mgmt:3000/api"  '"/x509"' "true"
 addAuthToEndpoint "x509-identity-mgmt"
-
+   
 # service: kafka-ws
 createEndpoint "kafka-ws" "http://kafka-ws:8080/"  '"/kafka-ws"' "false"
 
 echo ""
 echo ""
 echo "- add timeout to kafka-ws"
+
 curl -sS -X PATCH \
     --url ${kong}/services/kafka-ws \
     --data "read_timeout=300000" \
@@ -182,3 +186,5 @@ curl -sS -X PATCH \
 
 createEndpoint "kafka-ws-ticket" "http://kafka-ws:8080/"  '"/kafka-ws/v[0-9]+/ticket"' "false"
 addAuthToEndpoint "kafka-ws-ticket"
+    
+

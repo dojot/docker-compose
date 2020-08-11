@@ -2,7 +2,7 @@ version: '2.1'
 services:
 
   history:
-    image: dojot/history:development
+    image: dojot/history:v0.5.0-alpha.3
     restart: always
     depends_on:
       - mongodb
@@ -15,7 +15,7 @@ services:
         max-size: 100m
 
   persister:
-    image: dojot/persister:development
+    image: dojot/persister:v0.5.0-alpha.3
     restart: always
     depends_on:
       - mongodb
@@ -42,9 +42,8 @@ services:
     volumes:
       - mongodb-volume:/data/db
       - mongodb-cfg-volume:/data/configdb
-
   gui:
-    image: dojot/gui:development
+    image: dojot/gui:v0.5.0-alpha.3
     restart: always
     logging:
       driver: json-file
@@ -52,7 +51,7 @@ services:
         max-size: 100m
 
   data-broker:
-    image: dojot/data-broker:development
+    image: dojot/data-broker:v0.5.0-alpha.3
     restart: always
     depends_on:
       - kafka
@@ -93,7 +92,7 @@ services:
 # iot-agent lwm2m
 ################
   iotagent-lwm2m:
-    image: dojot/iotagent-leshan:development
+    image: dojot/iotagent-leshan:v0.5.0-alpha.3
     depends_on:
       - kafka
       - data-broker
@@ -116,7 +115,7 @@ services:
         max-size: 100m
 
   image-manager:
-    image: dojot/image-manager:development
+    image: dojot/image-manager:v0.5.0-alpha.3
     restart: always
     depends_on:
       - postgres
@@ -149,7 +148,7 @@ services:
       - minio-volume:/data
 
   device-manager:
-    image: dojot/device-manager:development
+    image: dojot/device-manager:v0.5.0-alpha.3
     restart: always
     environment:
       # TODO: Fill these env variables with suitable values
@@ -205,7 +204,7 @@ services:
 
   # Prepare database, Bootstrap the database
   kong-migrations:
-    image: dojot/kong:development
+    image: dojot/kong:v0.5.0-alpha.3
     command: kong migrations bootstrap
     depends_on:
       postgres:
@@ -225,7 +224,7 @@ services:
 
   # Run any new migrations and Finish running any pending migrations after 'up'.
   kong-migrations-up:
-    image:  dojot/kong:development
+    image:  dojot/kong:v0.5.0-alpha.3
     command: kong migrations up && kong migrations finish
     depends_on:
       postgres:
@@ -244,7 +243,7 @@ services:
         max-size: 100m
 
   apigw:
-    image: dojot/kong:development
+    image: dojot/kong:v0.5.0-alpha.3
     depends_on:
       postgres:
         condition: service_healthy
@@ -300,7 +299,7 @@ services:
       - ./kong/kong.config.sh:/opt/kong.config.sh:Z
 
   auth:
-    image: dojot/auth:development
+    image: dojot/auth:v0.5.0-alpha.3
     restart: always
     depends_on:
       - apigw
@@ -333,7 +332,7 @@ services:
         max-size: 100m
 
   flowbroker:
-    image: dojot/flowbroker:development
+    image: dojot/flowbroker:v0.5.0-alpha.3
     restart: always
     environment:
       DEPLOY_ENGINE: "docker"
@@ -355,7 +354,7 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock:Z
 
   flowbroker-context-manager:
-    image: dojot/flowbroker-context-manager:development
+    image: dojot/flowbroker-context-manager:v0.5.0-alpha.3
     restart: always
     environment:
       ZOOKEEPER_HOST: zookeeper
@@ -383,9 +382,9 @@ services:
     image: dojot/zookeeper:3.4
     restart: always
     volumes:
-      - zookeeper-volume:/datalog
-      - zookeeper-volume:/logs
       - zookeeper-volume:/data
+      - zookeeper-logs-volume:/logs
+      - zookeeper-datalog-volume:/datalog
     logging:
       driver: json-file
       options:
@@ -409,7 +408,7 @@ services:
         max-size: 100m
 
   x509-identity-mgmt:
-    image: dojot/x509-identity-mgmt:development
+    image: dojot/x509-identity-mgmt:v0.5.0-alpha.3
     depends_on:
       - postgres
       - mongodb
@@ -431,7 +430,7 @@ services:
         max-size: 100m
 
   kafka-ws:
-    image: dojot/kafka-ws:development
+    image: dojot/kafka-ws:v0.5.0-alpha.3
     depends_on:
       - kafka
       - kafka-ws-redis
@@ -518,20 +517,20 @@ services:
         max-size: 100m
 
   data-manager:
-    image: dojot/data-manager:development
+    image: dojot/data-manager:v0.5.0-alpha.3
     restart: always
     depends_on:
       - flowbroker
       - device-manager
 
   backstage:
-    image: dojot/backstage:development
+    image: dojot/backstage:v0.5.0-alpha.3
     restart: always
     depends_on:
       - postgres
 
   cron:
-    image: dojot/cron:development
+    image: dojot/cron:v0.5.0-alpha.3
     depends_on:
       - kafka
       - data-broker
@@ -576,6 +575,8 @@ volumes:
   minio-volume:
   rabbitmq-volume:
   zookeeper-volume:
+  zookeeper-logs-volume:
+  zookeeper-datalog-volume:
   kafka-volume:
   iotagent-mqtt-volume:
   auth-redis-volume:
