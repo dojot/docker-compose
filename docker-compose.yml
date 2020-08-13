@@ -378,6 +378,7 @@ services:
     depends_on:
       - zookeeper
     restart: always
+    hostname: "kafka"
     environment:
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
       KAFKA_ADVERTISED_HOST_NAME: kafka
