@@ -9,6 +9,7 @@ services:
     environment:
       FALCON_SETTINGS_MODULE: 'history.settings.docker'
       DOJOT_MANAGEMENT_USER: 'history'
+      LOG_LEVEL: INFO
     logging:
       driver: json-file
       options:
@@ -26,6 +27,7 @@ services:
       FALCON_SETTINGS_MODULE: 'history.settings.docker'
       DOJOT_MANAGEMENT_USER: 'persister'
       KAFKA_GROUP_ID: 'persister-group'
+      LOG_LEVEL: INFO
     logging:
       driver: json-file
       options:
@@ -42,6 +44,7 @@ services:
     volumes:
       - mongodb-volume:/data/db
       - mongodb-cfg-volume:/data/configdb
+
   gui:
     image: dojot/gui:v0.5.0-alpha.3
     restart: always
@@ -63,6 +66,8 @@ services:
       SERVICE_PORT: ${DATA_BROKER_SERVICE_PORT}
       DATA_BROKER_URL: 'http://data-broker:${DATA_BROKER_SERVICE_PORT}'
       LOG_LEVEL: 'info'
+      KAFKA_NUM_PARTITIONS: 1
+      KAFKA_REPLICATION_FACTOR: 1
     logging:
       driver: json-file
       options:
@@ -73,16 +78,6 @@ services:
     restart: always
     volumes:
       - data-broker-redis-volume:/data
-    logging:
-      driver: json-file
-      options:
-        max-size: 100m
-
-  device-manager-redis:
-    image: dojot/redis:5.0.5-alpine3.10
-    restart: always
-    volumes:
-      - device-manager-redis-volume:/data
     logging:
       driver: json-file
       options:
@@ -172,11 +167,11 @@ services:
       options:
         max-size: 100m
 
-  auth-redis:
+  device-manager-redis:
     image: dojot/redis:5.0.5-alpine3.10
     restart: always
     volumes:
-      - auth-redis-volume:/data
+      - device-manager-redis-volume:/data
     logging:
       driver: json-file
       options:
@@ -321,11 +316,11 @@ services:
       options:
         max-size: 100m
 
-  flowbroker-redis:
+  auth-redis:
     image: dojot/redis:5.0.5-alpine3.10
     restart: always
     volumes:
-      - flowbroker-redis-volume:/data
+      - auth-redis-volume:/data
     logging:
       driver: json-file
       options:
@@ -352,6 +347,16 @@ services:
     volumes:
       - flowbroker-volume:/data
       - /var/run/docker.sock:/var/run/docker.sock:Z
+
+  flowbroker-redis:
+    image: dojot/redis:5.0.5-alpine3.10
+    restart: always
+    volumes:
+      - flowbroker-redis-volume:/data
+    logging:
+      driver: json-file
+      options:
+        max-size: 100m
 
   flowbroker-context-manager:
     image: dojot/flowbroker-context-manager:v0.5.0-alpha.3
@@ -492,6 +497,7 @@ services:
       V2K_MQTT_SERVER_ADDRESS: iotagent-mqtt
       V2K_MQTT_SERVER_PORT: 8883
       V2K_KAFKA_METADATA_BROKER_LIST: kafka:9092
+      V2K_LOGGER_TRANSPORTS_CONSOLE_LEVEL: info
     restart: always
     logging:
       driver: json-file
@@ -515,6 +521,57 @@ services:
       driver: json-file
       options:
         max-size: 100m
+
+  ###
+  # BEGIN - Legacy mqtt broker based on mosca (https://github.com/moscajs/mosca)
+  #
+  # How to use mqtt broker based on mosca:
+  #
+  # Uncomment the `iotagent-mqtt-mosca` and `mosca-redis` services blocks, and
+  # then comment on the `iotagent-mqtt`,` v2k-bridge` and `k2v-bridge` services blocks.
+  # It is necessary to comment `iotagent-mqtt` to avoid conflicts on ports 1883 and 8883,
+  # or to change such ports that will be mapped for external access.
+  #
+  ###
+  # iotagent-mqtt-mosca:
+  #   image: dojot/iotagent-mosca:v0.5.0-alpha.3
+  #   depends_on:
+  #     - mosca-redis
+  #     - kafka
+  #     - data-broker
+  #     - auth
+  #     - x509-identity-mgmt
+  #   ports:
+  #     - 1883:1883
+  #     - 8883:8883
+  #   restart: always
+  #   environment:
+  #     DOJOT_MANAGEMENT_USER: 'iotagent-mqtt-mosca'
+  #     KAFKA_GROUP_ID: 'iotagent-mqtt-mosca-group'
+  #     ALLOW_UNSECURED_MODE: 'true'
+  #     LOG_LEVEL: 'info'
+  #     MOSCA_TLS_DNS_LIST: 'localhost'
+  #     MOSCA_TLS_CRL_UPDATE_TIME: '0 */2 * * *' # Updated CRL Every 2 hours
+  #     MOSCA_TLS_CON_MAX_LIFETIME: 7200000 # Maximum lifetime of a connection in ms (If is 0 then is disabled)
+  #     MOSCA_TLS_CON_IDLE_TIMEOUT: 1800000 # The idle timeout for a connection in ms (If is 0 then is disabled)
+  #     MOSCA_TLS_CNAME: "iotagent-mqtt-mosca"
+  #   logging:
+  #     driver: json-file
+  #     options:
+  #       max-size: 100m
+
+  # mosca-redis:
+  #   image: dojot/redis:5.0.5-alpine3.10
+  #   restart: always
+  #   volumes:
+  #     - mosca-redis-volume:/data
+  #   logging:
+  #     driver: json-file
+  #     options:
+  #       max-size: 100m
+  ###
+  # END - Legacy mqtt broker based on https://github.com/moscajs/mosca
+  ###
 
   data-manager:
     image: dojot/data-manager:v0.5.0-alpha.3
@@ -587,6 +644,7 @@ volumes:
   data-broker-redis-volume:
   device-manager-redis-volume:
   kafka-ws-redis-volume:
+  mosca-redis-volume:
 
 networks:
   flowbroker:
