@@ -384,30 +384,52 @@ services:
         max-size: 100m
 
   zookeeper:
-    image: dojot/zookeeper:3.4
+    image: "confluentinc/cp-zookeeper:5.5.0"
     restart: always
+    environment:
+      ZOOKEEPER_REPLICAS: "1"
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_ELECTION_PORT: 3888
+      ZOOKEEPER_SERVER_PORT: 2888
+      ZOOKEEPER_HEAP_SIZE: "2G"
+      ZOOKEEPER_INIT_LIMIT: "5"
+      ZOOKEEPER_LOG_LEVEL: "INFO"
+      ZOOKEEPER_MAX_CLIENT_CNXNS: "100"
+      ZOOKEEPER_MAX_SESSION_TIMEOUT: "40000"
+      ZOOKEEPER_MIN_SESSION_TIMEOUT: "4000"
+      ZOOKEEPER_PURGE_INTERVAL: "0"
+      ZOOKEEPER_SNAP_RETAIN_COUNT: "3"
+      ZOOKEEPER_SYNC_LIMIT: "10"
+      ZOOKEEPER_TICK_TIME: "2000"
     volumes:
-      - zookeeper-volume:/data
-      - zookeeper-logs-volume:/logs
-      - zookeeper-datalog-volume:/datalog
+      - zookeeper-volume:/var/lib/zookeeper/data
+      - zookeeper-log-volume:/var/lib/zookeeper/log
+      - zookeeper-secrets-volume:/etc/zookeeper/secrets
     logging:
       driver: json-file
       options:
         max-size: 100m
 
   kafka:
-    image: dojot/wurstmeister-kafka:2.12-2.1.1
+    image: confluentinc/cp-kafka:5.5.0
     depends_on:
       - zookeeper
     restart: always
     hostname: "kafka"
     environment:
-      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-      KAFKA_ADVERTISED_HOST_NAME: kafka
-      KAFKA_NUM_PARTITIONS: 10
-      JMX_PORT: 1099
+      KAFKA_BROKER_ID: "1"
+      KAFKA_ZOOKEEPER_CONNECT: "zookeeper:2181"
+      KAFKA_ADVERTISED_LISTENERS: "PLAINTEXT://:9092"
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: "1"
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: "1"
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: "1"
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: "0"
+      KAFKA_LOG_RETENTION_MINUTES: "30"
+      KAFKA_LOG_SEGMENT_BYTES: "262144000"
+      KAFKA_LOG_RETENTION_CHECK_INTERVAL_MS: "30000"
     volumes:
-      - kafka-volume:/kafka
+      - kafka-volume:/var/lib/kafka/data
+      - kafka-secrets-volume:/etc/kafka/secrets
     logging:
       driver: json-file
       options:
@@ -633,9 +655,10 @@ volumes:
   minio-volume:
   rabbitmq-volume:
   zookeeper-volume:
-  zookeeper-logs-volume:
-  zookeeper-datalog-volume:
+  zookeeper-log-volume:
+  zookeeper-secrets-volume:
   kafka-volume:
+  kafka-secrets-volume:
   iotagent-mqtt-volume:
   iotagent-mqtt-log-volume:
   iotagent-mqtt-etc-volume:
