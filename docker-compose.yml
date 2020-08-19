@@ -99,6 +99,7 @@ services:
       # The FILE_SERVER_ADDRESS should be filled with an address accesible to the devices that want to update the firmware
       FILE_SERVER_ADDRESS: 127.0.0.1
     ports:
+      - 5896:5896 # file server http port
       - 5683:5683/udp # configuration coap port
       - 5684:5684/udp # configuration dtls port
       - 5693:5693/udp # file server coap port
@@ -334,6 +335,7 @@ services:
       FLOWBROKER_NETWORK: ${FLOWBROKER_NETWORK}
       DOJOT_MANAGEMENT_USER: 'flowbroker'
       KAFKA_GROUP_ID: 'flowbroker-group'
+      LOG_LEVEL: 'info'
     depends_on:
       - rabbitmq
       - kafka
