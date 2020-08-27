@@ -81,6 +81,10 @@ createRoute "${1}" "${1}_route" "${3}" "${4}"
 
 createEndpoint "gui" "http://gui:80"  '"/"' "false"
 
+# service: gui-v2
+
+createEndpoint "gui-v2" "http://gui-v2:80"  '"/v2"' "true"
+
 # service: data-broker
 
 createEndpoint  "data-broker" "http://data-broker:80"  '"/device/(.*)/latest", "/subscription"' "false"
@@ -144,11 +148,6 @@ createEndpoint "flowsRedImages" "http://flowbroker:80/red/images"  '"/flows/red/
 
 createEndpoint "history" "http://history:8000"  '"/history"' "true"
 addAuthToEndpoint "history"
-
-# service: ejbca
-
-createEndpoint "ejbca-paths" "http://ejbca:5583/"  '"/sign", "/ca", "/user"' "false"
-addAuthToEndpoint "ejbca-paths"
 
 # service: data-manager
 
