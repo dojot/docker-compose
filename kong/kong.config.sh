@@ -149,11 +149,6 @@ createEndpoint "flowsRedImages" "http://flowbroker:80/red/images"  '"/flows/red/
 createEndpoint "history" "http://history:8000"  '"/history"' "true"
 addAuthToEndpoint "history"
 
-# service: ejbca
-
-createEndpoint "ejbca-paths" "http://ejbca:5583/"  '"/sign", "/ca", "/user"' "false"
-addAuthToEndpoint "ejbca-paths"
-
 # service: data-manager
 
 createEndpoint "data-manager" "http://data-manager:3000/"  '"/export", "/import"' "false"
