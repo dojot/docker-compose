@@ -628,6 +628,22 @@ services:
       - mongodb
     restart: always
 
+  kafka2ftp:
+    image: dojot/kafka2ftp:v0.5.0-alpha.4
+    environment:
+      FTP_TENANT: 'admin' #TENANT da dojot
+      FTP_HOST: 'ftp.cpqd.com.br' #host ftp
+      FTP_PORT: 21
+      FTP_USER: 'dojot' #login
+      FTP_PASSWORD: 'dojot'
+      MAX_CONCURRENT_CONNECTIONS: 10
+      FTP_REMOTE_DIR: " " ## "/incoming/Dojot_Test/"
+    depends_on:
+      - kafka
+      - data-broker
+      - flowbroker
+    restart: always
+
 # GUI to Kong Admin API - BEGIN
 # Konga GUI will be available at http://localhost:1337
 #
