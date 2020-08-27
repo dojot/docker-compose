@@ -658,6 +658,7 @@ services:
 # GUI to Kong Admin API - END
 
 volumes:
+  ejbca-volume:
   postgres-volume:
   mongodb-volume:
   mongodb-cfg-volume:
