@@ -497,7 +497,7 @@ services:
     depends_on:
       - x509-identity-mgmt
     ports:
-      - 1883:1883
+      - 1883:1883 # You can comment this line (- 1883:1883) to disable insecure mode without TLS.
       - 8883:8883
     environment:
       HOSTNAME: iotagent-mqtt
