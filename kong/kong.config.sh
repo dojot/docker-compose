@@ -149,6 +149,11 @@ createEndpoint "flowsRedImages" "http://flowbroker:80/red/images"  '"/flows/red/
 createEndpoint "history" "http://history:8000"  '"/history"' "true"
 addAuthToEndpoint "history"
 
+# service: persister
+
+createEndpoint "persister" "http://persister:8057/persister"  '"/history/persister"' "true"
+addAuthToEndpoint "persister"
+
 # service: data-manager
 
 createEndpoint "data-manager" "http://data-manager:3000/"  '"/export", "/import"' "false"
@@ -169,7 +174,7 @@ addAuthToEndpoint "cron"
 # service: x509-identity-mgmt
 createEndpoint "x509-identity-mgmt" "http://x509-identity-mgmt:3000/api"  '"/x509"' "true"
 addAuthToEndpoint "x509-identity-mgmt"
-   
+
 # service: kafka-ws
 createEndpoint "kafka-ws" "http://kafka-ws:8080/"  '"/kafka-ws"' "false"
 
@@ -185,5 +190,5 @@ curl -sS -X PATCH \
 
 createEndpoint "kafka-ws-ticket" "http://kafka-ws:8080/"  '"/kafka-ws/v[0-9]+/ticket"' "false"
 addAuthToEndpoint "kafka-ws-ticket"
-    
+
 
