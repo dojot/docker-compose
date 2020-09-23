@@ -287,7 +287,7 @@ services:
     # Exposes certificates
     #volumes:
     #  - ./kong/certificates/:/certs/:Z
-    restart: on-failure
+    restart: always
     logging:
       driver: json-file
       options:
