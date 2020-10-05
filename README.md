@@ -7,8 +7,8 @@ For instructions on how to get it up and running, please check [Installation Gui
 
 To use this docker-compose.yml, you will need:
 
-- Docker engine > 17.12
-- docker-compose > 1.18
+- Docker engine > 19.03
+- docker-compose > 1.27
 
 Both are available in the [Docker official site](https://docs.docker.com/install/)_. All tests were performed with Docker CE.
 
