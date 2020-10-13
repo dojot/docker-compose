@@ -53,13 +53,13 @@ services:
       options:
         max-size: 100m
 
-  # gui-v2:
-  #   image: artifactory.cpqd.com.br:8443/docker-dev/cpqd/dojot/gui-v2:development
-  #   restart: always
-  #   logging:
-  #     driver: json-file
-  #     options:
-  #       max-size: 100m
+  gui-v2:
+    image: dojot/gui-v2:development
+    restart: always
+    logging:
+      driver: json-file
+      options:
+        max-size: 100m
 
   data-broker:
     image: dojot/data-broker:development
