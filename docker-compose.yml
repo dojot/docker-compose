@@ -54,7 +54,7 @@ services:
         max-size: 100m
 
   gui-v2:
-    image: dojot/gui-v2:v0.5.0-rc.1
+    image: dojot/gui-v2:v0.5.0-alpha.4
     restart: always
     logging:
       driver: json-file
