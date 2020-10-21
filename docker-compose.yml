@@ -277,6 +277,10 @@ services:
       - KONG_PG_HOST=postgres
     command: kong migrations up
     restart: on-failure
+    logging:
+      driver: json-file
+      options:
+        max-size: 100m
 
   apigw:
     image: dojot/kong:v0.4.4-rc.1
@@ -304,6 +308,10 @@ services:
       - apigw
     volumes:
       - ./kong.config.sh:/opt/kong.config.sh:Z
+    logging:
+      driver: json-file
+      options:
+        max-size: 100m  
 
   flowbroker-redis:
     image: dojot/redis:5.0.5-alpine3.10
@@ -337,6 +345,10 @@ services:
     volumes:
       - flowbroker-volume:/data
       - /var/run/docker.sock:/var/run/docker.sock:Z
+    logging:
+      driver: json-file
+      options:
+        max-size: 100m  
 
   flowbroker-context-manager:
     image: dojot/flowbroker-context-manager:v0.4.4-rc.1
@@ -352,6 +364,10 @@ services:
     networks:
       - default
       - flowbroker
+    logging:
+      driver: json-file
+      options:
+        max-size: 100m  
 
   rabbitmq:
     image: dojot/rabbitmq:3.7-alpine
@@ -413,12 +429,20 @@ services:
     depends_on:
       - flowbroker
       - device-manager
+    logging:
+      driver: json-file
+      options:
+        max-size: 100m  
 
   backstage:
     image: dojot/backstage:v0.4.4-rc.1
     restart: always
     depends_on:
       - postgres
+    logging:
+      driver: json-file
+      options:
+        max-size: 100m  
 
   cron:
     image: dojot/cron:v0.4.4-rc.1
@@ -428,6 +452,10 @@ services:
       - auth
       - mongodb
     restart: always
+    logging:
+      driver: json-file
+      options:
+        max-size: 100m
 
 volumes:
   postgres-volume:
