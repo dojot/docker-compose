@@ -526,11 +526,9 @@ services:
       - x509-identity-mgmt
       - data-broker
     environment:
-      V2K_APP_HOSTNAME: v2k-bridge
-      V2K_MQTT_SERVER_ADDRESS: iotagent-mqtt
-      V2K_MQTT_SERVER_PORT: 8883
-      V2K_KAFKA_METADATA_BROKER_LIST: kafka:9092
-      V2K_LOGGER_TRANSPORTS_CONSOLE_LEVEL: info
+      V2K_APP_HOSTNAME: "v2k-bridge"
+      V2K_APP_USER_CONFIG_FILE: "docker.conf"
+      V2K_PRODUCER_METADATA_BROKER_LIST: "kafka:9092"
     restart: always
     logging:
       driver: json-file
