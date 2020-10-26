@@ -37,6 +37,12 @@ services:
     image: dojot/mongo:3.2
     restart: always
     user: "mongodb"
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongo mongodb:27017/test --quiet
+      interval: 10s
+      timeout: 10s
+      retries: 5
+      start_period: 40s
     logging:
       driver: json-file
       options:
