@@ -7,8 +7,8 @@ For instructions on how to get it up and running, please check [Installation Gui
 
 To use this docker-compose.yml, you will need:
 
-- Docker engine > 17.12
-- docker-compose > 1.18
+- Docker engine > 19.03
+- docker-compose > 1.27
 
 Both are available in the [Docker official site](https://docs.docker.com/install/)_. All tests were performed with Docker CE.
 
@@ -85,7 +85,7 @@ sudo crontab -e
 Place the following at the end of the file, then close and save it.
 
 ``` sh
-0 23 * * * docker run --rm -it --name certbot -v "/dojot/etc/letsencrypt:/etc/letsencrypt" -v "/dojot/var/lib/letsencrypt:/var/lib/letsencrypt" -v "/dojot/data/letsencrypt:/data/letsencrypt" -v "/dojot/var/log/letsencrypt:/var/log/letsencrypt" certbot/certbot renew --webroot -w /data/letsencrypt --quiet && docker kill --signal=HUP https-nginx
+0 23 * * * docker run --rm --name certbot -v "/dojot/etc/letsencrypt:/etc/letsencrypt" -v "/dojot/var/lib/letsencrypt:/var/lib/letsencrypt" -v "/dojot/data/letsencrypt:/data/letsencrypt" -v "/dojot/var/log/letsencrypt:/var/log/letsencrypt" certbot/certbot renew --webroot -w /data/letsencrypt --quiet && docker restart https-nginx
 ```
 
 The above command will run every night at 23:00, renewing the certificate and forcing Nginx to restart
