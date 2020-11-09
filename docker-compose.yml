@@ -561,7 +561,7 @@ services:
       - x509-identity-mgmt
     environment:
       K2V_APP_HOSTNAME: "k2v-bridge"
-      V2K_APP_USER_CONFIG_FILE: "docker.conf"
+      K2V_APP_USER_CONFIG_FILE: "docker.conf"
       K2V_CONSUMER_METADATA_BROKER_LIST: "kafka:9092"
     restart: always
     logging:
