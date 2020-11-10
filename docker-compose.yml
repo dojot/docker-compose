@@ -559,12 +559,10 @@ services:
       - iotagent-mqtt
       - kafka
       - x509-identity-mgmt
-      - data-broker
     environment:
-      K2V_APP_HOSTNAME: k2v-bridge
-      K2V_MQTT_SERVER_ADDRESS: iotagent-mqtt
-      K2V_MQTT_SERVER_PORT: 8883
-      K2V_KAFKA_METADATA_BROKER_LIST: kafka:9092
+      K2V_APP_HOSTNAME: "k2v-bridge"
+      K2V_APP_USER_CONFIG_FILE: "docker.conf"
+      K2V_CONSUMER_METADATA_BROKER_LIST: "kafka:9092"
     restart: always
     logging:
       driver: json-file
