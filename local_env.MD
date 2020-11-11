@@ -26,7 +26,6 @@ iotagent-lwm2m:
     <dependency>
         <groupId>com.github.dojot</groupId>
         <artifactId>dojot-module-java</artifactId>
-        <version>6e9cebd903a00e65ac7a9fac00333d769e2fb7a9</version>
         <version>keycloak_10.0.1-SNAPSHOT</version>
     </dependency>
 ```
