@@ -17,12 +17,17 @@ services:
 
   persister:
     image: dojot/persister:development
+    volumes: 
+      - ${DOJOT_MODULE_PYTHON}:/usr/src/venv/lib/python3.6/site-packages/dojot.module-0.0.1a5-py3.6.egg/dojot/module
     restart: always
     depends_on:
       - mongodb
-      - auth
+      - keycloak
       - kafka
       - data-broker
+    depends_on:
+      keycloak:
+        condition: service_healthy
     environment:
       FALCON_SETTINGS_MODULE: 'history.settings.docker'
       DOJOT_MANAGEMENT_USER: 'persister'
@@ -69,11 +74,16 @@ services:
 
   data-broker:
     image: dojot/data-broker:development
+    volumes: 
+    - ${DOJOT_MODULE_NODEJS}:/opt/data-broker/node_modules/@dojot/dojot-module
     restart: always
     depends_on:
       - kafka
       - data-broker-redis
-      - auth
+      - keycloak
+    depends_on:
+      keycloak:
+        condition: service_healthy
     environment:
       DOJOT_MANAGEMENT_USER: 'data-broker'
       KAFKA_GROUP_ID: 'data-broker-group'
@@ -101,12 +111,15 @@ services:
 # iot-agent lwm2m
 ################
   iotagent-lwm2m:
-    image: dojot/iotagent-leshan:development
+    image: local/iotagent-leshan:development
     depends_on:
       - kafka
       - data-broker
-      - auth
+      - keycloak
       - image-manager
+    depends_on:
+      keycloak:
+        condition: service_healthy
     environment:
       DOJOT_MANAGEMENT_USER: 'iotagent-lwm2m'
       KAFKA_GROUP_ID: "iotagent-lwm2m-group"
@@ -253,7 +266,7 @@ services:
         max-size: 100m
 
   apigw:
-    image: dojot/kong:development
+    image: local/kong:development
     depends_on:
       postgres:
         condition: service_healthy
@@ -312,38 +325,27 @@ services:
       options:
         max-size: 100m
 
-  auth:
-    image: dojot/auth:development
-    restart: always
+  keycloak:
+    image: local/keycloak:development
+    healthcheck:
+      test: ["CMD-SHELL", "curl http://localhost:8080/auth/realms/admin/.well-known/openid-configuration"]
+      interval: 30s
+      timeout: 10s
+      retries: 10
     depends_on:
-      - apigw
       - postgres
-      - auth-redis
+      - kafka
+    ports:
+      - "8080:8080"
     environment:
-      AUTH_DB_HOST: "postgres"
-      AUTH_DB_USER: "auth"
-      AUTH_DB_PWD:  "auth"
-      AUTH_KONG_URL: "http://apigw:8001"
-      AUTH_CACHE_HOST: "auth-redis"
-      # This is used to select the type of cache to be used.
-      # Allowed values are "redis" or "nocache"
-      AUTH_CACHE_NAME: "redis"
-      DOJOT_MANAGEMENT_USER: 'auth'
-      KAFKA_GROUP_ID: 'auth-group'
-    logging:
-      driver: json-file
-      options:
-        max-size: 100m
-
-  auth-redis:
-    image: dojot/redis:5.0.5-alpine3.10
-    restart: always
-    volumes:
-      - auth-redis-volume:/data
-    logging:
-      driver: json-file
-      options:
-        max-size: 100m
+      DB_VENDOR: POSTGRES
+      DB_ADDR: postgres
+      DB_DATABASE: keycloak
+      DB_USER: keycloak
+      DB_PASSWORD: keycloak
+      KEYCLOAK_USER: admin
+      KEYCLOAK_PASSWORD: admin
+      KEYCLOAK_FRONTEND_URL: http://keycloak:8080/auth
 
   flowbroker:
     image: dojot/flowbroker:development
@@ -358,15 +360,19 @@ services:
       - rabbitmq
       - kafka
       - mongodb
-      - auth
+      - keycloak
       - flowbroker-context-manager
       - flowbroker-redis
+    depends_on: 
+      keycloak:
+        condition: service_healthy
     networks:
       - default
       - flowbroker
     volumes:
       - flowbroker-volume:/data
       - /var/run/docker.sock:/var/run/docker.sock:Z
+      - ${DOJOT_MODULE_NODEJS}:/opt/flowbroker/orchestrator/node_modules/@dojot/dojot-module
     logging:
       driver: json-file
       options:
@@ -643,11 +649,16 @@ services:
 
   cron:
     image: dojot/cron:development
+    volumes: 
+    - ${DOJOT_MODULE_NODEJS}:/opt/cron/node_modules/@dojot/dojot-module
     depends_on:
       - kafka
       - data-broker
-      - auth
+      - keycloak
       - mongodb
+    depends_on: 
+      keycloak:
+        condition: service_healthy
     restart: always
     logging:
       driver: json-file
@@ -720,7 +731,6 @@ volumes:
   iotagent-mqtt-volume:
   iotagent-mqtt-log-volume:
   iotagent-mqtt-etc-volume:
-  auth-redis-volume:
   flowbroker-volume:
   flowbroker-redis-volume:
   data-broker-redis-volume:

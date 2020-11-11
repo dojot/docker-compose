@@ -18,14 +18,16 @@ addAuthToEndpoint() {
 echo ""
 echo ""
 echo "- addAuthToEndpoint: ServiceName=${1}"
-curl  -sS  -X POST \
---url ${kong}/services/"${1}"/plugins/ \
---data "name=pepkong" \
---data "config.pdpUrl=http://auth:5000/pdp"
+
+curl -X POST ${kong}/services/"${1}"/plugins \
+  --data "name=jwt-keycloak" \
+  --data "config.allowed_iss=http://keycloak:8080/auth/realms/admin"
 
 curl  -sS  -X POST \
 --url ${kong}/services/"${1}"/plugins/ \
---data "name=jwt"
+--data "name=pepkong" \
+--data "config.resource=${1}"
+
 }
 
 # add a Service
@@ -104,36 +106,6 @@ addAuthToEndpoint "device-manager"
 
 createEndpoint "image" "http://image-manager:5000"  '"/fw-image"' "true"
 addAuthToEndpoint "image"
-
-# service: auth
-
-createEndpoint "auth-permissions-service" "http://auth:5000/pap"  '"/auth/pap"' "true"
-addAuthToEndpoint "auth-permissions-service"
-
-createEndpoint "auth-service" "http://auth:5000"  '"/auth"' "true"
-echo ""
-echo ""
-echo "- add plugin rate-limiting in auth-service"
-curl  -s  -sS -X POST \
---url ${kong}/services/auth-service/plugins/ \
---data "name=rate-limiting" \
---data "config.minute=5" \
---data "config.hour=40" \
---data "config.policy=local"
-
-createEndpoint "auth-revoke" "http://auth:5000"  '"/auth/revoke"' "false"
-# rate plugin limit to avoid brute-force atacks
-echo ""
-echo ""
-echo "- add plugin request-termination in auth-revoke"
-curl  -s  -sS -X POST \
---url ${kong}/services/auth-revoke/plugins/ \
-    --data "name=request-termination" \
-    --data "config.status_code=403" \
-    --data "config.message=Not authorized"
-
-createEndpoint "user-service" "http://auth:5000/user"  '"/auth/user"' "true"
-addAuthToEndpoint "user-service"
 
 # service: flowbroker
 
