@@ -21,7 +21,7 @@ echo "- addAuthToEndpoint: ServiceName=${1}"
 
 curl -X POST ${kong}/services/"${1}"/plugins \
   --data "name=jwt-keycloak" \
-  --data "config.allowed_iss=http://keycloak:8080/auth/realms/admin"
+  --data "config.allowed_iss=http://localhost:8000/auth/realms/admin"
 
 curl  -sS  -X POST \
 --url ${kong}/services/"${1}"/plugins/ \
@@ -78,6 +78,10 @@ echo "- createEndpoint: ServiceName=${1} Url=${2} PathS=${3} StripPath=${4}"
 createService "${1}" "${2}"
 createRoute "${1}" "${1}_route" "${3}" "${4}"
 }
+
+# service: auth
+
+createEndpoint "auth-service" "http://keycloak:8080/auth"  '"/auth"' "true"
 
 # service: gui
 

@@ -335,17 +335,15 @@ services:
     depends_on:
       - postgres
       - kafka
-    ports:
-      - "8080:8080"
     environment:
       DB_VENDOR: POSTGRES
       DB_ADDR: postgres
       DB_DATABASE: keycloak
       DB_USER: keycloak
       DB_PASSWORD: keycloak
-      KEYCLOAK_USER: admin
-      KEYCLOAK_PASSWORD: admin
-      KEYCLOAK_FRONTEND_URL: http://keycloak:8080/auth
+      KEYCLOAK_USER: ${KEYCLOAK_USER:?KEYCLOAK_USER required}
+      KEYCLOAK_PASSWORD: ${KEYCLOAK_PASSWORD:?KEYCLOAK_PASSWORD required}
+      PROXY_ADDRESS_FORWARDING: 'true'
 
   flowbroker:
     image: dojot/flowbroker:development
