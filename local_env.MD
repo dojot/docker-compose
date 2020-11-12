@@ -1,10 +1,3 @@
-Build keycloak image:
-
-```bash
-git clone https://github.com/dojot/dojot.git && cd dojot && git checkout feature-keycloak-10.0.1
-docker build -t local/keycloak:development ./docker
-```
-
 Build kong image:
 
 ```bash
