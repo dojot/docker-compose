@@ -328,7 +328,7 @@ services:
   keycloak:
     image: local/keycloak:development
     healthcheck:
-      test: ["CMD-SHELL", "curl http://localhost:8080/auth/realms/admin/.well-known/openid-configuration"]
+      test: ["CMD-SHELL", "curl ${KEYCLOAK_HEALTHCHECK_URL}"]
       interval: 30s
       timeout: 10s
       retries: 10
