@@ -654,6 +654,8 @@ services:
       options:
         max-size: 100m
 
+### influxdb begin
+
   # influxdb-retriever:
   #   image: dojot/influxdb-retriever:development
   #   depends_on:
@@ -679,6 +681,17 @@ services:
   #     options:
   #       max-size: 100m
 
+  # influxdb-setup:
+  #   image: quay.io/influxdb/influxdb:v2.0.2
+  #   restart: on-failure
+  #   volumes:
+  #     - influxdb-cfg-volume:/root/.influxdbv2/
+  #     - ./influxdb/init-influx.sh:/init-influx.sh:Z
+  #   entrypoint:
+  #     - /init-influx.sh
+  #   depends_on:
+  #     - influxdb
+
   # influxdb:
   #   image: quay.io/influxdb/influxdb:v2.0.2
   #   command: influxd --reporting-disabled
@@ -693,6 +706,8 @@ services:
   #     driver: json-file
   #     options:
   #       max-size: 100m
+
+### influxdb end
 
   # kafka2ftp:
   #   image: dojot/kafka2ftp:development
