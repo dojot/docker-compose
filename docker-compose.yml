@@ -685,7 +685,7 @@ services:
   #   image: quay.io/influxdb/influxdb:v2.0.2
   #   restart: on-failure
   #   volumes:
-  #     - influxdb-cfg-volume:/root/.influxdbv2/
+  #     - influxdb-volume:/root/.influxdbv2/
   #     - ./influxdb/init-influx.sh:/init-influx.sh:Z
   #   entrypoint:
   #     - /init-influx.sh
@@ -698,8 +698,7 @@ services:
   #   restart: always
   #   # check if this volumes are right
   #   volumes:
-  #     - influxdb-volume:/var/lib/influxdb
-  #     - influxdb-cfg-volume:/root/.influxdbv2
+  #     - influxdb-volume:/root/.influxdbv2
   #   healthcheck:
   #     test: "influx ping"
   #   logging:
@@ -783,7 +782,6 @@ volumes:
   kafka-ws-redis-volume:
   mosca-redis-volume:
   influxdb-volume:
-  influxdb-cfg-volume:
 
 networks:
   flowbroker:
