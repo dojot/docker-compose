@@ -665,7 +665,7 @@ services:
   #     MAX_CONCURRENT_CONNECTIONS: 10
   #     FTP_REMOTE_DIR: "/"
   #     RETRIES: 13
-  #     LOG_LEVEL: info
+  #     LOG_CONSOLE_LEVEL: info
   #   depends_on:
   #     - kafka
   #     - data-broker
