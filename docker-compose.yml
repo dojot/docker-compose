@@ -694,7 +694,6 @@ services:
 
   # influxdb:
   #   image: quay.io/influxdb/influxdb:v2.0.2
-  #   command: influxd --reporting-disabled
   #   restart: always
   #   # check if this volumes are right
   #   volumes:
