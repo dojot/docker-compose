@@ -13,7 +13,8 @@ services:
     logging:
       driver: json-file
       options:
-        max-size: 100m
+        max-size: 20m
+        max-file: '5'
 
   persister:
     image: dojot/persister:v0.5.1-rc.1
@@ -31,7 +32,8 @@ services:
     logging:
       driver: json-file
       options:
-        max-size: 100m
+        max-size: 20m
+        max-file: '5'
 
   mongodb:
     image: dojot/mongo:3.2
@@ -40,7 +42,8 @@ services:
     logging:
       driver: json-file
       options:
-        max-size: 100m
+        max-size: 20m
+        max-file: '5'
     volumes:
       - mongodb-volume:/data/db
       - mongodb-cfg-volume:/data/configdb
@@ -51,7 +54,8 @@ services:
     logging:
       driver: json-file
       options:
-        max-size: 100m
+        max-size: 20m
+        max-file: '5'
 
   gui-v2:
     image: dojot/gui-v2:v0.5.1-rc.1
@@ -59,7 +63,8 @@ services:
     logging:
       driver: json-file
       options:
-        max-size: 100m
+        max-size: 20m
+        max-file: '5'
 
   data-broker:
     image: dojot/data-broker:v0.5.1-rc.1
@@ -79,7 +84,8 @@ services:
     logging:
       driver: json-file
       options:
-        max-size: 100m
+        max-size: 20m
+        max-file: '5'
 
   data-broker-redis:
     image: dojot/redis:5.0.5-alpine3.10
@@ -89,7 +95,8 @@ services:
     logging:
       driver: json-file
       options:
-        max-size: 100m
+        max-size: 20m
+        max-file: '5'
 
 ################
 # iot-agent lwm2m
@@ -116,7 +123,8 @@ services:
     logging:
       driver: json-file
       options:
-        max-size: 100m
+        max-size: 20m
+        max-file: '5'
 
   image-manager:
     image: dojot/image-manager:v0.5.1-rc.1
@@ -127,7 +135,8 @@ services:
     logging:
       driver: json-file
       options:
-        max-size: 100m
+        max-size: 20m
+        max-file: '5'
     environment:
       # TODO: The following should be unique for each environment
       S3ACCESSKEY: 9HEODSF6WQN5EZ39DM7Z
@@ -142,7 +151,8 @@ services:
     logging:
       driver: json-file
       options:
-        max-size: 100m
+        max-size: 20m
+        max-file: '5'
     environment:
       # TODO: The following should be unique for each environment
       MINIO_ACCESS_KEY: 9HEODSF6WQN5EZ39DM7Z
@@ -174,7 +184,8 @@ services:
     logging:
       driver: json-file
       options:
-        max-size: 100m
+        max-size: 20m
+        max-file: '5'
 
   device-manager-redis:
     image: dojot/redis:5.0.5-alpine3.10
@@ -184,7 +195,8 @@ services:
     logging:
       driver: json-file
       options:
-        max-size: 100m
+        max-size: 20m
+        max-file: '5'
 
   postgres:
     image: dojot/postgres:9.5.21-alpine
@@ -204,7 +216,8 @@ services:
     logging:
       driver: json-file
       options:
-        max-size: 100m
+        max-size: 20m
+        max-file: '5'
 
   # Prepare database, Bootstrap the database
   kong-migrations:
@@ -224,7 +237,8 @@ services:
     logging:
       driver: json-file
       options:
-        max-size: 100m
+        max-size: 20m
+        max-file: '5'
 
   # Run any new migrations and Finish running any pending migrations after 'up'.
   kong-migrations-up:
@@ -244,7 +258,8 @@ services:
     logging:
       driver: json-file
       options:
-        max-size: 100m
+        max-size: 20m
+        max-file: '5'
 
   apigw:
     image: dojot/kong:v0.5.1-rc.1
@@ -291,7 +306,8 @@ services:
     logging:
       driver: json-file
       options:
-        max-size: 100m
+        max-size: 20m
+        max-file: '5'
 
   kong-config:
     image: dojot/appropriate-curl
@@ -304,7 +320,8 @@ services:
     logging:
       driver: json-file
       options:
-        max-size: 100m  
+        max-size: 20m
+        max-file: '5'
 
   auth:
     image: dojot/auth:v0.5.1-rc.1
@@ -327,7 +344,8 @@ services:
     logging:
       driver: json-file
       options:
-        max-size: 100m
+        max-size: 20m
+        max-file: '5'
 
   auth-redis:
     image: dojot/redis:5.0.5-alpine3.10
@@ -337,7 +355,8 @@ services:
     logging:
       driver: json-file
       options:
-        max-size: 100m
+        max-size: 20m
+        max-file: '5'
 
   flowbroker:
     image: dojot/flowbroker:v0.5.1-rc.1
@@ -364,7 +383,8 @@ services:
     logging:
       driver: json-file
       options:
-        max-size: 100m
+        max-size: 20m
+        max-file: '5'
 
   flowbroker-redis:
     image: dojot/redis:5.0.5-alpine3.10
@@ -374,7 +394,8 @@ services:
     logging:
       driver: json-file
       options:
-        max-size: 100m
+        max-size: 20m
+        max-file: '5'
 
   flowbroker-context-manager:
     image: dojot/flowbroker-context-manager:v0.5.1-rc.1
@@ -393,7 +414,8 @@ services:
     logging:
       driver: json-file
       options:
-        max-size: 100m
+        max-size: 20m
+        max-file: '5'
 
   rabbitmq:
     image: dojot/rabbitmq:3.7-alpine
@@ -403,7 +425,8 @@ services:
     logging:
       driver: json-file
       options:
-        max-size: 100m
+        max-size: 20m
+        max-file: '5'
 
   zookeeper:
     image: "confluentinc/cp-zookeeper:5.5.0"
@@ -430,7 +453,8 @@ services:
     logging:
       driver: json-file
       options:
-        max-size: 100m
+        max-size: 20m
+        max-file: '5'
 
   kafka:
     image: confluentinc/cp-kafka:5.5.0
@@ -455,7 +479,8 @@ services:
     logging:
       driver: json-file
       options:
-        max-size: 100m
+        max-size: 20m
+        max-file: '5'
 
   x509-identity-mgmt:
     image: dojot/x509-identity-mgmt:v0.5.1-rc.1
@@ -477,7 +502,8 @@ services:
     logging:
       driver: json-file
       options:
-        max-size: 100m
+        max-size: 20m
+        max-file: '5'
 
   kafka-ws:
     image: dojot/kafka-ws:v0.5.1-rc.1
@@ -491,7 +517,8 @@ services:
     logging:
       driver: json-file
       options:
-        max-size: 100m
+        max-size: 20m
+        max-file: '5'
 
   kafka-ws-redis:
     image: dojot/redis:6.0.4-alpine3.11
@@ -501,7 +528,8 @@ services:
     logging:
       driver: json-file
       options:
-        max-size: 100m
+        max-size: 20m
+        max-file: '5'
 
   iotagent-mqtt:
     image: dojot/vernemq-dojot:v0.5.1-rc.1
@@ -528,7 +556,8 @@ services:
     logging:
       driver: json-file
       options:
-        max-size: 100m
+        max-size: 20m
+        max-file: '5'
 
   v2k-bridge:
     image: dojot/v2k-bridge:v0.5.1-rc.1
@@ -547,7 +576,8 @@ services:
     logging:
       driver: json-file
       options:
-        max-size: 100m
+        max-size: 20m
+        max-file: '5'
 
   k2v-bridge:
     image: dojot/k2v-bridge:v0.5.1-rc.1
@@ -565,7 +595,8 @@ services:
     logging:
       driver: json-file
       options:
-        max-size: 100m
+        max-size: 20m
+        max-file: '5'
 
   ###
   # BEGIN - Legacy mqtt broker based on mosca (https://github.com/moscajs/mosca)
@@ -603,7 +634,8 @@ services:
   #   logging:
   #     driver: json-file
   #     options:
-  #       max-size: 100m
+  #       max-size: 20m
+  #       max-file: '5'
 
   # mosca-redis:
   #   image: dojot/redis:5.0.5-alpine3.10
@@ -613,7 +645,8 @@ services:
   #   logging:
   #     driver: json-file
   #     options:
-  #       max-size: 100m
+  #       max-size: 20m
+  #       max-file: '5'
   ###
   # END - Legacy mqtt broker based on https://github.com/moscajs/mosca
   ###
@@ -627,7 +660,8 @@ services:
     logging:
       driver: json-file
       options:
-        max-size: 100m  
+        max-size: 20m
+        max-file: '5'
 
   backstage:
     image: dojot/backstage:v0.5.1-rc.1
@@ -637,7 +671,8 @@ services:
     logging:
       driver: json-file
       options:
-        max-size: 100m  
+        max-size: 20m
+        max-file: '5'
 
   cron:
     image: dojot/cron:v0.5.1-rc.1
@@ -650,7 +685,8 @@ services:
     logging:
       driver: json-file
       options:
-        max-size: 100m
+        max-size: 20m
+        max-file: '5'
 
   # kafka2ftp:
   #   image: dojot/kafka2ftp:v0.5.1-rc.1
@@ -672,7 +708,8 @@ services:
   #   logging:
   #      driver: json-file
   #      options:
-  #        max-size: 100m
+  #        max-size: 20m
+  #        max-file: '5'
 
 # GUI to Kong Admin API - BEGIN
 # Konga GUI will be available at http://localhost:1337
@@ -699,7 +736,8 @@ services:
 #   logging:
 #     driver: json-file
 #     options:
-#       max-size: 100m
+#       max-size: 20m
+#       max-file: '5'
 #
 # GUI to Kong Admin API - END
 
