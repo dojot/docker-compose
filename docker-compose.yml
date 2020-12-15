@@ -690,6 +690,59 @@ services:
         max-size: 20m
         max-file: '5'
 
+### influxdb begin
+
+  # influxdb-retriever:
+  #   image: dojot/influxdb-retriever:development
+  #   depends_on:
+  #     - influxdb
+  #   environment:
+  #     RETRIEVER_LOG_CONSOLE_LEVEL: "info"
+  #   restart: always
+  #   logging:
+  #     driver: json-file
+  #     options:
+  #       max-size: 100m
+
+  # influxdb-storer:
+  #   image: dojot/influxdb-storer:development
+  #   depends_on:
+  #     - kafka
+  #     - influxdb
+  #   environment:
+  #     STORER_LOG_CONSOLE_LEVEL: "info"
+  #   restart: always
+  #   logging:
+  #     driver: json-file
+  #     options:
+  #       max-size: 100m
+
+  # influxdb-setup:
+  #   image: quay.io/influxdb/influxdb:v2.0.2
+  #   restart: on-failure
+  #   volumes:
+  #     - influxdb-volume:/root/.influxdbv2/
+  #     - ./influxdb/init-influx.sh:/init-influx.sh:Z
+  #   entrypoint:
+  #     - /init-influx.sh
+  #   depends_on:
+  #     - influxdb
+
+  # influxdb:
+  #   image: quay.io/influxdb/influxdb:v2.0.2
+  #   restart: always
+  #   # check if this volumes are right
+  #   volumes:
+  #     - influxdb-volume:/root/.influxdbv2
+  #   healthcheck:
+  #     test: "influx ping"
+  #   logging:
+  #     driver: json-file
+  #     options:
+  #       max-size: 100m
+
+### influxdb end
+
   # kafka2ftp:
   #   image: dojot/kafka2ftp:development
   #   environment:
@@ -765,6 +818,7 @@ volumes:
   device-manager-redis-volume:
   kafka-ws-redis-volume:
   mosca-redis-volume:
+  influxdb-volume:
 
 networks:
   flowbroker:
