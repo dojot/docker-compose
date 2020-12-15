@@ -169,7 +169,12 @@ addAuthToEndpoint "cron"
 # service: x509-identity-mgmt
 createEndpoint "x509-identity-mgmt" "http://x509-identity-mgmt:3000/api"  '"/x509"' "true"
 addAuthToEndpoint "x509-identity-mgmt"
-   
+
+# service: influx-retriever
+createEndpoint "influxdb-retriever" "http://influxdb-retriever:3000/tss"  '"/tss"' "true"
+addAuthToEndpoint "influxdb-retriever"
+createEndpoint "influxdb-retriever-api-docs" "http://influxdb-retriever:3000/tss/v1/api-docs"  '"/tss/v1/api-docs"' "true"
+
 # service: kafka-ws
 createEndpoint "kafka-ws" "http://kafka-ws:8080/"  '"/kafka-ws"' "false"
 
