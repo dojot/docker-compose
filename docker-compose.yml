@@ -702,7 +702,8 @@ services:
   #   logging:
   #     driver: json-file
   #     options:
-  #       max-size: 100m
+  #       max-size: 20m
+  #       max-file: '5'
 
   # influxdb-storer:
   #   image: dojot/influxdb-storer:development
@@ -715,7 +716,8 @@ services:
   #   logging:
   #     driver: json-file
   #     options:
-  #       max-size: 100m
+  #       max-size: 20m
+  #       max-file: '5'
 
   # influxdb-setup:
   #   image: quay.io/influxdb/influxdb:v2.0.2
@@ -727,6 +729,12 @@ services:
   #     - /init-influx.sh
   #   depends_on:
   #     - influxdb
+  #   logging:
+  #     driver: json-file
+  #     options:
+  #       max-size: 20m
+  #       max-file: '5'
+
 
   # influxdb:
   #   image: quay.io/influxdb/influxdb:v2.0.2
@@ -739,7 +747,8 @@ services:
   #   logging:
   #     driver: json-file
   #     options:
-  #       max-size: 100m
+  #       max-size: 20m
+  #       max-file: '5'
 
 ### influxdb end
 
