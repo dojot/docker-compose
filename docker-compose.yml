@@ -2,7 +2,7 @@ version: '3.8'
 services:
 
   history:
-    image: dojot/history:v0.5.1-rc.1
+    image: dojot/history:v0.5.1-rc.2
     restart: always
     depends_on:
       - mongodb
@@ -17,7 +17,7 @@ services:
         max-file: '5'
 
   persister:
-    image: dojot/persister:v0.5.1-rc.1
+    image: dojot/persister:v0.5.1-rc.2
     restart: always
     depends_on:
       - mongodb
@@ -49,7 +49,7 @@ services:
       - mongodb-cfg-volume:/data/configdb
 
   gui:
-    image: dojot/gui:v0.5.1-rc.1
+    image: dojot/gui:v0.5.1-rc.2
     restart: always
     logging:
       driver: json-file
@@ -58,7 +58,7 @@ services:
         max-file: '5'
 
   gui-v2:
-    image: dojot/gui-v2:v0.5.1-rc.1
+    image: dojot/gui-v2:v0.5.1-rc.2
     restart: always
     logging:
       driver: json-file
@@ -67,7 +67,7 @@ services:
         max-file: '5'
 
   data-broker:
-    image: dojot/data-broker:v0.5.1-rc.1
+    image: dojot/data-broker:v0.5.1-rc.2
     restart: always
     depends_on:
       - kafka
@@ -102,7 +102,7 @@ services:
 # iot-agent lwm2m
 ################
   iotagent-lwm2m:
-    image: dojot/iotagent-leshan:v0.5.1-rc.1
+    image: dojot/iotagent-leshan:v0.5.1-rc.2
     depends_on:
       - kafka
       - data-broker
@@ -127,7 +127,7 @@ services:
         max-file: '5'
 
   image-manager:
-    image: dojot/image-manager:v0.5.1-rc.1
+    image: dojot/image-manager:v0.5.1-rc.2
     restart: always
     depends_on:
       - postgres
@@ -162,7 +162,7 @@ services:
       - minio-volume:/data
 
   device-manager:
-    image: dojot/device-manager:v0.5.1-rc.1
+    image: dojot/device-manager:v0.5.1-rc.2
     restart: always
     environment:
       # TODO: Fill these env variables with suitable values
@@ -221,7 +221,7 @@ services:
 
   # Prepare database, Bootstrap the database
   kong-migrations:
-    image: dojot/kong:v0.5.1-rc.1
+    image: dojot/kong:v0.5.1-rc.2
     command: kong migrations bootstrap
     depends_on:
       postgres:
@@ -242,7 +242,7 @@ services:
 
   # Run any new migrations and Finish running any pending migrations after 'up'.
   kong-migrations-up:
-    image:  dojot/kong:v0.5.1-rc.1
+    image:  dojot/kong:v0.5.1-rc.2
     command: kong migrations up && kong migrations finish
     depends_on:
       postgres:
@@ -262,7 +262,7 @@ services:
         max-file: '5'
 
   apigw:
-    image: dojot/kong:v0.5.1-rc.1
+    image: dojot/kong:v0.5.1-rc.2
     depends_on:
       postgres:
         condition: service_healthy
@@ -324,7 +324,7 @@ services:
         max-file: '5'
 
   auth:
-    image: dojot/auth:v0.5.1-rc.1
+    image: dojot/auth:v0.5.1-rc.2
     restart: always
     depends_on:
       - apigw
@@ -359,7 +359,7 @@ services:
         max-file: '5'
 
   flowbroker:
-    image: dojot/flowbroker:v0.5.1-rc.1
+    image: dojot/flowbroker:v0.5.1-rc.2
     restart: always
     environment:
       DEPLOY_ENGINE: "docker"
@@ -398,7 +398,7 @@ services:
         max-file: '5'
 
   flowbroker-context-manager:
-    image: dojot/flowbroker-context-manager:v0.5.1-rc.1
+    image: dojot/flowbroker-context-manager:v0.5.1-rc.2
     restart: always
     environment:
       ZOOKEEPER_HOST: zookeeper
@@ -483,7 +483,7 @@ services:
         max-file: '5'
 
   x509-identity-mgmt:
-    image: dojot/x509-identity-mgmt:v0.5.1-rc.1
+    image: dojot/x509-identity-mgmt:v0.5.1-rc.2
     depends_on:
       - postgres
       - mongodb
@@ -506,7 +506,7 @@ services:
         max-file: '5'
 
   kafka-ws:
-    image: dojot/kafka-ws:v0.5.1-rc.1
+    image: dojot/kafka-ws:v0.5.1-rc.2
     depends_on:
       - kafka
       - kafka-ws-redis
@@ -532,7 +532,7 @@ services:
         max-file: '5'
 
   iotagent-mqtt:
-    image: dojot/vernemq-dojot:v0.5.1-rc.1
+    image: dojot/vernemq-dojot:v0.5.1-rc.2
     command: ["/bin/bash", "-c", "echo $$VERNEMQ_CONF | base64 -d > /etc/vernemq/vernemq.conf; echo $$VM_ARGS | base64 -d > /etc/vernemq/vm.args; /vernemq/vmq_dojot.sh"]
     depends_on:
       - x509-identity-mgmt
@@ -560,7 +560,7 @@ services:
         max-file: '5'
 
   v2k-bridge:
-    image: dojot/v2k-bridge:v0.5.1-rc.1
+    image: dojot/v2k-bridge:v0.5.1-rc.2
     depends_on:
       - iotagent-mqtt
       - kafka
@@ -580,7 +580,7 @@ services:
         max-file: '5'
 
   k2v-bridge:
-    image: dojot/k2v-bridge:v0.5.1-rc.1
+    image: dojot/k2v-bridge:v0.5.1-rc.2
     depends_on:
       - iotagent-mqtt
       - kafka
@@ -610,7 +610,7 @@ services:
   #
   ###
   # iotagent-mqtt-mosca:
-  #   image: dojot/iotagent-mosca:v0.5.1-rc.1
+  #   image: dojot/iotagent-mosca:v0.5.1-rc.2
   #   depends_on:
   #     - mosca-redis
   #     - kafka
@@ -652,7 +652,7 @@ services:
   ###
 
   data-manager:
-    image: dojot/data-manager:v0.5.1-rc.1
+    image: dojot/data-manager:v0.5.1-rc.2
     restart: always
     depends_on:
       - flowbroker
@@ -664,7 +664,7 @@ services:
         max-file: '5'
 
   backstage:
-    image: dojot/backstage:v0.5.1-rc.1
+    image: dojot/backstage:v0.5.1-rc.2
     restart: always
     depends_on:
       - postgres
@@ -675,7 +675,7 @@ services:
         max-file: '5'
 
   cron:
-    image: dojot/cron:v0.5.1-rc.1
+    image: dojot/cron:v0.5.1-rc.2
     depends_on:
       - kafka
       - data-broker
@@ -691,7 +691,7 @@ services:
 ### influxdb begin
 
   # influxdb-retriever:
-  #   image: dojot/influxdb-retriever:v0.5.1-rc.1
+  #   image: dojot/influxdb-retriever:v0.5.1-rc.2
   #   depends_on:
   #     - influxdb
   #   environment:
@@ -704,7 +704,7 @@ services:
   #       max-file: '5'
 
   # influxdb-storer:
-  #   image: dojot/influxdb-storer:v0.5.1-rc.1
+  #   image: dojot/influxdb-storer:v0.5.1-rc.2
   #   depends_on:
   #     - kafka
   #     - influxdb
@@ -749,7 +749,7 @@ services:
 ### influxdb end
 
   # kafka2ftp:
-  #   image: dojot/kafka2ftp:v0.5.1-rc.1
+  #   image: dojot/kafka2ftp:v0.5.1-rc.2
   #   environment:
   #     FTP_TENANT: 'admin'
   #     FTP_HOST: 'localhost'
