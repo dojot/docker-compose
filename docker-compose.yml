@@ -556,7 +556,7 @@ services:
     domainname: dojot.iot
     healthcheck:
       # check liveness from iotagent-mqtt-cert-sidecar
-      test: ["CMD", "curl", "-f", "http://iotagent-mqtt-cert-sidecar:9000/live"]
+      test: ["CMD", "curl", "-f", "http://iotagent-mqtt-cert-sidecar:8889/live"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -614,7 +614,7 @@ services:
     restart: always
     healthcheck:
       # check liveness from v2k-bridge-cert-sidecar
-      test: ["CMD", "curl", "-f", "http://v2k-bridge-cert-sidecar:9000/live"]
+      test: ["CMD", "curl", "-f", "http://v2k-bridge-cert-sidecar:8889/live"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -669,7 +669,7 @@ services:
     restart: always
     healthcheck:
       # check liveness from k2v-bridge-cert-sidecar
-      test: ["CMD", "curl", "-f", "http://k2v-bridge-cert-sidecar:9000/live"]
+      test: ["CMD", "curl", "-f", "http://k2v-bridge-cert-sidecar:8889/live"]
       interval: 10s
       timeout: 5s
       retries: 5
