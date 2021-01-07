@@ -568,7 +568,8 @@ services:
     logging:
       driver: json-file
       options:
-        max-size: 100m
+        max-size: 20m
+        max-file: '5'
 
   iotagent-mqtt-cert-sidecar:
     image: dojot/cert-sidecar:development
@@ -622,7 +623,8 @@ services:
     logging:
       driver: json-file
       options:
-        max-size: 100m
+        max-size: 20m
+        max-file: '5'
 
   v2k-bridge-cert-sidecar:
     image: dojot/cert-sidecar:development
@@ -676,7 +678,8 @@ services:
     logging:
       driver: json-file
       options:
-        max-size: 100m
+        max-size: 20m
+        max-file: '5'
 
   k2v-bridge-cert-sidecar:
     image: dojot/cert-sidecar:development
