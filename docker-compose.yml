@@ -540,8 +540,8 @@ services:
 
   iotagent-mqtt:
     image: dojot/vernemq-dojot:development
-    labels: # allow autoheal to restart if unhealthy
-      autoheal: "true"
+    # labels: # allow autoheal to restart if unhealthy
+    #   autoheal: "true"
     command: ["/bin/bash", "-c", "echo $$VERNEMQ_CONF | base64 -d > /etc/vernemq/vernemq.conf; echo $$VM_ARGS | base64 -d > /etc/vernemq/vm.args; start_vernemq"]
     depends_on:
       - iotagent-mqtt-cert-sidecar
@@ -554,12 +554,12 @@ services:
     restart: always
     hostname: iotagent-mqtt
     domainname: dojot.iot
-    healthcheck:
-      # check liveness from iotagent-mqtt-cert-sidecar
-      test: ["CMD", "curl", "-f", "http://iotagent-mqtt-cert-sidecar:8889/live"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+    # healthcheck:
+    #   # check liveness from iotagent-mqtt-cert-sidecar
+    #   test: ["CMD", "curl", "-f", "http://iotagent-mqtt-cert-sidecar:8889/live"]
+    #   interval: 10s
+    #   timeout: 5s
+    #   retries: 5
     volumes:
       - iotagent-mqtt-volume:/vernemq/data
       - iotagent-mqtt-log-volume:/vernemq/log
@@ -596,8 +596,8 @@ services:
 
   v2k-bridge:
     image: dojot/v2k-bridge:development
-    labels: # allow autoheal to restart if unhealthy
-      autoheal: "true"
+    # labels: # allow autoheal to restart if unhealthy
+    #   autoheal: "true"
     depends_on:
       - iotagent-mqtt
       - kafka
@@ -612,12 +612,12 @@ services:
       V2K_MQTT_KEY:  "/certs/v2k-bridge.key"
       V2K_LOG_CONSOLE_LEVEL: "info"
     restart: always
-    healthcheck:
-      # check liveness from v2k-bridge-cert-sidecar
-      test: ["CMD", "curl", "-f", "http://v2k-bridge-cert-sidecar:8889/live"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+    # healthcheck:
+    #   # check liveness from v2k-bridge-cert-sidecar
+    #   test: ["CMD", "curl", "-f", "http://v2k-bridge-cert-sidecar:8889/live"]
+    #   interval: 10s
+    #   timeout: 5s
+    #   retries: 5
     volumes:
       - v2k-bridge-cert-side-volume:/certs
     logging:
@@ -651,8 +651,8 @@ services:
 
   k2v-bridge:
     image: dojot/k2v-bridge:development
-    labels: # allow autoheal to restart if unhealthy
-      autoheal: "true"
+    # labels: # allow autoheal to restart if unhealthy
+    #   autoheal: "true"
     depends_on:
       - iotagent-mqtt
       - kafka
@@ -667,12 +667,12 @@ services:
       K2V_MQTT_KEY: /certs/k2v-bridge.key
       K2V_LOG_CONSOLE_LEVEL: info
     restart: always
-    healthcheck:
-      # check liveness from k2v-bridge-cert-sidecar
-      test: ["CMD", "curl", "-f", "http://k2v-bridge-cert-sidecar:8889/live"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+    # healthcheck:
+    #   # check liveness from k2v-bridge-cert-sidecar
+    #   test: ["CMD", "curl", "-f", "http://k2v-bridge-cert-sidecar:8889/live"]
+    #   interval: 10s
+    #   timeout: 5s
+    #   retries: 5
     volumes:
       - k2v-bridge-cert-side-volume:/certs
     logging:
@@ -859,17 +859,17 @@ services:
 
   # automatically restarting unhealty containers
   # apply the label autoheal=true to container to have it watched
-  autoheal:
-    restart: always
-    image: willfarrell/autoheal
-    environment:
-      - AUTOHEAL_INTERVAL=10
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-    logging:
-      driver: json-file
-      options:
-        max-size: 100m
+  # autoheal:
+  #   restart: always
+  #   image: willfarrell/autoheal
+  #   environment:
+  #     - AUTOHEAL_INTERVAL=10
+  #   volumes:
+  #     - /var/run/docker.sock:/var/run/docker.sock
+  #   logging:
+  #     driver: json-file
+  #     options:
+  #       max-size: 100m
 
   # kafka2ftp:
   #   image: dojot/kafka2ftp:development
