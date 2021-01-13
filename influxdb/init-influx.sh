@@ -8,7 +8,8 @@ DEFAULT_PASSWORD=${DEFAULT_PASSWORD:-"dojot@password"}
 DEFAULT_TOKEN=${DEFAULT_TOKEN:-"dojot@token_default"}
 DEFAULT_ORGANIZATION=${DEFAULT_ORGANIZATION:-"admin"}
 DEFAULT_BUCKET=${DEFAULT_BUCKET:-"devices"}
-# this retention is only for the organization `DEFAULT_ORGANIZATION` created when starting influxdb. For other retentions it is necessary to use an environment variable in the influxdb-storer.
+# This retention is only for the organization `DEFAULT_ORGANIZATION` created when starting influxdb. For other retentions it is necessary to use an environment variable in the influxdb-storer.
+# It is considered only the first time that InfluxDB is started.
 DEFAULT_RETENTION=${DEFAULT_RETENTION:-"7d"}
 # Valid units are nanoseconds (ns), microseconds (us or µs), milliseconds (ms), seconds (s), minutes (m), hours (h), days (d),  weeks (w) and 0 is infinite retention
 
