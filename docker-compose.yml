@@ -721,14 +721,18 @@ services:
 
   # influxdb-setup:
   #   image: quay.io/influxdb/influxdb:v2.0.2
-  #   restart: on-failure
+  #   deploy:
+  #     restart_policy:
+  #       condition: on-failure
+  #       max_attempts: 3
   #   volumes:
   #     - influxdb-volume:/root/.influxdbv2/
   #     - ./influxdb/init-influx.sh:/init-influx.sh:Z
   #   entrypoint:
   #     - /init-influx.sh
   #   depends_on:
-  #     - influxdb
+  #     influxdb:
+  #       condition: service_healthy
   #   logging:
   #     driver: json-file
   #     options:
@@ -739,7 +743,6 @@ services:
   # influxdb:
   #   image: quay.io/influxdb/influxdb:v2.0.2
   #   restart: always
-  #   # check if this volumes are right
   #   volumes:
   #     - influxdb-volume:/root/.influxdbv2
   #   healthcheck:
