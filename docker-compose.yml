@@ -704,7 +704,7 @@ services:
   #       max-file: '5'
 
   # influxdb-storer:
-  #   image: dojot/influxdb-storer:v0.5.2-rc.1
+  #   image: dojot/influxdb-storer:v0.5.1-rc.1
   #   depends_on:
   #     - kafka
   #     - influxdb
@@ -719,14 +719,18 @@ services:
 
   # influxdb-setup:
   #   image: quay.io/influxdb/influxdb:v2.0.2
-  #   restart: on-failure
+  #   deploy:
+  #     restart_policy:
+  #       condition: on-failure
+  #       max_attempts: 3
   #   volumes:
   #     - influxdb-volume:/root/.influxdbv2/
   #     - ./influxdb/init-influx.sh:/init-influx.sh:Z
   #   entrypoint:
   #     - /init-influx.sh
   #   depends_on:
-  #     - influxdb
+  #     influxdb:
+  #       condition: service_healthy
   #   logging:
   #     driver: json-file
   #     options:
