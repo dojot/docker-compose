@@ -704,7 +704,7 @@ services:
   #       max-file: '5'
 
   # influxdb-storer:
-  #   image: dojot/influxdb-storer:v0.5.1-rc.1
+  #   image: dojot/influxdb-storer:v0.5.2-rc.1
   #   depends_on:
   #     - kafka
   #     - influxdb
