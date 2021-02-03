@@ -491,20 +491,57 @@ services:
   x509-identity-mgmt:
     image: dojot/x509-identity-mgmt:development
     depends_on:
+      - x509-ejbca
       - postgres
       - mongodb
     restart: always
-    hostname: "x509-identity-mgmt"
-    domainname: "dojot.iot"
+    environment:
+      NODE_ENV: production
+      X509IDMGMT_MONGO_CONN_URI: "mongodb://mongodb:27017/x509-identity-mgmt"
+      X509IDMGMT_EJBCA_HEALTHCHECK_URL: "http://x509-ejbca:8080/ejbca/publicweb/healthcheck/ejbcahealth"
+      X509IDMGMT_EJBCA_WSDL: "https://x509-ejbca:8443/ejbca/ejbcaws/ejbcaws?wsdl"
+      # ROARR_LOG: "true" # healthcheck is using 'Roarr' to implement logging.
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "-", "http://localhost:9000/health"]
+      interval: 10s
+      timeout: 10s
+      retries: 6
+      start_period: 2m
+    volumes:
+      - "ejbca-client-tls-volume:/opt/tls"
+    logging:
+      driver: json-file
+      options:
+        max-size: 20m
+        max-file: '5'
+
+  x509-ejbca: # this service cannot be called 'ejbca'
+    image: dojot/ejbca:development
+    depends_on:
+      - postgres
+    restart: always
+    hostname: "x509-ejbca" # The 'hostname' must have the same name as the 'service'
+                           # and cannot be called 'ejbca' so as not to conflict with
+                           # the ejbca's internal End-Entity (hidden)
+    domainname: "" # the 'domainname' must remain empty unless the
+                   # service name contains periods (such as an FQDN)
     environment:
       DATABASE_JDBC_URL: jdbc:postgresql://postgres:5432/ejbca?characterEncoding=UTF-8
       DATABASE_USER: ejbca
       DATABASE_PASSWORD: ejbca
-      EJBCA_PERFORM_DOJOT_SETUP: "true"
-      NODE_ENV: production
-      MONGO_URI: "mongodb://mongodb:27017/x509-identity-mgmt"
+      EJBCA_EXTERNAL_ACCESS: "true" # to make the Wildfly server visible on the x509-identity-mgmt
+      # EJBCA_SERVER_CERT_REGEN: "true" # Used to force the generation of a new certificate for the server
+      # EJBCA_LOCK_FILE_TIMEOUT: "0" # Used to break the '.lock' file
+      # EJBCA_ADMIN_USER: "true" # Access to the EJBCA web interface is useful for debugging purposes
+    healthcheck:
+      test: ["CMD", "curl", "http://localhost:8080/ejbca/publicweb/healthcheck/ejbcahealth"]
+      interval: 30s
+      timeout: 10s
+      retries: 2
+      start_period: 2m
     volumes:
-      - ejbca-volume:/mnt/persistent
+      - "ejbca-volume:/mnt/persistent"
+      - "ejbca-client-tls-volume:/opt/tls"
     logging:
       driver: json-file
       options:
@@ -810,6 +847,7 @@ services:
 
 volumes:
   ejbca-volume:
+  ejbca-client-tls-volume:
   postgres-volume:
   mongodb-volume:
   mongodb-cfg-volume:
