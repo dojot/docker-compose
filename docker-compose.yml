@@ -873,20 +873,6 @@ services:
 
 ### influxdb end
 
-  # automatically restarting unhealty containers
-  # apply the label autoheal=true to container to have it watched
-  # autoheal:
-  #   restart: always
-  #   image: willfarrell/autoheal
-  #   environment:
-  #     - AUTOHEAL_INTERVAL=10
-  #   volumes:
-  #     - /var/run/docker.sock:/var/run/docker.sock
-  #   logging:
-  #     driver: json-file
-  #     options:
-  #       max-size: 100m
-
   # kafka2ftp:
   #   image: dojot/kafka2ftp:development
   #   environment:
