@@ -607,7 +607,10 @@ services:
     environment:
       CERT_SC_APP_SIDECAR_TO: 'iotagent-mqtt'
       CERT_SC_LOG_CONSOLE_LEVEL: 'info'
-      CERT_SC_CERTS_HOSTNAMES: '["iotagent-mqtt", "localhost"]'
+      # About CERT_SC_CERTS_HOSTNAMES
+      #     Servers hostname/ip (the list of host to which the device connects); The value "iotagent-mqtt" is mandatory, it is used by v2k and k2v. 
+      #     It's the old EXTERNAL_SERVER_HOSTNAME and equivalent to MOSCA_TLS_DNS_LIST.
+      CERT_SC_CERTS_HOSTNAMES: '["iotagent-mqtt", "localhost"]' 
       HOSTNAME: iotagent-mqtt
       CERT_SC_CERTS_FILES_BASEPATH: /vernemq/cert
       CERT_SC_CERTS_FILES_CA: ca.crt
@@ -655,7 +658,7 @@ services:
       CERT_SC_APP_SIDECAR_TO: 'v2k-bridge'
       CERT_SC_LOG_CONSOLE_LEVEL: 'info'
       CERT_SC_CERTS_CRL: 'false'
-      CERT_SC_CERTS_HOSTNAMES: '["v2k-bridge", "localhost"]'
+      CERT_SC_CERTS_HOSTNAMES: '["v2k-bridge"]'
       HOSTNAME: v2k-bridge
       CERT_SC_CERTS_FILES_BASEPATH: /certs
       CERT_SC_CERTS_FILES_CA: ca.crt
@@ -702,7 +705,7 @@ services:
       CERT_SC_APP_SIDECAR_TO: 'k2v-bridge'
       CERT_SC_LOG_CONSOLE_LEVEL: 'info'
       CERT_SC_CERTS_CRL: 'false'
-      CERT_SC_CERTS_HOSTNAMES: '["k2v-bridge", "localhost"]'
+      CERT_SC_CERTS_HOSTNAMES: '["k2v-bridge"]'
       HOSTNAME: k2v-bridge
       CERT_SC_CERTS_FILES_BASEPATH: /certs
       CERT_SC_CERTS_FILES_CA: ca.crt
