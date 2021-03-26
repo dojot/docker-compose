@@ -79,7 +79,7 @@ createRoute "${1}" "${1}_route" "${3}" "${4}"
 
 # service: gui
 
-createEndpoint "gui" "http://gui:80"  '"/"' "false"
+createEndpoint "gui" "http://gui:80"  '"/cpqd-dojot/"' "true"
 
 # service: gui-v2
 
