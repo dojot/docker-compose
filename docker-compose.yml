@@ -495,9 +495,11 @@ services:
       - x509-ejbca
       - postgres
       - mongodb
+      - kafka
     restart: always
     environment:
       NODE_ENV: production
+      EJBCA_SERVER_CERT_REGEN: "true"
       X509IDMGMT_MONGO_CONN_URI: "mongodb://mongodb:27017/x509-identity-mgmt"
       X509IDMGMT_EJBCA_HEALTHCHECK_URL: "http://x509-ejbca:8080/ejbca/publicweb/healthcheck/ejbcahealth"
       X509IDMGMT_EJBCA_WSDL: "https://x509-ejbca:8443/ejbca/ejbcaws/ejbcaws?wsdl"
@@ -612,11 +614,14 @@ services:
       #     It's the old EXTERNAL_SERVER_HOSTNAME and equivalent to MOSCA_TLS_DNS_LIST.
       CERT_SC_CERTS_HOSTNAMES: '["iotagent-mqtt", "localhost"]'
       HOSTNAME: iotagent-mqtt
+      CERT_SC_CERTS_BELONGSTO_APPLICATION: vernemq
       CERT_SC_CERTS_FILES_BASEPATH: /vernemq/cert
       CERT_SC_CERTS_FILES_CA: ca.crt
       CERT_SC_CERTS_FILES_CERT: iotagent-mqtt.crt
       CERT_SC_CERTS_FILES_KEY: iotagent-mqtt.key
       CERT_SC_CERTS_FILES_CRL: ca.crl
+      CERT_SC_CERTS_FILES_CABUNDLE: cabundle.crt
+      CERT_SC_CRON_CABUNDLE: "true"
     volumes:
       - iotagent-mqtt-cert-side-volume:/vernemq/cert
     restart: always
@@ -660,6 +665,7 @@ services:
       CERT_SC_CERTS_CRL: 'false'
       CERT_SC_CERTS_HOSTNAMES: '["v2k-bridge"]'
       HOSTNAME: v2k-bridge
+      CERT_SC_CERTS_BELONGSTO_APPLICATION: v2k
       CERT_SC_CERTS_FILES_BASEPATH: /certs
       CERT_SC_CERTS_FILES_CA: ca.crt
       CERT_SC_CERTS_FILES_CERT: v2k-bridge.crt
@@ -681,13 +687,13 @@ services:
       - k2v-bridge-cert-sidecar
       - data-broker
     environment:
-      K2V_APP_HOSTNAME: k2v-bridge
+      K2V_APP_HOSTNAME: "k2v-bridge"
       K2V_APP_USER_CONFIG_FILE: "docker.conf"
-      K2V_CONSUMER_METADATA_BROKER_LIST: kafka:9092
-      K2V_MQTT_CA: /certs/ca.crt
-      K2V_MQTT_CERT: /certs/k2v-bridge.crt
-      K2V_MQTT_KEY: /certs/k2v-bridge.key
-      K2V_LOG_CONSOLE_LEVEL: info
+      K2V_CONSUMER_METADATA_BROKER_LIST: "kafka:9092"
+      K2V_MQTT_CA: "/certs/ca.crt"
+      K2V_MQTT_CERT: "/certs/k2v-bridge.crt"
+      K2V_MQTT_KEY: "/certs/k2v-bridge.key"
+      K2V_LOG_CONSOLE_LEVEL: "info"
     restart: always
     volumes:
       - k2v-bridge-cert-side-volume:/certs
@@ -707,6 +713,7 @@ services:
       CERT_SC_CERTS_CRL: 'false'
       CERT_SC_CERTS_HOSTNAMES: '["k2v-bridge"]'
       HOSTNAME: k2v-bridge
+      CERT_SC_CERTS_BELONGSTO_APPLICATION: k2v
       CERT_SC_CERTS_FILES_BASEPATH: /certs
       CERT_SC_CERTS_FILES_CA: ca.crt
       CERT_SC_CERTS_FILES_CERT: k2v-bridge.crt
@@ -928,6 +935,25 @@ services:
 #       max-file: '5'
 #
 # GUI to Kong Admin API - END
+
+# GUI to Kafka - BEGIN
+#  kafdrop:
+#    image: obsidiandynamics/kafdrop:latest
+#    depends_on:
+#      - kafka
+#    ports:
+#      - 9090:9000
+#    environment:
+#      KAFKA_BROKERCONNECT: "kafka:9092"
+#      JVM_OPTS: "-Xms32M -Xmx64M"
+#      SERVER_SERVLET_CONTEXTPATH: "/"
+#    restart: on-failure
+#    logging:
+#      driver: json-file
+#      options:
+#        max-size: 20m
+#        max-file: '5'
+# GUI to Kafka - END
 
 volumes:
   ejbca-volume:
