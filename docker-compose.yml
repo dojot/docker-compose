@@ -499,7 +499,6 @@ services:
     restart: always
     environment:
       NODE_ENV: production
-      EJBCA_SERVER_CERT_REGEN: "true"
       X509IDMGMT_MONGO_CONN_URI: "mongodb://mongodb:27017/x509-identity-mgmt"
       X509IDMGMT_EJBCA_HEALTHCHECK_URL: "http://x509-ejbca:8080/ejbca/publicweb/healthcheck/ejbcahealth"
       X509IDMGMT_EJBCA_WSDL: "https://x509-ejbca:8443/ejbca/ejbcaws/ejbcaws?wsdl"
@@ -533,7 +532,7 @@ services:
       DATABASE_USER: ejbca
       DATABASE_PASSWORD: ejbca
       EJBCA_EXTERNAL_ACCESS: "true" # to make the Wildfly server visible on the x509-identity-mgmt
-      # EJBCA_SERVER_CERT_REGEN: "true" # Used to force the generation of a new certificate for the server
+      EJBCA_SERVER_CERT_REGEN: "true" # Used to force the generation of a new certificate for the server
       # EJBCA_LOCK_FILE_TIMEOUT: "0" # Used to break the '.lock' file
       # EJBCA_ADMIN_USER: "true" # Access to the EJBCA web interface is useful for debugging purposes
     healthcheck:
