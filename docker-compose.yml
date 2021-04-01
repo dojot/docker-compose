@@ -499,6 +499,7 @@ services:
     restart: always
     environment:
       NODE_ENV: production
+      X509IDMGMT_CERTIFICATE_BELONGSTO_APPLICATION: '["iotagent-mqtt", "v2k-bridge", "k2v-bridge"]'
       X509IDMGMT_MONGO_CONN_URI: "mongodb://mongodb:27017/x509-identity-mgmt"
       X509IDMGMT_EJBCA_HEALTHCHECK_URL: "http://x509-ejbca:8080/ejbca/publicweb/healthcheck/ejbcahealth"
       X509IDMGMT_EJBCA_WSDL: "https://x509-ejbca:8443/ejbca/ejbcaws/ejbcaws?wsdl"
@@ -613,7 +614,6 @@ services:
       #     It's the old EXTERNAL_SERVER_HOSTNAME and equivalent to MOSCA_TLS_DNS_LIST.
       CERT_SC_CERTS_HOSTNAMES: '["iotagent-mqtt", "localhost"]'
       HOSTNAME: iotagent-mqtt
-      CERT_SC_CERTS_BELONGSTO_APPLICATION: vernemq
       CERT_SC_CERTS_FILES_BASEPATH: /vernemq/cert
       CERT_SC_CERTS_FILES_CA: ca.crt
       CERT_SC_CERTS_FILES_CERT: iotagent-mqtt.crt
@@ -664,7 +664,6 @@ services:
       CERT_SC_CERTS_CRL: 'false'
       CERT_SC_CERTS_HOSTNAMES: '["v2k-bridge"]'
       HOSTNAME: v2k-bridge
-      CERT_SC_CERTS_BELONGSTO_APPLICATION: v2k
       CERT_SC_CERTS_FILES_BASEPATH: /certs
       CERT_SC_CERTS_FILES_CA: ca.crt
       CERT_SC_CERTS_FILES_CERT: v2k-bridge.crt
@@ -712,7 +711,6 @@ services:
       CERT_SC_CERTS_CRL: 'false'
       CERT_SC_CERTS_HOSTNAMES: '["k2v-bridge"]'
       HOSTNAME: k2v-bridge
-      CERT_SC_CERTS_BELONGSTO_APPLICATION: k2v
       CERT_SC_CERTS_FILES_BASEPATH: /certs
       CERT_SC_CERTS_FILES_CA: ca.crt
       CERT_SC_CERTS_FILES_CERT: k2v-bridge.crt
