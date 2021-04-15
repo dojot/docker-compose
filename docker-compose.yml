@@ -2,7 +2,7 @@ services:
 
 
   iotagent-ocpp:
-    image: dojot/iotagentv2:1.0
+    image: dojot/iotagentv2:1.0.1
     restart: always
     depends_on:
       - mongodb
@@ -22,33 +22,33 @@ services:
         max-file: '5'
 
 
-  iotagent-ocpp-secure:
-    image: dojot/iotagentv8543
-    restart: always
-    depends_on:
-      - mongodb
-      - kafka
-      - history
-      - flowbroker
-      - rabbitmq
-    environment:
-      SECURE: 'true'
-      CERT: '/dojot/nodejs/certificates/cert.pem'
-      CERT_KEY: '/dojot/nodejs/certificates/key.pem'
-      SERVER_PORT: 8543
-    ports:
-      - "8543:8543"
-      - "3002:3002"
-    logging:
-      driver: json-file
-      options:
-        max-size: 20m
-        max-file: '5'
+#  iotagent-ocpp-secure:
+#    image: dojot/iotagentv8543
+#    restart: always
+#    depends_on:
+#      - mongodb
+#      - kafka
+#      - history
+#      - flowbroker
+#      - rabbitmq
+#    environment:
+#      SECURE: 'true'
+#      CERT: '/dojot/nodejs/certificates/cert.pem'
+#      CERT_KEY: '/dojot/nodejs/certificates/key.pem'
+#      SERVER_PORT: 8543
+#    ports:
+#      - "8543:8543"
+#      - "3002:3002"
+#    logging:
+#      driver: json-file
+#      options:
+#        max-size: 20m
+#        max-file: '5'
 
 
 
   history:
-    image: dojot/history:mob
+    image: dojot/history:mobilidade
     restart: always
     depends_on:
       - mongodb
@@ -95,7 +95,7 @@ services:
       - mongodb-cfg-volume:/data/configdb
 
   gui:
-    image: dojot/gui
+    image: dojot/gui:v0.5.0-1
     restart: always
     logging:
       driver: json-file
@@ -342,7 +342,7 @@ services:
         max-file: '5'
 
   flowbroker:
-    image: luissajunior/flow
+    image: luissajunior/flowbroker:mobilidade
     restart: always
     environment:
       DEPLOY_ENGINE: "docker"
@@ -403,6 +403,11 @@ services:
   rabbitmq:
     image: dojot/rabbitmq:3.7-alpine
     restart: always
+  #  healthcheck:
+  #    test: ["CMD", "curl", "-f", "http://rabbitmq:15672"]
+  #    interval: 30s
+  #    timeout: 10s
+  #    retries: 500
     volumes:
       - rabbitmq-volume:/var/lib/rabbitmq
     logging:
