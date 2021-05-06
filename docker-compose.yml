@@ -739,6 +739,7 @@ services:
   # `k2v-bridge-cert-sidecar`services blocks.
   # It is necessary to comment `iotagent-mqtt` to avoid conflicts on ports 1883 and 8883,
   # or to change such ports that will be mapped for external access.
+  # NOTE: To use iotagent-mqtt-mosca with tls it is necessary to set X509IDMGMT_CERTIFICATE_CHECK_SUBJECTDN to true in x509-identity-mgmt
   #
   ###
   # iotagent-mqtt-mosca:
