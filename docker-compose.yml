@@ -564,6 +564,8 @@ services:
     environment:
       KAFKA_WS_SERVER_JWT_EXP_TIME: "true"
       KAFKA_WS_REDIS_HOST: kafka-ws-redis
+      # The KAFKA_WS_TICKET_SECRET should be unique for each environment
+      KAFKA_WS_TICKET_SECRET: fT5nAgHR9pkj0yYsBdc4p+PPq6ArjshcPdz0HA6W
     restart: always
     logging:
       driver: json-file
