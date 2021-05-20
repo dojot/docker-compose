@@ -583,7 +583,7 @@ services:
         max-file: '5'
 
   acl-redis:
-    image: redis:6.2.1-alpine
+    image: dojot/redis:6.0.4-alpine3.11
     restart: always
     volumes:
       - acl-redis-volume:/data
@@ -594,7 +594,7 @@ services:
         max-file: '5'
 
   certificate-acl:
-    image: certificate-acl
+    image: dojot/certificate-acl:development
     depends_on:
       - acl-redis
       - kafka
