@@ -582,15 +582,41 @@ services:
         max-size: 20m
         max-file: '5'
 
+  acl-redis:
+    image: dojot/redis:6.0.4-alpine3.11
+    restart: always
+    volumes:
+      - acl-redis-volume:/data
+    logging:
+      driver: json-file
+      options:
+        max-size: 20m
+        max-file: '5'
+
+  certificate-acl:
+    image: dojot/certificate-acl:development
+    depends_on:
+      - acl-redis
+      - kafka
+      - x509-identity-mgmt
+    restart: always
+    logging:
+      driver: json-file
+      options:
+        max-size: 20m
+        max-file: '5'
+
   iotagent-mqtt:
     image: dojot/vernemq-dojot:development
     command: ["/bin/bash", "-c", "echo $$VERNEMQ_CONF | base64 -d > /etc/vernemq/vernemq.conf; echo $$VM_ARGS | base64 -d > /etc/vernemq/vm.args; start_vernemq"]
     depends_on:
       - iotagent-mqtt-cert-sidecar
+      - certificate-acl
     ports:
       - 1883:1883 # You can comment this line (- 1883:1883) to disable insecure mode without TLS.
       - 8883:8883
     environment:
+      REDIS_HOST: acl-redis
       VERNEMQ_CONF: bWV0YWRhdGFfcGx1Z2luID0gdm1xX3N3YwpwbHVnaW5zLnZtcV9wYXNzd2QgPSBvZmYKcGx1Z2lucy52bXFfYWNsID0gb2ZmCnBsdWdpbnMuZG9qb3RfZGlzY29ubmVjdF9wbHVnaW4ucGF0aCA9IC92ZXJuZW1xL2Rvam90X2Rpc2Nvbm5lY3RfcGx1Z2luL2RlZmF1bHQKcGx1Z2lucy5kb2pvdF9kaXNjb25uZWN0X3BsdWdpbiA9IG9uCnBsdWdpbnMuZG9qb3RfZGlzY29ubmVjdF9wbHVnaW4ucHJpb3JpdHkgPSAyCnBsdWdpbnMuZG9qb3RfYWNsX3BsdWdpbi5wYXRoID0gL3Zlcm5lbXEvZG9qb3RfYWNsX3BsdWdpbi9kZWZhdWx0CnBsdWdpbnMuZG9qb3RfYWNsX3BsdWdpbiA9IG9uCnBsdWdpbnMuZG9qb3RfYWNsX3BsdWdpbi5wcmlvcml0eSA9IDIKbGV2ZWxkYi5tYXhpbXVtX21lbW9yeS5wZXJjZW50ID0gMjAKbG9nLmNvbnNvbGUgPSBjb25zb2xlCmxpc3RlbmVyLm1heF9jb25uZWN0aW9ucyA9IDIwMDAwMApsaXN0ZW5lci5ucl9vZl9hY2NlcHRvcnMgPSAxMDAKbWF4X2luZmxpZ2h0X21lc3NhZ2VzID0gMjAKbWF4X29ubGluZV9tZXNzYWdlcyA9IDEwMDAwCmxpc3RlbmVyLnNzbC5kZWZhdWx0ID0gMC4wLjAuMDo4ODgzCmxpc3RlbmVyLnNzbC5kZWZhdWx0LmNhZmlsZSA9ICAvdmVybmVtcS9jZXJ0L2NhYnVuZGxlLmNydApsaXN0ZW5lci5zc2wuZGVmYXVsdC5jZXJ0ZmlsZSA9IC92ZXJuZW1xL2NlcnQvaW90YWdlbnQtbXF0dC5jcnQKbGlzdGVuZXIuc3NsLmRlZmF1bHQua2V5ZmlsZSA9IC92ZXJuZW1xL2NlcnQvaW90YWdlbnQtbXF0dC5rZXkKbGlzdGVuZXIuc3NsLmRlZmF1bHQuY3JsZmlsZSA9ICAvdmVybmVtcS9jZXJ0L2NhLmNybApsaXN0ZW5lci5zc2wuZGVmYXVsdC51c2VfaWRlbnRpdHlfYXNfdXNlcm5hbWUgPSBvbgpsaXN0ZW5lci5zc2wuZGVmYXVsdC5yZXF1aXJlX2NlcnRpZmljYXRlID0gb24=
       VM_ARGS: K1AgMjU2MDAwCi1lbnYgRVJMX01BWF9FVFNfVEFCTEVTIDI1NjAwMAotZW52IEVSTF9DUkFTSF9EVU1QIC92ZXJuZW1xL2xvZy9lcmxfY3Jhc2guZHVtcAotZW52IEVSTF9GVUxMU1dFRVBfQUZURVIgMAotZW52IEVSTF9NQVhfUE9SVFMgMjYyMTQ0CitBIDY0Ci1zZXRjb29raWUgdm1xCi1uYW1lIHZtcUBpb3RhZ2VudC1tcXR0LmRvam90LmlvdAorSyB0cnVlCitXIHcKLXNtcCBlbmFibGU=
     restart: always
@@ -985,6 +1011,7 @@ volumes:
   kafka-ws-redis-volume:
   mosca-redis-volume:
   influxdb-volume:
+  acl-redis-volume:
 
 networks:
   flowbroker:
