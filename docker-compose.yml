@@ -598,7 +598,7 @@ services:
     depends_on:
       - acl-redis
       - kafka
-      - x509-ejbca
+      - x509-identity-mgmt
     restart: always
     logging:
       driver: json-file
