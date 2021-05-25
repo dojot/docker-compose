@@ -428,7 +428,7 @@ services:
     image: dojot/rabbitmq:3.7-alpine
     restart: always
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://rabbitmq:15672"]
+      test: rabbitmq-diagnostics -q ping
       interval: 30s
       timeout: 10s
       retries: 5
