@@ -4,7 +4,7 @@
 
 1. [Overview](#overview)
 1. [Disclaimer](#disclaimer)
-1. [Required settings, Recommended settings and Attentions](#required-settings-recommended-settings-and-attentions)
+1. [Required settings and Recommended settings](#required-settings-and-recommended-settings)
 1. [How to get it up and running](#how-to-get-it-up-and-running)
     1. [How to run on localhost](#how-to-run-on-localhost)
     1. [How to run on a domain other than localhost with http (not recommended)](#how-to-run-on-a-domain-other-than-localhost-with-http-not-recommended)
@@ -26,19 +26,19 @@ for quick deployment of the dojot platform using `docker-compose`.
 This deployment option is best suited to development and functional environments.
 For production environment we recommend to use [Kubernetes with Ansible](https://github.com/dojot/ansible-dojot). See how to install on [guide](https://dojotdocs.readthedocs.io/en/latest/installation-guide.html#kubernetes).
 
-## Required settings, Recommended settings and Attentions
+## Required settings and Recommended settings
 
 __Required setting:__ Before running this deployment, it is necessary to define a password value in the [.env](./.env) file for the `KEYCLOAK_MASTER_PASSWORD` and `KEYCLOAK_ADMIN_PASSWORD_TEMP`  variables. The value `KEYCLOAK_ADMIN_PASSWORD_TEMP` will be the password of the user *admin* of all tenants (equivalent to realms in the keycloak) when created. **Passwords must have a digit number, a letter in upper case, a letter in lower case, a special character, they cannot be the user or an email and must have 8 characters. If the password does not fit in some cases there will be errors internally when trying to run this `docker-compose`.**
 
-__Recommended setting:__ It is recommended to configure Keycloak SMTP, see more in [Keycloak SMTP](#keycloak-smtp).
+__Recommended setting 1:__ It is recommended to configure Keycloak SMTP, see more in [Keycloak SMTP](#keycloak-smtp).
 
-__Attention 1:__ It is highly recommended to use dojot with security (**https**) for a deployment on a **domain other than `localhost`** follow the guide at [How to run with HTTPS (secure dojot with Let's Encrypt)](#how-to-run-with-https-secure-dojot-with-lets-encrypt---recommended)  and don't forget the item [How to schedule domain certificate renewal](#how-to-schedule-domain-certificate-renewal-recommended-and-important).
+__Recommended setting 2:__ It is highly recommended to use dojot with security (**https**) for a deployment on a **domain other than `localhost`** follow the guide at [How to run with HTTPS (secure dojot with Let's Encrypt)](#how-to-run-with-https-secure-dojot-with-lets-encrypt---recommended)  and don't forget the item [How to schedule domain certificate renewal](#how-to-schedule-domain-certificate-renewal-recommended-and-important).
 
-__Attention 2:__  The values of secrets must be unique for each environment, to ensure security. Give preference to large random values. The environment variables for these secrets can be found in the `docker.compose.yml` file and are `BS_SESSION_SECRET` in the **backstage** service, `S3ACCESSKEY` and `S3SECRETKEY` in the **image-manager** service, `MINIO_ACCESS_KEY` and `MINIO_SECRET_KEY` in the **minio** service and `KAFKA_WS_TICKET_SECRET` in the **kafka-ws** service.
+__Recommended setting 3:__ The values of secrets must be unique for each environment, to ensure security. Give preference to large random values. The environment variables for these secrets can be found in the `docker.compose.yml` file and are `BS_SESSION_SECRET` in the **backstage** service, `S3ACCESSKEY` and `S3SECRETKEY` in the **image-manager** service, `MINIO_ACCESS_KEY` and `MINIO_SECRET_KEY` in the **minio** service and `KAFKA_WS_TICKET_SECRET` in the **kafka-ws** service.
 
 ## How to get it up and running
 
-**Before, it is necessary to do the step [`Required setting`](#required-settings-recommended-settings-and-attentions) of the previous topic.**
+**Before, it is necessary to do the step [`Required setting`](#required-settings-and-recommended-settings) of the previous topic.**
 
 To use this `docker-compose.yml`, you will need:
 
