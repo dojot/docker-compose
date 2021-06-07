@@ -134,8 +134,6 @@ services:
       options:
         max-size: 20m
         max-file: '5'
-    tty: true # TODO remove
-    command: npm start #TODO remove
 
   gui-v2:
     image: dojot/gui:feature-keycloak #dojot/gui-v2:${DOJOT_VERSION}
