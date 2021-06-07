@@ -698,6 +698,8 @@ services:
 
   certificate-acl:
     image: dojot/certificate-acl:${DOJOT_VERSION}
+    environment:
+      CERTIFICATE_ACL_LOGGER_CONSOLE_LEVEL: "debug"
     depends_on:
       - acl-redis
       - kafka
