@@ -361,7 +361,6 @@ services:
     depends_on:
       - apigw
       - kong-config
-    container_name: 'letsencrypt-nginx'
     image: nginx:latest
     restart: always
     volumes:
