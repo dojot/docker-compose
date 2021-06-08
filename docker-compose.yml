@@ -457,6 +457,7 @@ services:
       - keycloak
       - flowbroker-context-manager
       - flowbroker-redis
+      - data-broker
     networks:
       - default
       - flowbroker
