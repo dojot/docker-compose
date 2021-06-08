@@ -132,7 +132,7 @@ KONG_SSL_CERT_KEY=/dojot/etc/letsencrypt/live/${DOJOT_DOMAIN_NAME}/privkey.pem
 Now run the rest of the dojot services:
 
 ``` sh
-docker-compose  up -d
+sudo docker-compose  up -d
 ```
 
 After that the dojot must be accessible at `https://<your domain>`. The tenant will be the value of the `KEYCLOAK_DEFAULT_REALM` variable which by default has the value `admin`, the username will be `admin` and the password the value defined in `KEYCLOAK_ADMIN_PASSWORD_TEMP`.
