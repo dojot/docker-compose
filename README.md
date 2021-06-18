@@ -21,6 +21,8 @@
 This repository contains the necessary configuration files
 for quick deployment of the dojot platform using `docker-compose`.
 
+__Attention__ To get completely ready, **healthy**, all services in this `docker-compose` take an average of at least 12 minutes.
+
 ## Disclaimer
 
 This deployment option is best suited to development and functional environments.
