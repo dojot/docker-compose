@@ -597,7 +597,7 @@ services:
       X509IDMGMT_MONGO_CONN_URI: "mongodb://mongodb:27017/x509-identity-mgmt"
       X509IDMGMT_EJBCA_HEALTHCHECK_URL: "http://x509-ejbca:8080/ejbca/publicweb/healthcheck/ejbcahealth"
       X509IDMGMT_EJBCA_WSDL: "https://x509-ejbca:8443/ejbca/ejbcaws/ejbcaws?wsdl"
-      # X509IDMGMT_CERTIFICATE_CHECK_SUBJECTDN: "true"
+      # X509IDMGMT_CERTIFICATE_CHECK_SUBJECTDN: "true" # add to CN `tenant:deviceid`
       # ROARR_LOG: "true" # healthcheck is using 'Roarr' to implement logging.
     healthcheck:
       test: ["CMD", "wget", "-q", "-O", "-", "http://localhost:9000/health"]
