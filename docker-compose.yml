@@ -711,30 +711,6 @@ services:
         max-size: 20m
         max-file: '5'
 
-  acl-redis:
-    image: dojot/redis:6.0.4-alpine3.11
-    restart: always
-    volumes:
-      - acl-redis-volume:/data
-    logging:
-      driver: json-file
-      options:
-        max-size: 20m
-        max-file: '5'
-
-  certificate-acl:
-    image: dojot/certificate-acl:development
-    depends_on:
-      - acl-redis
-      - kafka
-      - x509-identity-mgmt
-    restart: always
-    logging:
-      driver: json-file
-      options:
-        max-size: 20m
-        max-file: '5'
-
   iotagent-mqtt:
     image: dojot/vernemq-dojot:${DOJOT_VERSION}
     command: ["/bin/bash", "-c", "echo $$VERNEMQ_CONF | base64 -d > /etc/vernemq/vernemq.conf; echo $$VM_ARGS | base64 -d > /etc/vernemq/vm.args; start_vernemq"]
