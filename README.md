@@ -7,9 +7,10 @@
 1. [Required settings and Recommended settings](#required-settings-and-recommended-settings)
 1. [How to get it up and running](#how-to-get-it-up-and-running)
     1. [How to run on localhost](#how-to-run-on-localhost)
-    1. [How to run on a domain other than localhost with http (not recommended)](#how-to-run-on-a-domain-other-than-localhost-with-http-not-recommended)
     1. [How to run with HTTPS (secure dojot with Let's Encrypt) - recommended](#how-to-run-with-https-secure-dojot-with-lets-encrypt---recommended)
         1. [How to schedule domain certificate renewal (recommended and important)](#how-to-schedule-domain-certificate-renewal-recommended-and-important)
+    1. [How to use self-signed certificate](#how-to-use-self-signed-certificate)
+    1. [How to run on a domain other than localhost with http (not recommended)](#how-to-run-on-a-domain-other-than-localhost-with-http-not-recommended)
 1. [Environment variable](#environment-variable)
     1. [The available variables](#the-available-variables)
     1. [Keycloak SMTP](#keycloak-smtp)
@@ -59,31 +60,6 @@ sudo docker-compose up  -d
 
 After that the dojot must be accessible at `http://localhost:8000`. The tenant will be the value of the `KEYCLOAK_DEFAULT_REALM` variable which by default has the value `admin`, the username will be `admin` and the password the value defined in `KEYCLOAK_ADMIN_PASSWORD_TEMP`.
 
-### How to run on a domain *other than localhost* with http (not recommended)
-
-**We discourage using this deployment mode for security reasons. Using it is at your own risk.**
-
-To get dojot running with http on a domain other than localhost, at least for the purposes of this guide, you **MUST** ensure you have set up a static public IP address for your server and registered a domain for it. Then just follow the next steps. *And that domain must be accessible where dojot is running, an alternative solution for this is look for the commented out codes in `docker-compose.yml` preceded by the titles `Gateway-static-dojot _default-1`, `Gateway-static-dojot_default-2` and `Gateway-static-dojot_default-3` and uncomment the codes accordingly instructions.*
-
-Add the following lines to the end of the file [.env](./.env) and change `<your domain>` for your registered domain. (If you want to use port 8000 do not add the variable `DOJOT_HTTP_PORT`, It be accessible at `http://<your domain>:8000`.)
-
-``` sh
-DOJOT_DOMAIN_NAME=<your domain>
-
-DOJOT_HTTP_PORT=80
-
-DOJOT_URL=http://${DOJOT_DOMAIN_NAME}:${DOJOT_HTTP_PORT}
-
-```
-
-Then run the command below:
-
-``` sh
-sudo docker-compose up  -d
-```
-
-After that the dojot must be accessible at `http://<your domain>`. The tenant will be the value of the `KEYCLOAK_DEFAULT_REALM` variable which by default has the value `admin`, the username will be `admin` and the password the value defined in `KEYCLOAK_ADMIN_PASSWORD_TEMP`.
-
 ## How to run with HTTPS (secure dojot with Let's Encrypt) - recommended
 
 To get dojot running with https, at least for the purposes of this guide, you **MUST** ensure you have set up a static public IP address for your server and registered a domain for it. Then just follow the next steps. *And that domain must be accessible where dojot is running, , an alternative solution for this is look for the commented out codes in `docker-compose.yml` preceded by the titles `Gateway-static-dojot _default-1`, `Gateway-static-dojot_default-2` and `Gateway-static-dojot_default-3` and uncomment the codes accordingly instructions.*
@@ -97,6 +73,7 @@ DOJOT_HTTP_PORT=80
 DOJOT_HTTPS_PORT=443
 
 DOJOT_ENABLE_HTTPS_ONLY=true
+DOJOT_BACKSTAGE_PROXY_SECURE=true
 
 DOJOT_URL=https://${DOJOT_DOMAIN_NAME}:${DOJOT_HTTPS_PORT}
 
@@ -157,6 +134,97 @@ Place the following at the end of the file, then close and save it.
 ```
 
 The above command will run every night at 23:00, renewing the certificate and forcing Kong to restart if the certificate is due for renewal.
+
+## How to use self-signed certificate
+
+As prerequisites this uses [git](https://git-scm.com/) and [OpenSSL](https://www.openssl.org/).
+
+On Debian-based Linux distributions, you can install these prerequisites by running:
+
+``` sh
+sudo apt install git openssl
+```
+
+After installing the prerequisites if necessary, download the tool to generate certificates [certgen](https://github.com/dojot/dojot/tree/development/tools/certgen) (to see other possible parameters go to [documents] (https://github.com/dojot/dojot/tree/development/tools/certgen#readme)):
+
+```sh
+git clone --single-branch --branch development https://github.com/dojot/dojot.git cert-tools-temp && cp -r cert-tools-temp/tools/certgen certgen && rm -rf cert-tools-temp
+```
+
+Now let's generate the certificate with the commands below, change `<your domain>` or `<your ip>`  for your domain or IP.
+
+For domain case:
+
+```sh
+DOJOT_DOMAIN_NAME=<your domain>
+./certgen/bin/certgen.sh \
+    --dns ${DOJOT_DOMAIN_NAME} \
+    --cname ${DOJOT_DOMAIN_NAME}
+
+chmod -R 0755 certs/ ca/
+```
+
+For IP case:
+
+```sh
+DOJOT_IP=<your ip>
+./certgen/bin/certgen.sh \
+    --ip  ${DOJOT_IP} \
+    --cname ${DOJOT_IP}
+
+chmod -R 0755 certs/ ca/
+```
+
+Add the following lines to the end of the file [.env](./.env) and change `<your domain>` for your domain or **IP**.
+
+```sh
+DOJOT_DOMAIN_NAME=<your domain>
+
+DOJOT_HTTP_PORT=80
+DOJOT_HTTPS_PORT=443
+
+DOJOT_ENABLE_HTTPS_ONLY=true
+
+DOJOT_URL=https://${DOJOT_DOMAIN_NAME}:${DOJOT_HTTPS_PORT}
+
+KEYCLOAK_REALM_SSL_MODE=EXTERNAL
+
+KONG_SSL_CERT=/certs/${DOJOT_DOMAIN_NAME}.crt
+KONG_SSL_CERT_KEY=/certs/${DOJOT_DOMAIN_NAME}.key
+KONG_SSL_CERT_CA=/ca/ca.crt
+
+```
+
+In addition it is necessary to configure in your browser a new *Certificate Authority*, in *chrome* and *firefox* the steps are very close, go to **Setting** then look for **Privacy and Security** and **Security** look for something like **Manage Certificates** or **Certificates**, go to the **Authorities** tab, import the file from `ca/ca.crt` and check the option next to **Thus this CA to identifying websites** and click in **OK**.
+
+__NOTE__ And also when accessing this url via CURL, postman and other such services, via code, it is necessary to use this `ca/ca.crt` file as being a CA, a *Certificate Authority* trustworthy.
+
+After that the dojot must be accessible at `https://<your domain>` in the browser that has been configured with the new **Certification Authority**. The tenant will be the value of the `KEYCLOAK_DEFAULT_REALM` variable which by default has the value `admin`, the username will be `admin` and the password the value defined in `KEYCLOAK_ADMIN_PASSWORD_TEMP`.
+
+### How to run on a domain *other than localhost* with http (not recommended)
+
+**We discourage using this deployment mode for security reasons. Using it is at your own risk.**
+
+To get dojot running with http on a domain other than localhost, at least for the purposes of this guide, you **MUST** ensure you have set up a static public IP address for your server and registered a domain for it. Then just follow the next steps. *And that domain must be accessible where dojot is running, an alternative solution for this is look for the commented out codes in `docker-compose.yml` preceded by the titles `Gateway-static-dojot _default-1`, `Gateway-static-dojot_default-2` and `Gateway-static-dojot_default-3` and uncomment the codes accordingly instructions.*
+
+Add the following lines to the end of the file [.env](./.env) and change `<your domain>` for your domain or IP. (If you want to use port 8000 do not add the variable `DOJOT_HTTP_PORT`, It be accessible at `http://<your domain>:8000`.)
+
+``` sh
+DOJOT_DOMAIN_NAME=<your domain>
+
+DOJOT_HTTP_PORT=80
+
+DOJOT_URL=http://${DOJOT_DOMAIN_NAME}:${DOJOT_HTTP_PORT}
+
+```
+
+Then run the command below:
+
+``` sh
+sudo docker-compose up  -d
+```
+
+After that the dojot must be accessible at `http://<your domain>`. The tenant will be the value of the `KEYCLOAK_DEFAULT_REALM` variable which by default has the value `admin`, the username will be `admin` and the password the value defined in `KEYCLOAK_ADMIN_PASSWORD_TEMP`.
 
 ## Environment variable
 

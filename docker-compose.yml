@@ -389,6 +389,8 @@ services:
       # issued by a public CA, such as lets encrypt in KONG_SSL_CERT.
       KONG_SSL_CERT: ${KONG_SSL_CERT:-}
       KONG_SSL_CERT_KEY: ${KONG_SSL_CERT_KEY:-}
+      KONG_LUA_SSL_TRUSTED_CERTIFICATE: ${KONG_SSL_CERT_CA:-/etc/ssl/certs/ca-certificates.crt}
+      DOJOT_PLUGIN_SSL_VERIFY: ${SSL_VERIFY:-true}
       # To enable HTTPs internal with mutual authentication, it is necessary to configure public certificates
       # issued by a EJBCA internal from dojot in KONG_NGINX_PROXY_PROXY_SSL_CERTIFICATE.
       # KONG_NGINX_PROXY_PROXY_SSL_CERTIFICATE_KEY: /certs/example-internal.key
@@ -407,6 +409,8 @@ services:
       retries: 10
     volumes:
       - /dojot/etc/letsencrypt/:/dojot/etc/letsencrypt/:Z
+      - ./certs/:/certs/:Z
+      - ./ca/:/ca/:Z
     restart: always
     ## ## **`Gateway-static-dojot_default-1`**
     ## This setting `extra_hosts` is to be used together with the static ip of the
@@ -954,20 +958,25 @@ services:
       - keycloak
       - backstage-redis
       - postgres
+    volumes:
+      - ./certs/:/certs/:Z
+      - ./ca/:/ca/:Z
     environment:
       # The BS_SESSION_SECRET should be unique for each environment
       BS_SESSION_SECRET: j0yYsBdc4p+PPq6ArjshcPdz0HA6WT
       BS_LOG_CONSOLE_LEVEL: 'info'
       BS_APP_BASE_URL: ${DOJOT_URL:-http://localhost:8000}
       BS_GRAPHQL_SECURE: ${DOJOT_ENABLE_HTTPS_ONLY:-false}
+      BS_GRAPHQL_SSL_CA: ${KONG_SSL_CERT_CA:-}
       BS_GRAPHQL_BASE_URL: ${DOJOT_URL:-http://apigw:8000}
       BS_SESSION_DOMAIN: ${DOJOT_DOMAIN_NAME:-localhost}
       BS_SESSION_COOKIE_HTTPS: ${DOJOT_ENABLE_HTTPS_ONLY:-false}
       BS_KEYCLOAK_URL_EXTERNAL: '${DOJOT_URL:-http://localhost:8000}/auth'
       BS_KEYCLOAK_URL_INTERNAL: '${DOJOT_URL:-http://apigw:8000}/auth'
       BS_KEYCLOAK_SECURE: ${DOJOT_ENABLE_HTTPS_ONLY:-false}
+      BS_KEYCLOAK_SSL_CA: ${KONG_SSL_CERT_CA:-}
       BS_PROXY_TARGET: ${DOJOT_URL:-http://apigw:8000}
-      BS_PROXY_SECURE: ${DOJOT_ENABLE_HTTPS_ONLY:-false}
+      BS_PROXY_SECURE: ${DOJOT_BACKSTAGE_PROXY_SECURE:-false}
 ## ## **`Gateway-static-dojot_default-2`**
 ## This setting `extra_hosts` is to be used together with the static ip of the
 ## docker network gateway, `dojot_default`. This can be useful when
