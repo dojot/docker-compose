@@ -137,7 +137,7 @@ services:
         max-file: '5'
 
   gui-v2:
-    image: dojot/gui:feature-keycloak #dojot/gui-v2:${DOJOT_VERSION}
+    image: dojot/gui-v2:feature-keycloak #dojot/gui-v2:${DOJOT_VERSION}
     depends_on:
       - backstage
     restart: always
