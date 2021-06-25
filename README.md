@@ -103,7 +103,7 @@ certonly --webroot \
 -d <your domain>; sudo chmod -R 0755 /dojot/etc/letsencrypt/{live,archive}
 ```
 
-Now that you have your certificate, you have to edit the [.env](./.env) again by adding the variables below. Do **not** remove `DOJOT_DOMAIN_NAME`, `DOJOT_HTTP_PORT` and `DOJOT_HTTPS_PORT`.
+Now that you have your certificate, you have to edit the [.env](./.env) again by adding the variables below. Do **not** remove the variables added in the previous step.
 
 ``` sh
 KONG_SSL_CERT=/dojot/etc/letsencrypt/live/${DOJOT_DOMAIN_NAME}/fullchain.pem
