@@ -238,6 +238,7 @@ After that the dojot must be accessible at `http://<your domain>`. The tenant wi
 | DOJOT_HTTPS_PORT | HTTPs port to access the dojot | 8443 | a port
 | DOJOT_ENABLE_HTTPS_ONLY | Enables use with HTTPs only  | false | true or false
 | DOJOT_URL | URL that dojot is available. For example, `https://www.dojot.com.br`.  | none | url
+| DOJOT_BACKSTAGE_PROXY_SECURE | Enables use with HTTPs in backstage proxy  | false | true or false
 | COMPOSE_PROJECT_NAME | Sets the project name.  |  dojot | string
 | FLOWBROKER_NETWORK | Network used by flowbroker  |  flowbroker | string
 | KEYCLOAK_MASTER_USER | Master user name. This user has access to all settings and information for all tenants (equivalent to realms in the keycloak) in the keycloak.  |  master | string
