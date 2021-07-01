@@ -619,7 +619,7 @@ services:
         max-file: '5'
 
   x509-ejbca: # this service cannot be called 'ejbca'
-    image: dojot/ejbca:feature-keycloak # dojot/ejbca:${DOJOT_VERSION}
+    image: dojot/ejbca:v0.7.0-rc.1 # dojot/ejbca:${DOJOT_VERSION}
     depends_on:
       - postgres
     restart: always
