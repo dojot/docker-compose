@@ -1,13 +1,13 @@
 # dojot Deploy - Docker compose
 
-__Attention__: Before running this deployment, it is necessary to define your domain or IP in the [.env](./.env) file in the variable ``DOJOT_DOMAIN_NAME``. And  **always change the ``admin`` user password to a suitable password and keep it safe.**
+__Attention__: Before running this deployment, it is necessary to define your domain or IP in the [.env](./.env) file in the variable ``DOJOT_DOMAIN_NAME``. 
 
 __Note__ To get completely ready, **healthy**, all services in this `docker-compose` take an average of at least 12 minutes.
 
 This repository contains the necessary configuration files
 for quick deployment of the dojot platform using docker-compose.
 
-For instructions on how to get it up and running, please check [Installation Guide](https://dojotdocs.readthedocs.io/en/latest/installation-guide.html#docker-compose).
+For instructions on how to get it up and running, please check [Installation Guide](https://dojotdocs.readthedocs.io/en/latest/installation-guide.html#docker-compose). **Always change the ``admin`` user password to a suitable password and keep it safe.**
 
 To use this docker-compose.yml, you will need:
 
