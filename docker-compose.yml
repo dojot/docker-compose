@@ -619,7 +619,7 @@ services:
         max-file: '5'
 
   x509-ejbca: # this service cannot be called 'ejbca'
-    image: dojot/ejbca:${DOJOT_VERSION}
+    image: dojot/ejbca:feature-keycloak # dojot/ejbca:${DOJOT_VERSION}
     depends_on:
       - postgres
     restart: always
@@ -702,7 +702,7 @@ services:
         max-file: '5'
 
   certificate-acl:
-    image: dojot/certificate-acl:${DOJOT_VERSION}
+    image: dojot/certificate-acl:v0.7.0-rc.1 # dojot/certificate-acl:${DOJOT_VERSION}
     environment:
       CERTIFICATE_ACL_LOGGER_CONSOLE_LEVEL: "info"
     depends_on:
@@ -717,7 +717,7 @@ services:
         max-file: '5'
 
   iotagent-mqtt:
-    image: dojot/vernemq-dojot:${DOJOT_VERSION}
+    image: dojot/vernemq-dojot:v0.7.0-rc.1 #dojot/vernemq-dojot:${DOJOT_VERSION}
     command: ["/bin/bash", "-c", "echo $$VERNEMQ_CONF | base64 -d > /etc/vernemq/vernemq.conf; echo $$VM_ARGS | base64 -d > /etc/vernemq/vm.args; start_vernemq"]
     depends_on:
       - iotagent-mqtt-cert-sidecar
@@ -743,7 +743,7 @@ services:
         max-file: '5'
 
   iotagent-mqtt-cert-sidecar:
-    image: dojot/cert-sidecar:${DOJOT_VERSION}
+    image: dojot/cert-sidecar:v0.7.0-rc.1 #dojot/cert-sidecar:${DOJOT_VERSION}
     depends_on:
       - x509-identity-mgmt
     environment:
@@ -771,7 +771,7 @@ services:
         max-file: '5'
 
   v2k-bridge:
-    image: dojot/v2k-bridge:${DOJOT_VERSION}
+    image: dojot/v2k-bridge:v0.7.0-rc.1 #dojot/v2k-bridge:${DOJOT_VERSION}
     depends_on:
       - iotagent-mqtt
       - kafka
@@ -795,7 +795,7 @@ services:
         max-file: '5'
 
   v2k-bridge-cert-sidecar:
-    image: dojot/cert-sidecar:${DOJOT_VERSION}
+    image: dojot/cert-sidecar:v0.7.0-rc.1 #dojot/cert-sidecar:${DOJOT_VERSION}
     depends_on:
       - x509-identity-mgmt
     environment:
@@ -818,7 +818,7 @@ services:
         max-file: '5'
 
   k2v-bridge:
-    image: dojot/k2v-bridge:${DOJOT_VERSION}
+    image: dojot/k2v-bridge:v0.7.0-rc.1 #dojot/k2v-bridge:${DOJOT_VERSION}
     depends_on:
       - iotagent-mqtt
       - kafka
@@ -842,7 +842,7 @@ services:
         max-file: '5'
 
   k2v-bridge-cert-sidecar:
-    image: dojot/cert-sidecar:${DOJOT_VERSION}
+    image: dojot/cert-sidecar:v0.7.0-rc.1 #dojot/cert-sidecar:${DOJOT_VERSION}
     depends_on:
       - x509-identity-mgmt
     environment:
@@ -925,7 +925,7 @@ services:
   ###
 
   data-manager:
-    image: dojot/data-manager:${DOJOT_VERSION}
+    image: dojot/data-manager:v0.7.0-rc.1 #dojot/data-manager:${DOJOT_VERSION}
     restart: always
     depends_on:
       - flowbroker
