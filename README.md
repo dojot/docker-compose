@@ -75,6 +75,8 @@ DOJOT_HTTPS_PORT=443
 DOJOT_ENABLE_HTTPS_ONLY=true
 DOJOT_BACKSTAGE_PROXY_SECURE=true
 
+DOJOT_KONG_ROUTE_ALLOW_ONLY_HTTPS=true
+
 DOJOT_URL=https://${DOJOT_DOMAIN_NAME}:${DOJOT_HTTPS_PORT}
 
 KEYCLOAK_REALM_SSL_MODE=EXTERNAL
@@ -248,6 +250,7 @@ After that the dojot must be accessible at `http://<your domain>`. The tenant wi
 | KEYCLOAK_REALM_SSL_MODE | **EXTERNAL**: Keycloak can run out of the box without SSL so long as you stick to private IP addresses like localhost, 127.0.0.1, 10.0.x.x, 192.168.x.x, and 172.16.x.x. If you don’t have SSL/HTTPS configured on the server or you try to access Keycloak over HTTP from a non-private IP adress you will get an error. **NONE**: Keycloak does not require SSL. This should really only be used in development when you are playing around with things. **ALL**: Keycloak requires SSL for all IP addresses.  |  NONE | ALL, EXTERNAL or NONE
 | KONG_SSL_CERT | Public certificates issued by a public CA, such as lets encrypt. |  none | string path to cert
 | KONG_SSL_CERT_KEY | Private key certificates uses to issue a public CA, such as lets encrypt. |  none | string path to cert key
+| DOJOT_KONG_ROUTE_ALLOW_ONLY_HTTPS |  Enables using only the https on kong routes.  |  false | true or false
 
 ### Keycloak SMTP
 

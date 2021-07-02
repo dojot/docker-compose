@@ -433,6 +433,7 @@ services:
     restart: on-failure
     environment:
       DOJOT_DOMAIN_NAME: '${DOJOT_DOMAIN_NAME:-localhost}'
+      DOJOT_KONG_ROUTE_ALLOW_ONLY_HTTPS: ${DOJOT_KONG_ROUTE_ALLOW_ONLY_HTTPS:-false}
     depends_on:
       - apigw
     volumes:

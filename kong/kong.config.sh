@@ -1,7 +1,15 @@
 #!/bin/sh
 kong="http://apigw:8001"
 dojot_domain_name=${DOJOT_DOMAIN_NAME:-localhost}
+route_allow_only_https=${DOJOT_KONG_ROUTE_ALLOW_ONLY_HTTPS:-false}
 
+
+route_allow_protocol='"http","https"'
+
+if [ "$route_allow_only_https" = "true" ]; then
+    echo "Allow onlyhttps"
+    route_allow_protocol='"https"'
+fi;
 
 # check if kong is started
 if curl --output /dev/null --silent --head --fail "$kong"; then
@@ -65,7 +73,9 @@ echo "-- createRoute: ServiceName=${1} Url=${2} PathS=${3} StripPath=${4}"
     -d @- ) <<PAYLOAD
 {
     "paths": [${3}],
-    "strip_path": ${4}
+    "strip_path": ${4},
+    "protocols": [${route_allow_protocol}],
+    "https_redirect_status_code": 301
 }
 PAYLOAD
 }
@@ -88,7 +98,15 @@ createRoute "${1}" "${1}_route" "${3}" "${4}"
 
 # service: letsencrypt-nginx
 
-createEndpoint "letsencrypt-nginx" "http://letsencrypt-nginx:80"  '"/.well-known/acme-challenge"' "false"
+curl  -sS -X PUT \
+--url ${kong}/services/letsencrypt-nginx \
+--data "name=letsencrypt-nginx" \
+--data "url=http://letsencrypt-nginx:80"
+
+curl  -sS -X PUT \
+--url ${kong}/services/letsencrypt-nginx/routes/letsencrypt-nginx_route \
+--data "paths=/.well-known/acme-challenge" \
+--data "strip_path=false"
 
 # service: gui
 
