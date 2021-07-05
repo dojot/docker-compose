@@ -163,7 +163,7 @@ On Debian-based Linux distributions, you can install these prerequisites by runn
 sudo apt install git openssl
 ```
 
-After installing the prerequisites if necessary, download the tool to generate certificates [certgen](https://github.com/dojot/dojot/tree/development/tools/certgen) (to see other possible parameters go to [documents] (<https://github.com/dojot/dojot/tree/development/tools/certgen#readme>)):
+After installing the prerequisites if necessary, download the tool to generate certificates [certgen](https://github.com/dojot/dojot/tree/development/tools/certgen) (to see other possible parameters go to [documents](https://github.com/dojot/dojot/tree/development/tools/certgen#readme)):
 
 ```sh
 git clone --single-branch --branch development https://github.com/dojot/dojot.git cert-tools-temp && cp -r cert-tools-temp/tools/certgen certgen && rm -rf cert-tools-temp
