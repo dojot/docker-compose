@@ -57,12 +57,12 @@ Both are available in the [Docker official site](https://docs.docker.com/install
 It's important to note that we have four ways to deploy dojot on Docker Compose and these ways will be shown in the topics below.
 You should check which way is most interesting for your use case and then follow the respective documentation.
 
-1. [How to run on localhost](#how-to-run-on-localhost)
-1. [How to run with HTTPS](#how-to-run-with-https)
-    1. [Secure dojot with Let's Encrypt (recommended)](#secure-dojot-with-lets-encrypt-recommended)
-        1. [How to schedule domain certificate renewal (recommended and important)](#how-to-schedule-domain-certificate-renewal-recommended-and-important)
-    1. [Use HTTPS with self-signed certificate](#use-https-with-self-signed-certificate)
-1. [Run on a domain other than localhost with http (not recommended)](#run-on-a-domain-other-than-localhost-with-http-not-recommended)
+- [How to run on localhost](#how-to-run-on-localhost)
+- [How to run with HTTPS](#how-to-run-with-https)
+  - [Secure dojot with Let's Encrypt (recommended)](#secure-dojot-with-lets-encrypt-recommended)
+    - [How to schedule domain certificate renewal (recommended and important)](#how-to-schedule-domain-certificate-renewal-recommended-and-important)
+  - [Use HTTPS with self-signed certificate](#use-https-with-self-signed-certificate)
+- [Run on a domain other than localhost with http (not recommended)](#run-on-a-domain-other-than-localhost-with-http-not-recommended)
 
 #### How to run on *localhost*
 
@@ -163,7 +163,7 @@ On Debian-based Linux distributions, you can install these prerequisites by runn
 sudo apt install git openssl
 ```
 
-After installing the prerequisites if necessary, download the tool to generate certificates [certgen](https://github.com/dojot/dojot/tree/development/tools/certgen) (to see other possible parameters go to [documents] (https://github.com/dojot/dojot/tree/development/tools/certgen#readme)):
+After installing the prerequisites if necessary, download the tool to generate certificates [certgen](https://github.com/dojot/dojot/tree/development/tools/certgen) (to see other possible parameters go to [documents] (<https://github.com/dojot/dojot/tree/development/tools/certgen#readme>)):
 
 ```sh
 git clone --single-branch --branch development https://github.com/dojot/dojot.git cert-tools-temp && cp -r cert-tools-temp/tools/certgen certgen && rm -rf cert-tools-temp
