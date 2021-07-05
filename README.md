@@ -6,11 +6,13 @@
 1. [Disclaimer](#disclaimer)
 1. [Required settings and Recommended settings](#required-settings-and-recommended-settings)
 1. [How to get it up and running](#how-to-get-it-up-and-running)
-    1. [How to run on localhost](#how-to-run-on-localhost)
-    1. [How to run with HTTPS (secure dojot with Let's Encrypt) - recommended](#how-to-run-with-https-secure-dojot-with-lets-encrypt---recommended)
-        1. [How to schedule domain certificate renewal (recommended and important)](#how-to-schedule-domain-certificate-renewal-recommended-and-important)
-    1. [How to use HTTPS with self-signed certificate](#how-to-use-https-self-signed-certificate)
-    1. [How to run on a domain other than localhost with http (not recommended)](#how-to-run-on-a-domain-other-than-localhost-with-http-not-recommended)
+    1. [Deploy Options](#deploy-options)
+        1. [How to run on localhost](#how-to-run-on-localhost)
+        1. [How to run with HTTPS](#how-to-run-with-https)
+            1. [Secure dojot with Let's Encrypt (recommended)](#secure-dojot-with-lets-encrypt-recommended)
+                1. [How to schedule domain certificate renewal (recommended and important)](#how-to-schedule-domain-certificate-renewal-recommended-and-important)
+            1. [Use HTTPS with self-signed certificate](#use-https-with-self-signed-certificate)
+        1. [Run on a domain other than localhost with http (not recommended)](#run-on-a-domain-other-than-localhost-with-http-not-recommended)
 1. [Environment variable](#environment-variable)
     1. [The available variables](#the-available-variables)
     1. [Keycloak SMTP](#keycloak-smtp)
@@ -50,7 +52,19 @@ To use this `docker-compose.yml`, you will need:
 
 Both are available in the [Docker official site](https://docs.docker.com/install/). All tests were performed with Docker CE. And also using Ubuntu 18.04 and 20.04.
 
-### How to run on *localhost*
+### Deploy Options
+
+It's important to note that we have four ways to deploy dojot on Docker Compose and these ways will be shown in the topics below.
+You should check which way is most interesting for your use case and then follow the respective documentation.
+
+1. [How to run on localhost](#how-to-run-on-localhost)
+1. [How to run with HTTPS](#how-to-run-with-https)
+    1. [Secure dojot with Let's Encrypt (recommended)](#secure-dojot-with-lets-encrypt-recommended)
+        1. [How to schedule domain certificate renewal (recommended and important)](#how-to-schedule-domain-certificate-renewal-recommended-and-important)
+    1. [Use HTTPS with self-signed certificate](#use-https-with-self-signed-certificate)
+1. [Run on a domain other than localhost with http (not recommended)](#run-on-a-domain-other-than-localhost-with-http-not-recommended)
+
+#### How to run on *localhost*
 
 Just run the command below:
 
@@ -60,7 +74,9 @@ sudo docker-compose up  -d
 
 After that the dojot must be accessible at `http://localhost:8000`. The tenant will be the value of the `KEYCLOAK_DEFAULT_REALM` variable which by default has the value `admin`, the username will be `admin` and the password the value defined in `KEYCLOAK_ADMIN_PASSWORD_TEMP`.
 
-## How to run with HTTPS (secure dojot with Let's Encrypt) - recommended
+#### How to run with HTTPS
+
+##### Secure dojot with Let's Encrypt (recommended)
 
 To get dojot running with https, at least for the purposes of this guide, you **MUST** ensure you have set up a static public IP address for your server and registered a domain for it. Then just follow the next steps. *And that domain must be accessible where dojot is running, , an alternative solution for this is look for the commented out codes in `docker-compose.yml` preceded by the titles `Gateway-static-dojot _default-1`, `Gateway-static-dojot_default-2` and `Gateway-static-dojot_default-3` and uncomment the codes accordingly instructions.*
 
@@ -120,7 +136,7 @@ sudo docker-compose  up -d
 
 After that the dojot must be accessible at `https://<your domain>`. The tenant will be the value of the `KEYCLOAK_DEFAULT_REALM` variable which by default has the value `admin`, the username will be `admin` and the password the value defined in `KEYCLOAK_ADMIN_PASSWORD_TEMP`.
 
-### How to schedule domain certificate renewal (recommended and important)
+###### How to schedule domain certificate renewal (recommended and important)
 
 Periodically, you need to renew the certificate. The process is very simple, run a Certbot command and restart the Nginx. To automate it with a cron job, run:
 
@@ -137,7 +153,7 @@ Place the following at the end of the file, then close and save it.
 
 The above command will run every night at 23:00, renewing the certificate and forcing Kong to restart if the certificate is due for renewal.
 
-## How to use HTTPS with self-signed certificate
+##### Use HTTPS with self-signed certificate
 
 As prerequisites this uses [git](https://git-scm.com/) and [OpenSSL](https://www.openssl.org/).
 
@@ -203,7 +219,7 @@ __NOTE__ And also when accessing this url via CURL, postman and other such servi
 
 After that the dojot must be accessible at `https://<your domain>` in the browser that has been configured with the new **Certification Authority**. The tenant will be the value of the `KEYCLOAK_DEFAULT_REALM` variable which by default has the value `admin`, the username will be `admin` and the password the value defined in `KEYCLOAK_ADMIN_PASSWORD_TEMP`.
 
-### How to run on a domain *other than localhost* with http (not recommended)
+#### Run on a domain other than localhost with http (not recommended)
 
 **We discourage using this deployment mode for security reasons. Using it is at your own risk.**
 
