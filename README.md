@@ -9,7 +9,7 @@
     1. [How to run on localhost](#how-to-run-on-localhost)
     1. [How to run with HTTPS (secure dojot with Let's Encrypt) - recommended](#how-to-run-with-https-secure-dojot-with-lets-encrypt---recommended)
         1. [How to schedule domain certificate renewal (recommended and important)](#how-to-schedule-domain-certificate-renewal-recommended-and-important)
-    1. [How to use self-signed certificate](#how-to-use-self-signed-certificate)
+    1. [How to use HTTPS with self-signed certificate](#how-to-use-https-self-signed-certificate)
     1. [How to run on a domain other than localhost with http (not recommended)](#how-to-run-on-a-domain-other-than-localhost-with-http-not-recommended)
 1. [Environment variable](#environment-variable)
     1. [The available variables](#the-available-variables)
@@ -137,7 +137,7 @@ Place the following at the end of the file, then close and save it.
 
 The above command will run every night at 23:00, renewing the certificate and forcing Kong to restart if the certificate is due for renewal.
 
-## How to use self-signed certificate
+## How to use HTTPS with self-signed certificate
 
 As prerequisites this uses [git](https://git-scm.com/) and [OpenSSL](https://www.openssl.org/).
 
