@@ -2,7 +2,7 @@ version: '3.8'
 services:
 
   history:
-    image: dojot/history:v0.7.0-rc.1
+    image: dojot/history:${DOJOT_VERSION}
     restart: always
     depends_on:
       - mongodb
@@ -17,7 +17,7 @@ services:
         max-file: '5'
 
   persister:
-    image: dojot/persister:v0.7.0-rc.1
+    image: dojot/persister:${DOJOT_VERSION}
     restart: always
     depends_on:
       - mongodb
@@ -56,7 +56,7 @@ services:
       - mongodb-cfg-volume:/data/configdb
 
   gui:
-    image: dojot/gui:v0.7.0-rc.1
+    image: dojot/gui:${DOJOT_VERSION}
     depends_on:
       - backstage
     restart: always
@@ -67,7 +67,7 @@ services:
         max-file: '5'
 
   gui-v2:
-    image: dojot/gui-v2:v0.7.0-rc.1
+    image: dojot/gui-v2:${DOJOT_VERSION}
     depends_on:
       - backstage
     restart: always
@@ -78,7 +78,7 @@ services:
         max-file: '5'
 
   data-broker:
-    image: dojot/data-broker:v0.7.0-rc.1
+    image: dojot/data-broker:${DOJOT_VERSION}
     restart: always
     depends_on:
       - kafka
@@ -118,7 +118,7 @@ services:
 # iot-agent lwm2m
 ################
   iotagent-lwm2m:
-    image: dojot/iotagent-leshan:v0.7.0-rc.1
+    image: dojot/iotagent-leshan:${DOJOT_VERSION}
     depends_on:
       - kafka
       - data-broker
@@ -143,7 +143,7 @@ services:
         max-file: '5'
 
   image-manager:
-    image: dojot/image-manager:v0.7.0-rc.1
+    image: dojot/image-manager:${DOJOT_VERSION}
     restart: always
     depends_on:
       - postgres
@@ -183,7 +183,7 @@ services:
       - minio-volume:/data
 
   device-manager:
-    image: dojot/device-manager:v0.7.0-rc.1
+    image: dojot/device-manager:${DOJOT_VERSION}
     restart: always
     environment:
       # TODO: Fill these env variables with suitable values
@@ -247,7 +247,7 @@ services:
 
   # Prepare database, Bootstrap the database
   kong-migrations:
-    image: dojot/kong:v0.7.0-rc.1
+    image: dojot/kong:${DOJOT_VERSION}
     command: kong migrations bootstrap
     depends_on:
       postgres:
@@ -268,7 +268,7 @@ services:
 
   # Run any new migrations and Finish running any pending migrations after 'up'.
   kong-migrations-up:
-    image:  dojot/kong:v0.7.0-rc.1
+    image:  dojot/kong:${DOJOT_VERSION}
     command: kong migrations up && kong migrations finish
     depends_on:
       postgres:
@@ -288,7 +288,7 @@ services:
         max-file: '5'
 
   apigw:
-    image: dojot/kong:v0.7.0-rc.1
+    image: dojot/kong:${DOJOT_VERSION}
     depends_on:
       postgres:
         condition: service_healthy
@@ -351,7 +351,7 @@ services:
 
 
   auth:
-    image: dojot/auth:v0.7.0-rc.1
+    image: dojot/auth:${DOJOT_VERSION}
     restart: always
     depends_on:
       - apigw
