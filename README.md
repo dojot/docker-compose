@@ -13,6 +13,7 @@
                 1. [How to schedule domain certificate renewal (recommended and important)](#how-to-schedule-domain-certificate-renewal-recommended-and-important)
             1. [Use HTTPS with self-signed certificate](#use-https-with-self-signed-certificate)
         1. [Run on a domain other than localhost with http (not recommended)](#run-on-a-domain-other-than-localhost-with-http-not-recommended)
+    1. [Problems with domain/ip not accessible on docker network](#problems-with-domainip-not-accessible-on-docker-network)
 1. [Environment variable](#environment-variable)
     1. [The available variables](#the-available-variables)
     1. [Keycloak SMTP](#keycloak-smtp)
@@ -64,6 +65,8 @@ You should check which way is most interesting for your use case and then follow
   - [Use HTTPS with self-signed certificate](#use-https-with-self-signed-certificate)
 - [Run on a domain other than localhost with http (not recommended)](#run-on-a-domain-other-than-localhost-with-http-not-recommended)
 
+__Note___ On some machines, when trying to run dojot on port ``80``, there are some internal permission errors in the `apigw (kong)` service. An alternative is to change the port value in ``DOJOT_HTTP_PORT`` to another one like ``8080``.
+
 #### How to run on *localhost*
 
 Just run the command below:
@@ -78,7 +81,7 @@ After that the dojot must be accessible at `http://localhost:8000`. The tenant w
 
 ##### Secure dojot with Let's Encrypt (recommended)
 
-To get dojot running with https, at least for the purposes of this guide, you **MUST** ensure you have set up a static public IP address for your server and registered a domain for it. Then just follow the next steps. *And that domain must be accessible where dojot is running, , an alternative solution for this is look for the commented out codes in `docker-compose.yml` preceded by the titles `Gateway-static-dojot _default-1`, `Gateway-static-dojot_default-2` and `Gateway-static-dojot_default-3` and uncomment the codes accordingly instructions.*
+To get dojot running with https and Let's Encrypt you **MUST** ensure you have set up a static public IP address for your server and registered a domain for it.
 
 Add the following lines to the end of the file [.env](./.env) and change `<your domain>` for your registered domain.
 
@@ -155,6 +158,8 @@ The above command will run every night at 23:00, renewing the certificate and fo
 
 ##### Use HTTPS with self-signed certificate
 
+To get dojot running with https with self-signed certificate, that domain/ip must be accessible where dojot is running and inside the docker network. See an [alternative solution](#problems-with-domainip-not-accessible-on-docker-network).
+
 As prerequisites this uses [git](https://git-scm.com/) and [OpenSSL](https://www.openssl.org/).
 
 On Debian-based Linux distributions, you can install these prerequisites by running:
@@ -223,7 +228,7 @@ After that the dojot must be accessible at `https://<your domain>` in the browse
 
 **We discourage using this deployment mode for security reasons. Using it is at your own risk.**
 
-To get dojot running with http on a domain other than localhost, at least for the purposes of this guide, you **MUST** ensure you have set up a static public IP address for your server and registered a domain for it. Then just follow the next steps. *And that domain must be accessible where dojot is running, an alternative solution for this is look for the commented out codes in `docker-compose.yml` preceded by the titles `Gateway-static-dojot _default-1`, `Gateway-static-dojot_default-2` and `Gateway-static-dojot_default-3` and uncomment the codes accordingly instructions.*
+To get dojot running with a domain other than localhost with http, that domain/ip must be accessible where dojot is running and inside the docker network. See an alternative solution [alternative solution](#problems-with-domainip-not-accessible-on-docker-network).
 
 Add the following lines to the end of the file [.env](./.env) and change `<your domain>` for your domain or IP. (If you want to use port 8000 add the variable `DOJOT_HTTP_PORT` with 8000 value, It be accessible at `http://<your domain>:8000`.)
 
@@ -243,6 +248,10 @@ sudo docker-compose up  -d
 ```
 
 After that the dojot must be accessible at `http://<your domain>`. The tenant will be the value of the `KEYCLOAK_DEFAULT_REALM` variable which by default has the value `admin`, the username will be `admin` and the password the value defined in `KEYCLOAK_ADMIN_PASSWORD_TEMP`.
+
+### Problems with domain/ip not accessible on docker network
+
+When the docker network cannot access the domain or ip where dojot is running there is an alternative solution for this is look for the commented out codes in `docker-compose.yml` preceded by the titles `Gateway-static-dojot_default-1`, `Gateway-static-dojot_default-2` and `Gateway-static-dojot_default-3` and uncomment the codes accordingly instructions in comments.
 
 ## Environment variable
 
