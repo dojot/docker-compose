@@ -251,7 +251,7 @@ After that the dojot must be accessible at `http://<your domain>`. The tenant wi
 
 ### Problems with domain/ip not accessible on docker network
 
-When the docker network cannot access the domain or ip where dojot is running there is an alternative solution for this is look for the commented out codes in `docker-compose.yml` preceded by the titles `Gateway-static-dojot_default-1`, `Gateway-static-dojot_default-2` and `Gateway-static-dojot_default-3` and uncomment the codes accordingly instructions in comments.
+When the docker network cannot access the domain or ip where dojot is running there is an alternative solution for this. You can look for the commented out codes in `docker-compose.yml` preceded by the titles `Gateway-static-dojot_default-1`, `Gateway-static-dojot_default-2` and `Gateway-static-dojot_default-3` and uncomment the codes accordingly instructions in comments.
 
 ## Environment variable
 
