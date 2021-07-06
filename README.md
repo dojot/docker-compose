@@ -225,7 +225,7 @@ After that the dojot must be accessible at `https://<your domain>` in the browse
 
 To get dojot running with http on a domain other than localhost, at least for the purposes of this guide, you **MUST** ensure you have set up a static public IP address for your server and registered a domain for it. Then just follow the next steps. *And that domain must be accessible where dojot is running, an alternative solution for this is look for the commented out codes in `docker-compose.yml` preceded by the titles `Gateway-static-dojot _default-1`, `Gateway-static-dojot_default-2` and `Gateway-static-dojot_default-3` and uncomment the codes accordingly instructions.*
 
-Add the following lines to the end of the file [.env](./.env) and change `<your domain>` for your domain or IP. (If you want to use port 8000 do not add the variable `DOJOT_HTTP_PORT`, It be accessible at `http://<your domain>:8000`.)
+Add the following lines to the end of the file [.env](./.env) and change `<your domain>` for your domain or IP. (If you want to use port 8000 add the variable `DOJOT_HTTP_PORT` with 8000 value, It be accessible at `http://<your domain>:8000`.)
 
 ``` sh
 DOJOT_DOMAIN_NAME=<your domain>
