@@ -180,22 +180,22 @@ For domain case:
 
 ```sh
 DOJOT_DOMAIN_NAME=<your domain>
-./certgen/bin/certgen.sh \
+sudo ./certgen/bin/certgen.sh \
     --dns ${DOJOT_DOMAIN_NAME} \
     --cname ${DOJOT_DOMAIN_NAME}
 
-chmod -R 0755 certs/ ca/
+sudo chmod -R 0755 certs/ ca/
 ```
 
 For IP case:
 
 ```sh
 DOJOT_IP=<your ip>
-./certgen/bin/certgen.sh \
+sudo ./certgen/bin/certgen.sh \
     --ip  ${DOJOT_IP} \
     --cname ${DOJOT_IP}
 
-chmod -R 0755 certs/ ca/
+sudo chmod -R 0755 certs/ ca/
 ```
 
 Add the following lines to the end of the file [.env](./.env) and change `<your domain>` for your domain or **IP**.
@@ -218,7 +218,7 @@ KONG_SSL_CERT_CA=/ca/ca.crt
 
 ```
 
-In addition it is necessary to configure in your browser a new *Certificate Authority*, in *chrome* and *firefox* the steps are very close, go to **Setting** then look for **Privacy and Security** and **Security** look for something like **Manage Certificates** or **Certificates**, go to the **Authorities** tab, import the file from `ca/ca.crt` and check the option next to **Thus this CA to identifying websites** and click in **OK**.
+In addition it is necessary to configure in your browser a new *Certificate Authority*, in *chrome* and *firefox* the steps are very close, go to **Settings** then look for **Privacy and Security** and **Security**, and then look for something like **Manage Certificates** or **Certificates**, go to the **Authorities** tab, import the file from `ca/ca.crt` and check the option next to **Thus this CA to identifying websites** and click in **OK**.
 
 __NOTE__ And also when accessing this url via CURL, postman and other such services, via code, it is necessary to use this `ca/ca.crt` file as being a CA, a *Certificate Authority* trustworthy.
 
