@@ -1,6 +1,6 @@
-# Dojot Deploy - Docker compose
+# **Dojot Deploy - Docker compose**
 
-## Table of Contents
+# Table of Contents
 
 1. [Overview](#overview)
 1. [Disclaimer](#disclaimer)
@@ -20,19 +20,19 @@
 1. [General documentation](#general-documentation)
 1. [Issues and help](#issues-and-help)
 
-## Overview
+# Overview
 
 This repository contains the necessary configuration files
 for quick deployment of the dojot platform using `docker-compose`.
 
 __Attention__ To get completely ready, **healthy**, all services in this `docker-compose` take an average of at least 12 minutes.
 
-## Disclaimer
+# Disclaimer
 
 This deployment option is best suited to development and functional environments.
 For production environment we recommend to use [Kubernetes with Ansible](https://github.com/dojot/ansible-dojot). See how to install on [guide](https://dojotdocs.readthedocs.io/en/latest/installation-guide.html#kubernetes).
 
-## Required settings and Recommended settings
+# Required settings and Recommended settings
 
 __Required setting:__ Before running this deployment, it is necessary to define a password value in the [.env](./.env) file for the `KEYCLOAK_MASTER_PASSWORD` and `KEYCLOAK_ADMIN_PASSWORD_TEMP`  variables. The value `KEYCLOAK_ADMIN_PASSWORD_TEMP` will be the password of the user *admin* of all tenants (equivalent to realms in the keycloak) when created. **Passwords must have a digit number, a letter in upper case, a letter in lower case, a special character, they cannot be the user or an email and must have 8 characters. If the password does not fit in some cases there will be errors internally when trying to run this `docker-compose`.**
 
@@ -42,7 +42,7 @@ __Recommended setting 2:__ It is highly recommended to use dojot with security (
 
 __Recommended setting 3:__ The values of secrets must be unique for each environment, to ensure security. Give preference to large random values. The environment variables for these secrets can be found in the `docker.compose.yml` file and are `BS_SESSION_SECRET` in the **backstage** service, `S3ACCESSKEY` and `S3SECRETKEY` in the **image-manager** service, `MINIO_ACCESS_KEY` and `MINIO_SECRET_KEY` in the **minio** service and `KAFKA_WS_TICKET_SECRET` in the **kafka-ws** service.
 
-## How to get it up and running
+# How to get it up and running
 
 **Before, it is necessary to do the step [`Required setting`](#required-settings-and-recommended-settings) of the previous topic.**
 
@@ -53,7 +53,7 @@ To use this `docker-compose.yml`, you will need:
 
 Both are available in the [Docker official site](https://docs.docker.com/install/). All tests were performed with Docker CE. And also using Ubuntu 18.04 and 20.04.
 
-### Deploy Options
+## Deploy Options
 
 It's important to note that we have four ways to deploy dojot on Docker Compose and these ways will be shown in the topics below.
 You should check which way is most interesting for your use case and then follow the respective documentation.
@@ -67,7 +67,7 @@ You should check which way is most interesting for your use case and then follow
 
 __Note___ On some machines, when trying to run dojot on port ``80``, there are some internal permission errors in the `apigw (kong)` service. An alternative is to change the port value in ``DOJOT_HTTP_PORT`` to another one like ``8080``.
 
-#### How to run on *localhost*
+### How to run on *localhost*
 
 Just run the command below:
 
@@ -77,9 +77,9 @@ sudo docker-compose up  -d
 
 After that the dojot must be accessible at `http://localhost:8000`. The tenant will be the value of the `KEYCLOAK_DEFAULT_REALM` variable which by default has the value `admin`, the username will be `admin` and the password the value defined in `KEYCLOAK_ADMIN_PASSWORD_TEMP`.
 
-#### How to run with HTTPS
+### How to run with HTTPS
 
-##### Secure dojot with Let's Encrypt (recommended)
+#### Secure dojot with Let's Encrypt (recommended)
 
 To get dojot running with https and Let's Encrypt you **MUST** ensure you have set up a static public IP address for your server and registered a domain for it.
 
@@ -224,7 +224,7 @@ __NOTE__ And also when accessing this url via CURL, postman and other such servi
 
 After that the dojot must be accessible at `https://<your domain>` in the browser that has been configured with the new **Certification Authority**. The tenant will be the value of the `KEYCLOAK_DEFAULT_REALM` variable which by default has the value `admin`, the username will be `admin` and the password the value defined in `KEYCLOAK_ADMIN_PASSWORD_TEMP`.
 
-#### Run on a domain other than localhost with http (not recommended)
+### Run on a domain other than localhost with http (not recommended)
 
 **We discourage using this deployment mode for security reasons. Using it is at your own risk.**
 
@@ -249,13 +249,13 @@ sudo docker-compose up  -d
 
 After that the dojot must be accessible at `http://<your domain>`. The tenant will be the value of the `KEYCLOAK_DEFAULT_REALM` variable which by default has the value `admin`, the username will be `admin` and the password the value defined in `KEYCLOAK_ADMIN_PASSWORD_TEMP`.
 
-### Problems with domain/ip not accessible on docker network
+## Problems with domain/ip not accessible on docker network
 
 When the docker network cannot access the domain or ip where dojot is running there is an alternative solution for this. You can look for the commented out codes in `docker-compose.yml` preceded by the titles `Gateway-static-dojot_default-1`, `Gateway-static-dojot_default-2` and `Gateway-static-dojot_default-3` and uncomment the codes accordingly instructions in comments.
 
-## Environment variable
+# Environment variable
 
-### The available variables
+## The available variables
 
 | Environment variable | Purpose | Default Value | Valid Values
 | -------------------- | ------- | ------------- | ------------
@@ -277,19 +277,19 @@ When the docker network cannot access the domain or ip where dojot is running th
 | KONG_SSL_CERT_KEY | Private key certificates uses to issue a public CA, such as lets encrypt. |  none | string path to cert key
 | DOJOT_KONG_ROUTE_ALLOW_ONLY_HTTPS |  Enables using only the https on kong routes.  |  false | true or false
 
-### Keycloak SMTP
+## Keycloak SMTP
 
 To configure the use of password recovery emails, setting passwords, etc., in the keycloak, it is necessary to configure a valid SMTP. These settings must be passed in the `keycloak` service in the `docker-compose.yml` file, they are already commented out there, they being `DOJOT_SMTP_HOST`, `DOJOT_SMTP_PORT`, `DOJOT_SMTP_SSL`,`DOJOT_SMTP_START_TLS`,
 `DOJOT_SMTP_FROM`, `DOJOT_SMTP_FROM_DISPLAY_NAME`, `DOJOT_SMTP_USERNAME`, `DOJOT_SMTP_PASSWORD`, to uncomment them and add the necessary values. For more information on these variables, [click here](https://github.com/dojot/dojot/tree/master/iam/keycloak/dojot-provider#smtp-server-configuration).
 
-## General documentation
+# General documentation
 
 Check the documentation for more information:
 
 - [Latest dojot platform documentation](https://dojotdocs.readthedocs.io/en/latest)
 - [Latest dojot installation guide platform documentation](https://dojotdocs.readthedocs.io/en/latest/installation-guide.html)
 
-## Issues and help
+# Issues and help
 
 If you found a problem or need help, leave an issue in the main
 [dojot repository](https://github.com/dojot/dojot) and we will help you!
