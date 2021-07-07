@@ -65,7 +65,7 @@ You should check which way is most interesting for your use case and then follow
   - [Use HTTPS with self-signed certificate](#use-https-with-self-signed-certificate)
 - [Run on a domain other than localhost with http (not recommended)](#run-on-a-domain-other-than-localhost-with-http-not-recommended)
 
-__Note___ On some machines, when trying to run dojot on port ``80``, ``433`` or ``8080``, there are some internal permission errors in the `apigw (kong)` service. An alternative is to change the port value in ``DOJOT_HTTP_PORT`` to another one like ``8000`` or ``8443``.
+__Note__ On some machines, when trying to run dojot on port ``80``, ``433`` or ``8080``, there are some internal permission errors in the `apigw (kong)` service. An alternative is to change the port value in ``DOJOT_HTTP_PORT`` to another one like ``8000`` or ``8443``.
 
 ### How to run on *localhost*
 
