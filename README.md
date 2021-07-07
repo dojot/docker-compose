@@ -1,16 +1,25 @@
 # dojot Deploy - Docker compose
 
+__Attention__: Before running this deployment, it is necessary to define your domain or IP in the [.env](./.env) file in the variable ``DOJOT_DOMAIN_NAME``.
+
+__Note__ To get completely ready, **healthy**, all services in this `docker-compose` take an average of at least 12 minutes.
+
 This repository contains the necessary configuration files
 for quick deployment of the dojot platform using docker-compose.
 
-For instructions on how to get it up and running, please check [Installation Guide](https://dojotdocs.readthedocs.io/en/latest/installation-guide.html#docker-compose)
+For instructions on how to get it up and running, please check [Installation Guide](https://dojotdocs.readthedocs.io/en/latest/installation-guide.html#docker-compose). **Always change the ``admin`` user password to a suitable password and keep it safe.**
 
 To use this docker-compose.yml, you will need:
 
 - Docker engine > 19.03
 - docker-compose > 1.27
 
-Both are available in the [Docker official site](https://docs.docker.com/install/)_. All tests were performed with Docker CE.
+Both are available in the [Docker official site](https://docs.docker.com/install/)_. All tests were performed with Docker CE. And also using Ubuntu 18.04 and 20.04.
+
+## Disclaimer
+
+This deployment option is best suited to development and functional environments.
+For production environment we recommend to use Kubernetes.
 
 ## How to secure dojot with Nginx and Let's Encrypt
 
@@ -91,7 +100,3 @@ Place the following at the end of the file, then close and save it.
 The above command will run every night at 23:00, renewing the certificate and forcing Nginx to restart
 if the certificate is due for renewal.
 
-## Disclaimer
-
-This deployment option is best suited to development and functional environments.
-For production environment we recommend to use Kubernetes.
