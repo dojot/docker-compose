@@ -126,7 +126,6 @@ services:
       - mongodb-cfg-volume:/data/configdb
 
   gui:
-
     image: dojot/gui:feature-keycloak #dojot/gui:${DOJOT_VERSION}
     depends_on:
       - backstage
