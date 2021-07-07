@@ -403,7 +403,7 @@ services:
     ports:
       - ${DOJOT_HTTP_PORT:-8000}:${DOJOT_HTTP_PORT:-8000}
       - ${DOJOT_HTTPS_PORT:-8443}:${DOJOT_HTTPS_PORT:-8443}
-      # # If you can't upload the apigw (kong) setting the
+      # # If you can't run the apigw (kong) setting the
       # # DOJOT_HTTP_PORT values to 80 and DOJOT_HTTPS_PORT to 443,
       # # an alternative is to uncomment the 2 lines below
       # # (- 443:${DOJOT_HTTPS_PORT:-8443} and 80:{DOJOT_HTTP_PORT:-8000}),
