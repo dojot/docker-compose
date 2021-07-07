@@ -1150,13 +1150,18 @@ services:
   #   image: obsidiandynamics/kafdrop
   #   depends_on:
   #     - kafka
-  #   restart: always
   #   environment:
   #     KAFKA_BROKERCONNECT: kafka:9092
   #     JVM_OPTS: "-Xms32M -Xmx64M"
   #     SERVER_SERVLET_CONTEXTPATH: "/"
   #   ports:
   #     - "9090:9000"
+  #   restart: on-failure
+  #   logging:
+  #     driver: json-file
+  #     options:
+  #       max-size: 20m
+  #       max-file: '5'
 # GUI to Kafka - END
 
 # GUI to mongo - BEGIN
@@ -1170,6 +1175,11 @@ services:
   #     ME_CONFIG_MONGODB_SERVER: mongodb
   #   ports:
   #     - "8383:8081"
+  #   logging:
+  #     driver: json-file
+  #     options:
+  #       max-size: 20m
+  #       max-file: '5'
 # GUI to mongo - END
 
 # GUI to postgres - BEGIN
@@ -1185,6 +1195,11 @@ services:
   #   restart: always
   #   ports:
   #     - 5050:80
+  #   logging:
+  #     driver: json-file
+  #     options:
+  #       max-size: 20m
+  #       max-file: '5'
 # GUI to postgres - END
 
 
