@@ -22,6 +22,10 @@
 
 # Overview
 
+__Attention__: Before running this deployment, it is necessary to define your domain or IP in the [.env](./.env) file in the variable ``DOJOT_DOMAIN_NAME``.
+
+__Note__ To get completely ready, **healthy**, all services in this `docker-compose` take an average of at least 12 minutes.
+
 This repository contains the necessary configuration files
 for quick deployment of the dojot platform using `docker-compose`.
 
@@ -293,3 +297,4 @@ Check the documentation for more information:
 
 If you found a problem or need help, leave an issue in the main
 [dojot repository](https://github.com/dojot/dojot) and we will help you!
+

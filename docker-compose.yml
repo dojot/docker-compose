@@ -126,6 +126,7 @@ services:
       - mongodb-cfg-volume:/data/configdb
 
   gui:
+
     image: dojot/gui:feature-keycloak #dojot/gui:${DOJOT_VERSION}
     depends_on:
       - backstage
@@ -588,6 +589,8 @@ services:
       KAFKA_LOG_RETENTION_MINUTES: "30"  # is the max time an individual message should remain
       KAFKA_LOG_SEGMENT_BYTES: "262144000"
       KAFKA_LOG_RETENTION_CHECK_INTERVAL_MS: "30000"
+    healthcheck:
+      test: ps augwwx | egrep [S]upportedKafka
     volumes:
       - kafka-volume:/var/lib/kafka/data
       - kafka-secrets-volume:/etc/kafka/secrets
@@ -1111,6 +1114,7 @@ services:
   #       max-size: 20m
   #       max-file: '5'
 
+
 # GUI to Kong Admin API - BEGIN
 # Konga GUI will be available at http://${DOJOT_DOMAIN_NAME}:1337
 #
@@ -1138,6 +1142,7 @@ services:
   #     options:
   #       max-size: 20m
   #       max-file: '5'
+
 #
 # GUI to Kong Admin API - END
 
