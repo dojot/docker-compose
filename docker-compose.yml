@@ -566,7 +566,7 @@ services:
         max-file: '5'
 
   v2k-bridge:
-    image: dojot/v2k-bridge:v0.6.0
+    image: dojot/v2k-bridge:v0.6.1-rc.1
     depends_on:
       - iotagent-mqtt
       - kafka
