@@ -54,6 +54,7 @@ services:
     volumes:
       - mongodb-volume:/data/db
       - mongodb-cfg-volume:/data/configdb
+    command: '--wiredTigerCacheSizeGB 1'
 
   gui:
     image: dojot/gui:${DOJOT_VERSION}
