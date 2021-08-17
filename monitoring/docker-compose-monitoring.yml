@@ -4,7 +4,7 @@ services:
   prometheus:
     image: prom/prometheus:latest # Colocar versão "cravada"
     container_name: prometheus
-    volumes:   
+    volumes:
       - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
     ports:
       - 9090:9090
