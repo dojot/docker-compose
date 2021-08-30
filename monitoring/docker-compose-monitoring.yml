@@ -2,16 +2,17 @@ version: "3.8"
 
 services:
   prometheus:
-    image: prom/prometheus:latest # Colocar versão "cravada"
+    image: prom/prometheus:v2.29.1
     container_name: prometheus
     volumes:
       - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus-volume:/prometheus
     ports:
       - 9090:9090
     depends_on:
       - cadvisor
   cadvisor:
-    image: gcr.io/cadvisor/cadvisor:latest
+    image: google/cadvisor:v0.32.0
     container_name: cadvisor
     expose:
       - 8080
@@ -23,22 +24,22 @@ services:
     depends_on:
       - redis
   redis:
-    image: redis:latest
+    image: redis:6.2.5
     container_name: redis
     ports:
       - 6379:6379
   node_exporter:
-    image: quay.io/prometheus/node-exporter:latest
+    image: prom/node-exporter:v1.2.2
     container_name: node_exporter
     command:
       - "--path.rootfs=/host"
-    expose:
-      - 9100
+    ports:
+      - 9100:9100
     restart: unless-stopped
     volumes:
       - "/:/host:ro,rslave"
   grafana:
-    image: grafana/grafana:latest
+    image: grafana/grafana:8.1.2
     environment:
       GF_INSTALL_PLUGINS: "grafana-clock-panel,grafana-simple-json-datasource"
     ports:
@@ -46,7 +47,8 @@ services:
     links:
       - prometheus
     volumes:
-      - grafana-data:/var/lib/grafana
+      - grafana-volume:/var/lib/grafana
       - ./grafana/provisioning/:/etc/grafana/provisioning/
 volumes:
-  grafana-data:
+  grafana-volume:
+  prometheus-volume:
