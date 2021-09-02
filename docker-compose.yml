@@ -546,7 +546,7 @@ services:
     environment:
       NODE_ENV: production
       X509IDMGMT_LOGGER_CONSOLE_LEVEL: info
-      X509IDMGMT_CERTIFICATE_BELONGSTO_APPLICATION: '["iotagent-mqtt", "v2k-bridge", "k2v-bridge"]'
+      X509IDMGMT_CERTIFICATE_BELONGSTO_APPLICATION: '["iotagent-mqtt", "v2k-bridge", "k2v-bridge", "http-agent"]'
       X509IDMGMT_MONGO_CONN_URI: "mongodb://mongodb:27017/x509-identity-mgmt"
       X509IDMGMT_EJBCA_HEALTHCHECK_URL: "http://x509-ejbca:8080/ejbca/publicweb/healthcheck/ejbcahealth"
       X509IDMGMT_EJBCA_WSDL: "https://x509-ejbca:8443/ejbca/ejbcaws/ejbcaws?wsdl"
@@ -813,6 +813,57 @@ services:
       options:
         max-size: 20m
         max-file: '5'
+
+  http-agent-cert-sidecar:
+    image: dojot/cert-sidecar:${DOJOT_VERSION}
+    depends_on:
+      - x509-identity-mgmt
+    environment:
+      CERT_SC_APP_SIDECAR_TO: 'http-agent'
+      CERT_SC_LOG_CONSOLE_LEVEL: 'info'
+      CERT_SC_CERTS_HOSTNAMES: '["http-agent", "localhost"]'
+      HOSTNAME: http-agent
+      CERT_SC_CERTS_FILES_BASEPATH: /certs
+      CERT_SC_CERTS_FILES_CA: ca.crt
+      CERT_SC_CERTS_FILES_CERT: http-agent.crt
+      CERT_SC_CERTS_FILES_KEY: http-agent.key
+      CERT_SC_CERTS_FILES_CRL: ca.crl
+    volumes:
+      - http-agent-cert-sidecar-volume:/certs
+    restart: always
+    logging:
+      driver: json-file
+      options:
+        max-size: 20m
+        max-file: '5'
+
+  http-agent:
+    image: dojot/http-agent:${DOJOT_VERSION}
+    depends_on:
+      - kafka
+      - data-broker
+      - auth
+      - http-agent-cert-sidecar
+      - device-manager
+      - certificate-acl
+    ports:
+      - 8080:3000
+    restart: always
+    environment:
+      HTTP_AGENT_HTTPS_CERT: '/certs/http-agent.crt'
+      HTTP_AGENT_HTTPS_KEY: '/certs/http-agent.key'
+      HTTP_AGENT_HTTPS_CA: '/certs/ca.crt'
+      HTTP_AGENT_SECURITY_CRL: '/certs/ca.crl'
+      HTTP_AGENT_SECURITY_CERT_DIRECTORY: '/certs'
+      HTTP_AGENT_LOG_CONSOLE_LEVEL: 'info'
+    volumes:
+      - http-agent-cert-sidecar-volume:/certs
+    logging:
+      driver: json-file
+      options:
+        max-size: 20m
+        max-file: '5'
+
 
   ###
   # BEGIN - Legacy mqtt broker based on mosca (https://github.com/moscajs/mosca)
@@ -1104,6 +1155,7 @@ volumes:
   mosca-redis-volume:
   influxdb-volume:
   acl-redis-volume:
+  http-agent-cert-sidecar-volume:
 
 networks:
   flowbroker:
