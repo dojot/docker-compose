@@ -1,0 +1,54 @@
+version: "3.8"
+
+services:
+  prometheus:
+    image: prom/prometheus:v2.29.1
+    container_name: prometheus
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus-volume:/prometheus
+    ports:
+      - 9090:9090
+    depends_on:
+      - cadvisor
+  cadvisor:
+    image: google/cadvisor:v0.32.0
+    container_name: cadvisor
+    expose:
+      - 8080
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:rw
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+    depends_on:
+      - redis
+  redis:
+    image: redis:6.2.5
+    container_name: redis
+    ports:
+      - 6379:6379
+  node_exporter:
+    image: prom/node-exporter:v1.2.2
+    container_name: node_exporter
+    command:
+      - "--path.rootfs=/host"
+    ports:
+      - 9100:9100
+    restart: unless-stopped
+    volumes:
+      - "/:/host:ro,rslave"
+  grafana:
+    image: grafana/grafana:8.1.2
+    environment:
+      GF_INSTALL_PLUGINS: "grafana-clock-panel,grafana-simple-json-datasource"
+    ports:
+      - 3000:3000
+    links:
+      - prometheus
+    volumes:
+      - grafana-volume:/var/lib/grafana
+      - ./grafana/provisioning/:/etc/grafana/provisioning/
+volumes:
+  grafana-volume:
+  prometheus-volume:
