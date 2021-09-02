@@ -27,7 +27,6 @@ We are currently extracting the following metrics with Node-Exporter:
 * Amount of RAM for I/O processes;
 * Used space of available disks.
 
-
 ## CAdvisor
 
 CAdvisor is an exporter developed by Google that provides metrics regarding resource usage and performance characteristics of running containers.
@@ -40,10 +39,10 @@ We are currently extracting the following metrics with CAdvisor:
 * Network traffic sent by container;
 * Percentage of RAM usage per container;
 * Percentage of CPU usage per container;
-* RSS Memory Usage per Container
+* RSS Memory Usage per Container;
 * RAM consumption table per container;
 * Available RAM for each conatainer;
-*  RAM limit established for each container
+* RAM limit established for each container.
 
 ## Using the service
 
@@ -62,12 +61,11 @@ If the file is empty, paste the following:
 }
 ``
 
-If the file is not empty, add these two keys, making sure the resulting file is a valid JSON. Be careful that all lines end with a comma  "," except the last line.
+If the file is not empty, add these two keys, making sure the resulting file is a valid JSON. Be careful that all lines must end with a comma "," except the last line.
 
-Since we are running Prometheus on localhost, in case we try to use the docker as localhost as well. Prometheus would understand that the metrics would be inside the service itself (prometheus) and then try to access port ``9323`` inside the Promethues container. To prevent this from happening we will use the default port **172.17.0.1** of the **bridge** docker ``docker0``.
+Since we are running Prometheus on localhost, in case we try to use the docker as localhost as well, Prometheus could understand that the metrics are inside the service itself (Prometheus) and then, could try to access port ``9323`` inside the Promethues container. To prevent this from happening we should use the default IP **172.17.0.1** of the **bridge** docker ``docker0``.
 
 Before running make sure that the ``docker0`` IP is really the default (172.17.0.1) with the following command:
-
 
 ```
 ip addr show docker0
@@ -86,7 +84,6 @@ docker0: <NO-CARRIER,BROADCAST,MULTICAST,UP> mtu 1500 qdisc noqueue state DOWN g
 If the IP is different, use the one that is on your ``docker0``.
 ## Changing prometheus.yml
 
-
 If the port is not the default one, you should edit the jobs that prometheus will analyze in the [prometheus.yml](prometheus/prometheus.yml), changing the IP of the docker service as shown below:
 
 Example job **docker**:
@@ -96,11 +93,9 @@ Example job **docker**:
     static_configs:
       - targets: ['<IP_DOCKER0>:9323']
 ```
-
 ## Starting services
 
 As we've already done the configuration, we can start the service:
-
 
 ```
 cd monitoring
@@ -110,11 +105,11 @@ docker-compose -f docker-compose-monitoring.yml up -d
 
 When the process is complete, we can check whether the services have been started:
 
-*   [Metrics Docker](http://localhost:9323/metrics).
+*   [Docker Metrics](http://localhost:9323/metrics).
 
-*   [Metrics Prometheus](http://localhost:9090/metrics).
+*   [Prometheus Metrics](http://localhost:9090/metrics).
 
-Visually, it is possible to check if everything is "UP" by [Targets Prometheus](http://localhost:9090/targets).
+Visually, it is possible to check if everything is "UP" by [Prometheus Targets](http://localhost:9090/targets).
 
 ## Viewing metrics in grafana
 
@@ -126,7 +121,6 @@ As the service is declared in [Docker Compose Monitoring](docker-compose-monitor
 
 [Grafana](http://localhost:3000)
 
-
 ## Graphana Configuration
 
 If you need to change or analyze the configuration files, you can find them in [Grafana Configuration Files](grafana/).
@@ -136,7 +130,6 @@ In the indicated folder, there are all dashboards (in json files), configuration
 ## Viewing data
 
 As the data and data source have already been imported automatically, you will be able to verify the data.
-
 
 * **System Metrics** refers to exporting Node-Exporter;
 * **Docker Metrics** refers to the CAdvisor exporter;
