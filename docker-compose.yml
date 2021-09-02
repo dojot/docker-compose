@@ -825,9 +825,8 @@ services:
       CERT_SC_CERTS_FILES_CERT: http-agent.crt
       CERT_SC_CERTS_FILES_KEY: http-agent.key
       CERT_SC_CERTS_FILES_CRL: ca.crl
-      CERT_SC_CRON_CRL_TIME: '0 */1 * * * *'
     volumes:
-      - http-agent-cert-side-volume:/certs
+      - http-agent-cert-sidecar-volume:/certs
     restart: always
     logging:
       driver: json-file
@@ -855,11 +854,12 @@ services:
       HTTP_AGENT_SECURITY_CERT_DIRECTORY: '/certs'
       HTTP_AGENT_LOG_CONSOLE_LEVEL: 'info'
     volumes:
-      - http-agent-cert-side-volume:/certs
+      - http-agent-cert-sidecar-volume:/certs
     logging:
       driver: json-file
       options:
-        max-size: 100m
+        max-size: 20m
+        max-file: '5'
 
 
   ###
@@ -1152,7 +1152,7 @@ volumes:
   mosca-redis-volume:
   influxdb-volume:
   acl-redis-volume:
-  http-agent-cert-side-volume:
+  http-agent-cert-sidecar-volume:
 
 networks:
   flowbroker:
