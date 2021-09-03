@@ -44,6 +44,27 @@ We are currently extracting the following metrics with CAdvisor:
 * Available RAM for each conatainer;
 * RAM limit established for each container.
 
+## VerneMQ
+
+As ``VerneMQ`` officially enables integration, the process becomes simpler. It is only necessary to declare the ``job`` in the Prometheus configuration file.
+
+We are currently using the following sets of metrics with VerneMQ:
+
+* Summary;
+* Clients;
+* Queues;
+* Subscriptions;
+* Erlang VM;
+* Bytes IN & OUT;
+* Retain;
+* TCP Sockets;
+* Node to cluster communication;
+* MQTT Connect;
+* MQTT Subscribe;
+* MQTT Publish;
+* MQTT Ping;
+* MISC.
+
 ## Using the service
 
 Since we are using Docker, it is natural that we will use its metrics. To set the Docker daemon as a Prometheus target, you need to specify the metrics-address in ``/etc/docker/daemon.json``.

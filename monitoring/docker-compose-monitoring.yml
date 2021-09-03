@@ -52,3 +52,7 @@ services:
 volumes:
   grafana-volume:
   prometheus-volume:
+networks:
+  default:
+    external: true
+    name: dojot_default
