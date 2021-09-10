@@ -25,3 +25,7 @@ scrape_configs:
   - job_name: docker
     static_configs:
       - targets: ['172.17.0.1:9323'] # 172.17.0.1 docker network interface default port "docker0"
+
+  - job_name: vernemq
+    static_configs:
+      - targets: ['iotagent-mqtt:8888']
