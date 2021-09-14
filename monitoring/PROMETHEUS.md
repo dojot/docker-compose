@@ -65,6 +65,19 @@ We are currently using the following sets of metrics with VerneMQ:
 * MQTT Ping;
 * MISC.
 
+## Apache Kafka Exporter
+
+Kafka-Exporter is used to get metrics from the service ``Kafka``. In other words, the metrics obtained by Prometheus are directly related to high-performance data pipelines, streaming analytics, data integration, and mission-critical applications.
+
+
+We are currently using the following sets of metrics with Kafka-Exporter:
+
+* Message in per second;
+* Lag by Consumer Group;
+* Message in per minute;
+* Message consume per minute;
+* Partitions per Topic.
+
 ## Using the service
 
 Since we are using Docker, it is natural that we will use its metrics. To set the Docker daemon as a Prometheus target, you need to specify the metrics-address in ``/etc/docker/daemon.json``.

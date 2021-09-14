@@ -13,7 +13,7 @@ services:
       - cadvisor
     networks:
       - default
-      - monitoring-dojot
+      - dojot-monitoring
   cadvisor:
     image: google/cadvisor:v0.32.0
     container_name: cadvisor
@@ -41,6 +41,14 @@ services:
     restart: unless-stopped
     volumes:
       - "/:/host:ro,rslave"
+  kafka_exporter:
+    image: danielqsj/kafka-exporter:v1.4.1
+    container_name: kafka_exporter
+    command: --kafka.server=kafka:9092
+    ports:
+      - 9308:9308
+    networks:
+      - dojot-monitoring
   grafana:
     image: grafana/grafana:8.1.2
     environment:
@@ -56,7 +64,7 @@ volumes:
   grafana-volume:
   prometheus-volume:
 networks:
-  monitoring-dojot:
+  dojot-monitoring:
     external: true
     name: dojot_default
   default:
