@@ -13,7 +13,7 @@ services:
       - cadvisor
     networks:
       - default
-      - monitoring-dojot
+      - dojot-monitoring
   cadvisor:
     image: google/cadvisor:v0.32.0
     container_name: cadvisor
@@ -48,7 +48,7 @@ services:
     ports:
       - 9308:9308
     networks:
-      - monitoring-dojot
+      - dojot-monitoring
   grafana:
     image: grafana/grafana:8.1.2
     environment:
@@ -64,7 +64,7 @@ volumes:
   grafana-volume:
   prometheus-volume:
 networks:
-  monitoring-dojot:
+  dojot-monitoring:
     external: true
     name: dojot_default
   default:
