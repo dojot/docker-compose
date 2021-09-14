@@ -41,6 +41,14 @@ services:
     restart: unless-stopped
     volumes:
       - "/:/host:ro,rslave"
+  kafka_exporter:
+    image: danielqsj/kafka-exporter:v1.4.1
+    container_name: kafka_exporter
+    command: --kafka.server=kafka:9092
+    ports:
+      - 9308:9308
+    networks:
+      - monitoring-dojot
   grafana:
     image: grafana/grafana:8.1.2
     environment:
