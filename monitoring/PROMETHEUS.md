@@ -68,7 +68,6 @@ Available metrics:
 
 Kafka-Exporter is used to get metrics from the service ``Kafka``. In other words, the metrics obtained by Prometheus are directly related to high-performance data pipelines, streaming analytics, data integration, and mission-critical applications.
 
-
 Available metrics:
 
 * Message in per second;
