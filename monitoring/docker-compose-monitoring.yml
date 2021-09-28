@@ -51,6 +51,7 @@ services:
       - dojot-monitoring
   grafana:
     image: grafana/grafana:8.1.2
+    container_name: grafana
     environment:
       GF_INSTALL_PLUGINS: "grafana-clock-panel,grafana-simple-json-datasource"
     ports:
@@ -69,4 +70,4 @@ networks:
     name: dojot_default
   default:
     driver: bridge
-    name: monitoring_default
+    name: default_monitoring
