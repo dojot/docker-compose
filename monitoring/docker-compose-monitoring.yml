@@ -49,6 +49,15 @@ services:
       - 9308:9308
     networks:
       - dojot-monitoring
+  mongodb_exporter:
+    image: bitnami/mongodb-exporter:0.11.2
+    container_name: mongodb_exporter
+    ports:
+      - 8880:9216
+    environment:
+      - MONGODB_URI=mongodb://mongodb:27017
+    networks:
+      - dojot-monitoring
   grafana:
     image: grafana/grafana:8.1.2
     container_name: grafana

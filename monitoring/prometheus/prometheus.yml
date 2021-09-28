@@ -37,3 +37,9 @@ scrape_configs:
   - job_name: apigw
     static_configs:
       - targets: ['apigw:8001']
+
+  - job_name: mongodb
+    scrape_interval: 1m
+    scrape_timeout: 5s
+    static_configs:
+      - targets: ["mongodb_exporter:9216"]
