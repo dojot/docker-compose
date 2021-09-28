@@ -12,7 +12,7 @@ As the inclusion of services (Prometheus and Grafana) is under development, some
 
 Node-Exporter is used for get host metrics from the host itself. In other words, the metrics obtained by Prometheus are directly related to hardware and operating system.
 
-We are currently extracting the following metrics with Node-Exporter:
+Available metrics:
 
 * Service uptime;
 * Number of CPU cores;
@@ -31,8 +31,7 @@ We are currently extracting the following metrics with Node-Exporter:
 
 CAdvisor is an exporter developed by Google that provides metrics regarding resource usage and performance characteristics of running containers.
 
-We are currently extracting the following metrics with CAdvisor:
-
+Available metrics::
 
 * Current status of the container: ``Running``, ``Stopped`` and ``Paused``;
 * Network traffic received by container;
@@ -48,7 +47,7 @@ We are currently extracting the following metrics with CAdvisor:
 
 As ``VerneMQ`` officially enables integration, the process becomes simpler. It is only necessary to declare the ``job`` in the Prometheus configuration file.
 
-We are currently using the following sets of metrics with VerneMQ:
+Available metrics:
 
 * Summary;
 * Clients;
@@ -70,7 +69,7 @@ We are currently using the following sets of metrics with VerneMQ:
 Kafka-Exporter is used to get metrics from the service ``Kafka``. In other words, the metrics obtained by Prometheus are directly related to high-performance data pipelines, streaming analytics, data integration, and mission-critical applications.
 
 
-We are currently using the following sets of metrics with Kafka-Exporter:
+Available metrics:
 
 * Message in per second;
 * Lag by Consumer Group;
