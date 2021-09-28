@@ -78,6 +78,24 @@ We are currently using the following sets of metrics with Kafka-Exporter:
 * Message consume per minute;
 * Partitions per Topic.
 
+## Kong API Gateway Exporter
+
+As ``Kong`` officially allows the integration, the process becomes simpler. It is only necessary to declare ``job`` in the Prometheus configuration file to get metrics regarding cloud services to manage, monitor and scale application programming interfaces and microservices.
+
+Available metrics:
+
+* Status codes;
+* Latencies Histograms;
+  * Request;
+  * Kong;
+  * Upstream;
+* Bandwidth;
+* DB reachability;
+* Connections;
+* Target Health;
+* Dataplane Status;
+* Enterprise License Information.
+
 ## Using the service
 
 Since we are using Docker, it is natural that we will use its metrics. To set the Docker daemon as a Prometheus target, you need to specify the metrics-address in ``/etc/docker/daemon.json``.
