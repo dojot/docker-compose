@@ -96,7 +96,7 @@ Available metrics:
 
 ## MongoDB Exporter
 
-MongoDB-Exporter is used to get metrics from the service ``MongoDB``.
+MongoDB-Exporter is used to get metrics from ``MongoDB`` service.
 
 Available metrics:
 
