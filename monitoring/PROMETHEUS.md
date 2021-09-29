@@ -94,6 +94,17 @@ Available metrics:
 * Dataplane Status;
 * Enterprise License Information.
 
+## MongoDB Exporter
+
+MongoDB-Exporter is used to get metrics from ``MongoDB`` service.
+
+Available metrics:
+
+* Query metrics for MongoDB;
+* Health metrics for MongoDb;
+* Resource Metrics;
+* Dashboard Row;
+
 ## Using the service
 
 Since we are using Docker, it is natural that we will use its metrics. To set the Docker daemon as a Prometheus target, you need to specify the metrics-address in ``/etc/docker/daemon.json``.
