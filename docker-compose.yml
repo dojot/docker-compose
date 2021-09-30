@@ -2,7 +2,7 @@ version: '3.8'
 services:
 
   history:
-    image: dojot/history:v0.6.1
+    image: dojot/history:${DOJOT_VERSION}
     restart: always
     depends_on:
       - mongodb
@@ -17,7 +17,7 @@ services:
         max-file: '5'
 
   persister:
-    image: dojot/persister:v0.6.1
+    image: dojot/persister:${DOJOT_VERSION}
     restart: always
     depends_on:
       - mongodb
@@ -29,6 +29,7 @@ services:
       DOJOT_MANAGEMENT_USER: 'persister'
       KAFKA_GROUP_ID: 'persister-group'
       LOG_LEVEL: INFO
+      HISTORY_DB_DATA_EXPIRATION: 604800 #Time in seconds - Set to collection when device is created.
     logging:
       driver: json-file
       options:
@@ -55,7 +56,9 @@ services:
       - mongodb-cfg-volume:/data/configdb
 
   gui:
-    image: dojot/gui:v0.6.1
+    image: dojot/gui:${DOJOT_VERSION}
+    depends_on:
+      - backstage
     restart: always
     logging:
       driver: json-file
@@ -64,7 +67,9 @@ services:
         max-file: '5'
 
   gui-v2:
-    image: dojot/gui-v2:v0.6.1
+    image: dojot/gui-v2:${DOJOT_VERSION}
+    depends_on:
+      - backstage
     restart: always
     logging:
       driver: json-file
@@ -73,7 +78,7 @@ services:
         max-file: '5'
 
   data-broker:
-    image: dojot/data-broker:v0.6.1
+    image: dojot/data-broker:${DOJOT_VERSION}
     restart: always
     depends_on:
       - kafka
@@ -96,6 +101,11 @@ services:
   data-broker-redis:
     image: dojot/redis:5.0.5-alpine3.10
     restart: always
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 1s
+      timeout: 3s
+      retries: 30
     volumes:
       - data-broker-redis-volume:/data
     logging:
@@ -108,7 +118,7 @@ services:
 # iot-agent lwm2m
 ################
   iotagent-lwm2m:
-    image: dojot/iotagent-leshan:v0.6.1
+    image: dojot/iotagent-leshan:${DOJOT_VERSION}
     depends_on:
       - kafka
       - data-broker
@@ -118,7 +128,7 @@ services:
       DOJOT_MANAGEMENT_USER: 'iotagent-lwm2m'
       KAFKA_GROUP_ID: "iotagent-lwm2m-group"
       # The FILE_SERVER_ADDRESS should be filled with an address accesible to the devices that want to update the firmware
-      FILE_SERVER_ADDRESS: 127.0.0.1
+      FILE_SERVER_ADDRESS: ${DOJOT_DOMAIN_NAME:-localhost}
     ports:
       - 5896:5896 # file server http port
       - 5683:5683/udp # configuration coap port
@@ -133,7 +143,7 @@ services:
         max-file: '5'
 
   image-manager:
-    image: dojot/image-manager:v0.6.1
+    image: dojot/image-manager:${DOJOT_VERSION}
     restart: always
     depends_on:
       - postgres
@@ -159,6 +169,11 @@ services:
       options:
         max-size: 20m
         max-file: '5'
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 30s
+      timeout: 20s
+      retries: 3
     environment:
       # TODO: The following should be unique for each environment
       MINIO_ACCESS_KEY: 9HEODSF6WQN5EZ39DM7Z
@@ -168,7 +183,7 @@ services:
       - minio-volume:/data
 
   device-manager:
-    image: dojot/device-manager:v0.6.1
+    image: dojot/device-manager:${DOJOT_VERSION}
     restart: always
     environment:
       # TODO: Fill these env variables with suitable values
@@ -196,6 +211,11 @@ services:
   device-manager-redis:
     image: dojot/redis:5.0.5-alpine3.10
     restart: always
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 1s
+      timeout: 3s
+      retries: 30
     volumes:
       - device-manager-redis-volume:/data
     logging:
@@ -227,7 +247,7 @@ services:
 
   # Prepare database, Bootstrap the database
   kong-migrations:
-    image: dojot/kong:v0.6.1
+    image: dojot/kong:${DOJOT_VERSION}
     command: kong migrations bootstrap
     depends_on:
       postgres:
@@ -248,7 +268,7 @@ services:
 
   # Run any new migrations and Finish running any pending migrations after 'up'.
   kong-migrations-up:
-    image:  dojot/kong:v0.6.1
+    image:  dojot/kong:${DOJOT_VERSION}
     command: kong migrations up && kong migrations finish
     depends_on:
       postgres:
@@ -268,7 +288,7 @@ services:
         max-file: '5'
 
   apigw:
-    image: dojot/kong:v0.6.1
+    image: dojot/kong:${DOJOT_VERSION}
     depends_on:
       postgres:
         condition: service_healthy
@@ -329,8 +349,9 @@ services:
         max-size: 20m
         max-file: '5'
 
+
   auth:
-    image: dojot/auth:v0.6.1
+    image: dojot/auth:${DOJOT_VERSION}
     restart: always
     depends_on:
       - apigw
@@ -342,6 +363,13 @@ services:
       AUTH_DB_PWD:  "auth"
       AUTH_KONG_URL: "http://apigw:8001"
       AUTH_CACHE_HOST: "auth-redis"
+      AUTH_RESET_PWD_VIEW: "http://${DOJOT_DOMAIN_NAME}:8000/#/setPassword/" #When using a front end with Auth, define this link to point to the password reset view.
+      AUTH_EMAIL_HOST: NOEMAIL # SMTP server to be used. If set to NOEMAIL, this functionality is disabled.
+      AUTH_EMAIL_PORT: 587 # SMTP server port.
+      AUTH_EMAIL_TLS: "true" # Whether to enable TLS or not for SMTP server.
+      AUTH_EMAIL_USER: "" # SMTP user.
+      AUTH_EMAIL_PASSWD: "" # SMTP password.
+      AUTH_USER_TMP_PWD: "temppwd" # The default temporary password that is given to new users if AUTH_EMAIL_HOST is set to NOEMAIL.
       # This is used to select the type of cache to be used.
       # Allowed values are "redis" or "nocache"
       AUTH_CACHE_NAME: "redis"
@@ -365,7 +393,7 @@ services:
         max-file: '5'
 
   flowbroker:
-    image: dojot/flowbroker:v0.6.1
+    image: dojot/flowbroker:${DOJOT_VERSION}
     restart: always
     environment:
       DEPLOY_ENGINE: "docker"
@@ -380,6 +408,7 @@ services:
       - auth
       - flowbroker-context-manager
       - flowbroker-redis
+      - data-broker
     networks:
       - default
       - flowbroker
@@ -395,6 +424,11 @@ services:
   flowbroker-redis:
     image: dojot/redis:5.0.5-alpine3.10
     restart: always
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 1s
+      timeout: 3s
+      retries: 30
     volumes:
       - flowbroker-redis-volume:/data
     logging:
@@ -404,7 +438,7 @@ services:
         max-file: '5'
 
   flowbroker-context-manager:
-    image: dojot/flowbroker-context-manager:v0.6.1
+    image: dojot/flowbroker-context-manager:${DOJOT_VERSION}
     restart: always
     environment:
       ZOOKEEPER_HOST: zookeeper
@@ -426,6 +460,11 @@ services:
   rabbitmq:
     image: dojot/rabbitmq:3.7-alpine
     restart: always
+    healthcheck:
+      test: rabbitmq-diagnostics -q ping
+      interval: 30s
+      timeout: 10s
+      retries: 5
     volumes:
       - rabbitmq-volume:/var/lib/rabbitmq
     logging:
@@ -437,6 +476,11 @@ services:
   zookeeper:
     image: "confluentinc/cp-zookeeper:5.5.0"
     restart: always
+    healthcheck:
+      test: echo stat | nc localhost 2181
+      interval: 10s
+      timeout: 10s
+      retries: 3
     environment:
       ZOOKEEPER_REPLICAS: "1"
       ZOOKEEPER_CLIENT_PORT: 2181
@@ -476,9 +520,11 @@ services:
       KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: "1"
       KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: "1"
       KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: "0"
-      KAFKA_LOG_RETENTION_MINUTES: "30"
+      KAFKA_LOG_RETENTION_MINUTES: "30" # is the max time an individual message should remain
       KAFKA_LOG_SEGMENT_BYTES: "262144000"
       KAFKA_LOG_RETENTION_CHECK_INTERVAL_MS: "30000"
+    healthcheck:
+      test: ps augwwx | egrep [S]upportedKafka
     volumes:
       - kafka-volume:/var/lib/kafka/data
       - kafka-secrets-volume:/etc/kafka/secrets
@@ -489,22 +535,63 @@ services:
         max-file: '5'
 
   x509-identity-mgmt:
-    image: dojot/x509-identity-mgmt:v0.6.1
+    image: dojot/x509-identity-mgmt:${DOJOT_VERSION}
     depends_on:
+      - x509-ejbca
       - postgres
       - mongodb
+      - kafka
     restart: always
-    hostname: "x509-identity-mgmt"
-    domainname: "dojot.iot"
+    environment:
+      NODE_ENV: production
+      X509IDMGMT_LOGGER_CONSOLE_LEVEL: info
+      X509IDMGMT_CERTIFICATE_BELONGSTO_APPLICATION: '["iotagent-mqtt", "v2k-bridge", "k2v-bridge"]'
+      X509IDMGMT_MONGO_CONN_URI: "mongodb://mongodb:27017/x509-identity-mgmt"
+      X509IDMGMT_EJBCA_HEALTHCHECK_URL: "http://x509-ejbca:8080/ejbca/publicweb/healthcheck/ejbcahealth"
+      X509IDMGMT_EJBCA_WSDL: "https://x509-ejbca:8443/ejbca/ejbcaws/ejbcaws?wsdl"
+      # X509IDMGMT_CERTIFICATE_CHECK_SUBJECTDN: "true" # add to CN `tenant:deviceid`
+      # ROARR_LOG: "true" # healthcheck is using 'Roarr' to implement logging.
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "-", "http://localhost:9000/health"]
+      interval: 10s
+      timeout: 10s
+      retries: 6
+      start_period: 2m
+    volumes:
+      - "ejbca-client-tls-volume:/opt/tls"
+    logging:
+      driver: json-file
+      options:
+        max-size: 20m
+        max-file: '5'
+
+  x509-ejbca: # this service cannot be called 'ejbca'
+    image: dojot/ejbca:${DOJOT_VERSION}
+    depends_on:
+      - postgres
+    restart: always
+    hostname: "x509-ejbca" # The 'hostname' must have the same name as the 'service'
+                           # and cannot be called 'ejbca' so as not to conflict with
+                           # the ejbca's internal End-Entity (hidden)
+    domainname: "" # the 'domainname' must remain empty unless the
+                   # service name contains periods (such as an FQDN)
     environment:
       DATABASE_JDBC_URL: jdbc:postgresql://postgres:5432/ejbca?characterEncoding=UTF-8
       DATABASE_USER: ejbca
       DATABASE_PASSWORD: ejbca
-      EJBCA_PERFORM_DOJOT_SETUP: "true"
-      NODE_ENV: production
-      MONGO_URI: "mongodb://mongodb:27017/x509-identity-mgmt"
+      EJBCA_EXTERNAL_ACCESS: "true" # to make the Wildfly server visible on the x509-identity-mgmt
+      EJBCA_SERVER_CERT_REGEN: "true" # Used to force the generation of a new certificate for the server
+      # EJBCA_LOCK_FILE_TIMEOUT: "0" # Used to break the '.lock' file
+      # EJBCA_ADMIN_USER: "true" # Access to the EJBCA web interface is useful for debugging purposes
+    healthcheck:
+      test: ["CMD", "curl", "http://localhost:8080/ejbca/publicweb/healthcheck/ejbcahealth"]
+      interval: 30s
+      timeout: 10s
+      retries: 2
+      start_period: 2m
     volumes:
-      - ejbca-volume:/mnt/persistent
+      - "ejbca-volume:/mnt/persistent"
+      - "ejbca-client-tls-volume:/opt/tls"
     logging:
       driver: json-file
       options:
@@ -512,13 +599,16 @@ services:
         max-file: '5'
 
   kafka-ws:
-    image: dojot/kafka-ws:v0.6.1
+    image: dojot/kafka-ws:${DOJOT_VERSION}
     depends_on:
       - kafka
       - kafka-ws-redis
     environment:
       KAFKA_WS_SERVER_JWT_EXP_TIME: "true"
       KAFKA_WS_REDIS_HOST: kafka-ws-redis
+      KAFKA_WS_LOG_CONSOLE_LEVEL: "info"
+      # The KAFKA_WS_TICKET_SECRET should be unique for each environment
+      KAFKA_WS_TICKET_SECRET: fT5nAgHR9pkj0yYsBdc4p+PPq6ArjshcPdz0HA6W
     restart: always
     logging:
       driver: json-file
@@ -529,6 +619,11 @@ services:
   kafka-ws-redis:
     image: dojot/redis:6.0.4-alpine3.11
     restart: always
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 1s
+      timeout: 3s
+      retries: 30
     volumes:
       - kafka-ws-redis-volume:/data
     logging:
@@ -537,20 +632,48 @@ services:
         max-size: 20m
         max-file: '5'
 
-  iotagent-mqtt:
-    image: dojot/vernemq-dojot:v0.6.1
-    command: ["/bin/bash", "-c", "echo $$VERNEMQ_CONF | base64 -d > /etc/vernemq/vernemq.conf; echo $$VM_ARGS | base64 -d > /etc/vernemq/vm.args; /vernemq/vmq_dojot.sh"]
+  acl-redis:
+    image: dojot/redis:6.0.4-alpine3.11
+    restart: always
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 1s
+      timeout: 3s
+      retries: 30
+    volumes:
+      - acl-redis-volume:/data
+    logging:
+      driver: json-file
+      options:
+        max-size: 20m
+        max-file: '5'
+
+  certificate-acl:
+    image: dojot/certificate-acl:${DOJOT_VERSION}
+    environment:
+      CERTIFICATE_ACL_LOGGER_CONSOLE_LEVEL: "info"
     depends_on:
+      - acl-redis
+      - kafka
       - x509-identity-mgmt
+    restart: always
+    logging:
+      driver: json-file
+      options:
+        max-size: 20m
+        max-file: '5'
+
+  iotagent-mqtt:
+    image: dojot/vernemq-dojot:${DOJOT_VERSION}
+    command: ["/bin/bash", "-c", "echo $$VERNEMQ_CONF | base64 -d > /etc/vernemq/vernemq.conf; echo $$VM_ARGS | base64 -d > /etc/vernemq/vm.args; start_vernemq"]
+    depends_on:
+      - iotagent-mqtt-cert-sidecar
+      - certificate-acl
     ports:
-      - 1883:1883 # You can comment this line (- 1883:1883) to disable insecure mode without TLS.
+      - 1883:1883 # You can comment this line (- 1883:1883) to disable insecure mode without TLS. (this is recommended)
       - 8883:8883
     environment:
-      HOSTNAME: iotagent-mqtt
-      INTERNAL_DNS: iotagent-mqtt
-      EXTERNAL_SERVER_IP: "127.0.0.1"
-      EXTERNAL_SERVER_HOSTNAME: localhost
-      VERNEMQ_CONF: bWV0YWRhdGFfcGx1Z2luID0gdm1xX3N3YwpwbHVnaW5zLnZtcV9wYXNzd2QgPSBvZmYKcGx1Z2lucy52bXFfYWNsID0gb2ZmCnBsdWdpbnMuZG9qb3RfZGlzY29ubmVjdF9wbHVnaW4ucGF0aCA9IC92ZXJuZW1xL2Rvam90X2Rpc2Nvbm5lY3RfcGx1Z2luL2RlZmF1bHQKcGx1Z2lucy5kb2pvdF9kaXNjb25uZWN0X3BsdWdpbiA9IG9uCnBsdWdpbnMuZG9qb3RfZGlzY29ubmVjdF9wbHVnaW4ucHJpb3JpdHkgPSAyCnBsdWdpbnMuZG9qb3RfYWNsX3BsdWdpbi5wYXRoID0gL3Zlcm5lbXEvZG9qb3RfYWNsX3BsdWdpbi9kZWZhdWx0CnBsdWdpbnMuZG9qb3RfYWNsX3BsdWdpbiA9IG9uCnBsdWdpbnMuZG9qb3RfYWNsX3BsdWdpbi5wcmlvcml0eSA9IDIKbGV2ZWxkYi5tYXhpbXVtX21lbW9yeS5wZXJjZW50ID0gMjAKbG9nLmNvbnNvbGUgPSBjb25zb2xlCmxpc3RlbmVyLm1heF9jb25uZWN0aW9ucyA9IDIwMDAwMApsaXN0ZW5lci5ucl9vZl9hY2NlcHRvcnMgPSAxMDAKbWF4X2luZmxpZ2h0X21lc3NhZ2VzID0gMjAKbWF4X29ubGluZV9tZXNzYWdlcyA9IDEwMDAwCmxpc3RlbmVyLnNzbC5kZWZhdWx0ID0gMC4wLjAuMDo4ODgzCmxpc3RlbmVyLnNzbC5kZWZhdWx0LmNhZmlsZSA9ICAvdmVybmVtcS9jZXJ0L2NhLmNydApsaXN0ZW5lci5zc2wuZGVmYXVsdC5jZXJ0ZmlsZSA9IC92ZXJuZW1xL2NlcnQvaW90YWdlbnQtbXF0dC5jcnQKbGlzdGVuZXIuc3NsLmRlZmF1bHQua2V5ZmlsZSA9IC92ZXJuZW1xL2NlcnQvaW90YWdlbnQtbXF0dC5rZXkKbGlzdGVuZXIuc3NsLmRlZmF1bHQuY3JsZmlsZSA9ICAvdmVybmVtcS9jZXJ0L2NhLmNybApsaXN0ZW5lci5zc2wuZGVmYXVsdC51c2VfaWRlbnRpdHlfYXNfdXNlcm5hbWUgPSBvbgpsaXN0ZW5lci5zc2wuZGVmYXVsdC5yZXF1aXJlX2NlcnRpZmljYXRlID0gb24=
+      VERNEMQ_CONF: bWV0YWRhdGFfcGx1Z2luID0gdm1xX3N3YwpwbHVnaW5zLnZtcV9wYXNzd2QgPSBvZmYKcGx1Z2lucy52bXFfYWNsID0gb2ZmCnBsdWdpbnMuZG9qb3RfZGlzY29ubmVjdF9wbHVnaW4ucGF0aCA9IC92ZXJuZW1xL2Rvam90X2Rpc2Nvbm5lY3RfcGx1Z2luL2RlZmF1bHQKcGx1Z2lucy5kb2pvdF9kaXNjb25uZWN0X3BsdWdpbiA9IG9uCnBsdWdpbnMuZG9qb3RfZGlzY29ubmVjdF9wbHVnaW4ucHJpb3JpdHkgPSAyCnBsdWdpbnMuZG9qb3RfYWNsX3BsdWdpbi5wYXRoID0gL3Zlcm5lbXEvZG9qb3RfYWNsX3BsdWdpbi9kZWZhdWx0CnBsdWdpbnMuZG9qb3RfYWNsX3BsdWdpbiA9IG9uCnBsdWdpbnMuZG9qb3RfYWNsX3BsdWdpbi5wcmlvcml0eSA9IDIKbGV2ZWxkYi5tYXhpbXVtX21lbW9yeS5wZXJjZW50ID0gMjAKbG9nLmNvbnNvbGUgPSBjb25zb2xlCmxpc3RlbmVyLm1heF9jb25uZWN0aW9ucyA9IDIwMDAwMApsaXN0ZW5lci5ucl9vZl9hY2NlcHRvcnMgPSAxMDAKbWF4X2luZmxpZ2h0X21lc3NhZ2VzID0gMjAKbWF4X29ubGluZV9tZXNzYWdlcyA9IDEwMDAwCmxpc3RlbmVyLnNzbC5kZWZhdWx0ID0gMC4wLjAuMDo4ODgzCmxpc3RlbmVyLnNzbC5kZWZhdWx0LmNhZmlsZSA9ICAvdmVybmVtcS9jZXJ0L2NhYnVuZGxlLmNydApsaXN0ZW5lci5zc2wuZGVmYXVsdC5jZXJ0ZmlsZSA9IC92ZXJuZW1xL2NlcnQvaW90YWdlbnQtbXF0dC5jcnQKbGlzdGVuZXIuc3NsLmRlZmF1bHQua2V5ZmlsZSA9IC92ZXJuZW1xL2NlcnQvaW90YWdlbnQtbXF0dC5rZXkKbGlzdGVuZXIuc3NsLmRlZmF1bHQuY3JsZmlsZSA9ICAvdmVybmVtcS9jZXJ0L2NhLmNybApsaXN0ZW5lci5zc2wuZGVmYXVsdC51c2VfaWRlbnRpdHlfYXNfdXNlcm5hbWUgPSBvbgpsaXN0ZW5lci5zc2wuZGVmYXVsdC5yZXF1aXJlX2NlcnRpZmljYXRlID0gb24KbGlzdGVuZXIuc3NsLmludGVybmFsID0gMC4wLjAuMDo5ODgzCmxpc3RlbmVyLnNzbC5pbnRlcm5hbC5jYWZpbGUgPSAgL3Zlcm5lbXEvY2VydC9jYWJ1bmRsZS5jcnQKbGlzdGVuZXIuc3NsLmludGVybmFsLmNlcnRmaWxlID0gL3Zlcm5lbXEvY2VydC9pb3RhZ2VudC1tcXR0LmNydApsaXN0ZW5lci5zc2wuaW50ZXJuYWwua2V5ZmlsZSA9IC92ZXJuZW1xL2NlcnQvaW90YWdlbnQtbXF0dC5rZXkKbGlzdGVuZXIuc3NsLmludGVybmFsLmNybGZpbGUgPSAgL3Zlcm5lbXEvY2VydC9jYS5jcmwKbGlzdGVuZXIuc3NsLmludGVybmFsLnJlcXVpcmVfY2VydGlmaWNhdGUgPSBvbg==
       VM_ARGS: K1AgMjU2MDAwCi1lbnYgRVJMX01BWF9FVFNfVEFCTEVTIDI1NjAwMAotZW52IEVSTF9DUkFTSF9EVU1QIC92ZXJuZW1xL2xvZy9lcmxfY3Jhc2guZHVtcAotZW52IEVSTF9GVUxMU1dFRVBfQUZURVIgMAotZW52IEVSTF9NQVhfUE9SVFMgMjYyMTQ0CitBIDY0Ci1zZXRjb29raWUgdm1xCi1uYW1lIHZtcUBpb3RhZ2VudC1tcXR0LmRvam90LmlvdAorSyB0cnVlCitXIHcKLXNtcCBlbmFibGU=
     restart: always
     hostname: iotagent-mqtt
@@ -559,6 +682,35 @@ services:
       - iotagent-mqtt-volume:/vernemq/data
       - iotagent-mqtt-log-volume:/vernemq/log
       - iotagent-mqtt-etc-volume:/vernemq/etc
+      - iotagent-mqtt-cert-side-volume:/vernemq/cert
+    logging:
+      driver: json-file
+      options:
+        max-size: 20m
+        max-file: '5'
+
+  iotagent-mqtt-cert-sidecar:
+    image: dojot/cert-sidecar:${DOJOT_VERSION}
+    depends_on:
+      - x509-identity-mgmt
+    environment:
+      CERT_SC_APP_SIDECAR_TO: 'iotagent-mqtt'
+      CERT_SC_LOG_CONSOLE_LEVEL: 'info'
+      # About CERT_SC_CERTS_HOSTNAMES
+      #     Servers hostname/ip (the list of host to which the device connects); The value "iotagent-mqtt" is mandatory, it is used by v2k and k2v.
+      #     It's the old EXTERNAL_SERVER_HOSTNAME and equivalent to MOSCA_TLS_DNS_LIST.
+      CERT_SC_CERTS_HOSTNAMES: '["iotagent-mqtt", "${DOJOT_DOMAIN_NAME:-localhost}"]'
+      HOSTNAME: iotagent-mqtt
+      CERT_SC_CERTS_FILES_BASEPATH: /vernemq/cert
+      CERT_SC_CERTS_FILES_CA: ca.crt
+      CERT_SC_CERTS_FILES_CERT: iotagent-mqtt.crt
+      CERT_SC_CERTS_FILES_KEY: iotagent-mqtt.key
+      CERT_SC_CERTS_FILES_CRL: ca.crl
+      CERT_SC_CERTS_FILES_CABUNDLE: cabundle.crt
+      CERT_SC_CRON_CABUNDLE: "true"
+    volumes:
+      - iotagent-mqtt-cert-side-volume:/vernemq/cert
+    restart: always
     logging:
       driver: json-file
       options:
@@ -566,16 +718,46 @@ services:
         max-file: '5'
 
   v2k-bridge:
-    image: dojot/v2k-bridge:v0.6.1
+    image: dojot/v2k-bridge:${DOJOT_VERSION}
     depends_on:
       - iotagent-mqtt
       - kafka
-      - x509-identity-mgmt
+      - v2k-bridge-cert-sidecar
       - data-broker
     environment:
       V2K_APP_HOSTNAME: "v2k-bridge"
       V2K_APP_USER_CONFIG_FILE: "docker.conf"
       V2K_PRODUCER_METADATA_BROKER_LIST: "kafka:9092"
+      V2K_MQTT_PORT: 9883
+      V2K_MQTT_CA: "/certs/ca.crt"
+      V2K_MQTT_CERT: "/certs/v2k-bridge.crt"
+      V2K_MQTT_KEY:  "/certs/v2k-bridge.key"
+      V2K_LOG_CONSOLE_LEVEL: "info"
+    restart: always
+    volumes:
+      - v2k-bridge-cert-side-volume:/certs
+    logging:
+      driver: json-file
+      options:
+        max-size: 20m
+        max-file: '5'
+
+  v2k-bridge-cert-sidecar:
+    image: dojot/cert-sidecar:${DOJOT_VERSION}
+    depends_on:
+      - x509-identity-mgmt
+    environment:
+      CERT_SC_APP_SIDECAR_TO: 'v2k-bridge'
+      CERT_SC_LOG_CONSOLE_LEVEL: 'info'
+      CERT_SC_CERTS_CRL: 'false'
+      CERT_SC_CERTS_HOSTNAMES: '["v2k-bridge"]'
+      HOSTNAME: v2k-bridge
+      CERT_SC_CERTS_FILES_BASEPATH: /certs
+      CERT_SC_CERTS_FILES_CA: ca.crt
+      CERT_SC_CERTS_FILES_CERT: v2k-bridge.crt
+      CERT_SC_CERTS_FILES_KEY: v2k-bridge.key
+    volumes:
+      - v2k-bridge-cert-side-volume:/certs
     restart: always
     logging:
       driver: json-file
@@ -584,15 +766,46 @@ services:
         max-file: '5'
 
   k2v-bridge:
-    image: dojot/k2v-bridge:v0.6.1
+    image: dojot/k2v-bridge:${DOJOT_VERSION}
     depends_on:
       - iotagent-mqtt
       - kafka
-      - x509-identity-mgmt
+      - k2v-bridge-cert-sidecar
+      - data-broker
     environment:
       K2V_APP_HOSTNAME: "k2v-bridge"
       K2V_APP_USER_CONFIG_FILE: "docker.conf"
       K2V_CONSUMER_METADATA_BROKER_LIST: "kafka:9092"
+      K2V_MQTT_PORT: 9883
+      K2V_MQTT_CA: "/certs/ca.crt"
+      K2V_MQTT_CERT: "/certs/k2v-bridge.crt"
+      K2V_MQTT_KEY: "/certs/k2v-bridge.key"
+      K2V_LOG_CONSOLE_LEVEL: "info"
+    restart: always
+    volumes:
+      - k2v-bridge-cert-side-volume:/certs
+    logging:
+      driver: json-file
+      options:
+        max-size: 20m
+        max-file: '5'
+
+  k2v-bridge-cert-sidecar:
+    image: dojot/cert-sidecar:${DOJOT_VERSION}
+    depends_on:
+      - x509-identity-mgmt
+    environment:
+      CERT_SC_APP_SIDECAR_TO: 'k2v-bridge'
+      CERT_SC_LOG_CONSOLE_LEVEL: 'info'
+      CERT_SC_CERTS_CRL: 'false'
+      CERT_SC_CERTS_HOSTNAMES: '["k2v-bridge"]'
+      HOSTNAME: k2v-bridge
+      CERT_SC_CERTS_FILES_BASEPATH: /certs
+      CERT_SC_CERTS_FILES_CA: ca.crt
+      CERT_SC_CERTS_FILES_CERT: k2v-bridge.crt
+      CERT_SC_CERTS_FILES_KEY: k2v-bridge.key
+    volumes:
+      - k2v-bridge-cert-side-volume:/certs
     restart: always
     logging:
       driver: json-file
@@ -606,13 +819,15 @@ services:
   # How to use mqtt broker based on mosca:
   #
   # Uncomment the `iotagent-mqtt-mosca` and `mosca-redis` services blocks, and
-  # then comment on the `iotagent-mqtt`,` v2k-bridge` and `k2v-bridge` services blocks.
+  # then comment on the `iotagent-mqtt`,`v2k-bridge`, `v2k-bridge-cert-sidecar`, `k2v-bridge` and
+  # `k2v-bridge-cert-sidecar`services blocks.
   # It is necessary to comment `iotagent-mqtt` to avoid conflicts on ports 1883 and 8883,
   # or to change such ports that will be mapped for external access.
+  # NOTE: To use iotagent-mqtt-mosca with tls it is necessary to set X509IDMGMT_CERTIFICATE_CHECK_SUBJECTDN to true in x509-identity-mgmt
   #
   ###
   # iotagent-mqtt-mosca:
-  #   image: dojot/iotagent-mosca:v0.6.1
+  #   image: dojot/iotagent-mosca:${DOJOT_VERSION}
   #   depends_on:
   #     - mosca-redis
   #     - kafka
@@ -620,7 +835,7 @@ services:
   #     - auth
   #     - x509-identity-mgmt
   #   ports:
-  #     - 1883:1883
+  #     - 1883:1883  # You can comment this line (- 1883:1883) to disable insecure mode without TLS. (this is recommended)
   #     - 8883:8883
   #   restart: always
   #   environment:
@@ -628,10 +843,7 @@ services:
   #     KAFKA_GROUP_ID: 'iotagent-mqtt-mosca-group'
   #     ALLOW_UNSECURED_MODE: 'true'
   #     LOG_LEVEL: 'info'
-  #     MOSCA_TLS_DNS_LIST: 'localhost'
-  #     MOSCA_TLS_CRL_UPDATE_TIME: '0 */2 * * *' # Updated CRL Every 2 hours
-  #     MOSCA_TLS_CON_MAX_LIFETIME: 7200000 # Maximum lifetime of a connection in ms (If is 0 then is disabled)
-  #     MOSCA_TLS_CON_IDLE_TIMEOUT: 1800000 # The idle timeout for a connection in ms (If is 0 then is disabled)
+  #     MOSCA_TLS_DNS_LIST: ${DOJOT_DOMAIN_NAME:-localhost}
   #     MOSCA_TLS_CNAME: "iotagent-mqtt-mosca"
   #   logging:
   #     driver: json-file
@@ -642,6 +854,11 @@ services:
   # mosca-redis:
   #   image: dojot/redis:5.0.5-alpine3.10
   #   restart: always
+  #   healthcheck:
+  #     test: ["CMD", "redis-cli", "ping"]
+  #     interval: 1s
+  #     timeout: 3s
+  #     retries: 30
   #   volumes:
   #     - mosca-redis-volume:/data
   #   logging:
@@ -654,7 +871,7 @@ services:
   ###
 
   data-manager:
-    image: dojot/data-manager:v0.6.1
+    image: dojot/data-manager:${DOJOT_VERSION}
     restart: always
     depends_on:
       - flowbroker
@@ -666,7 +883,7 @@ services:
         max-file: '5'
 
   backstage:
-    image: dojot/backstage:v0.6.1
+    image: dojot/backstage:${DOJOT_VERSION}
     restart: always
     depends_on:
       - postgres
@@ -677,7 +894,7 @@ services:
         max-file: '5'
 
   cron:
-    image: dojot/cron:v0.6.1
+    image: dojot/cron:${DOJOT_VERSION}
     depends_on:
       - kafka
       - data-broker
@@ -693,7 +910,7 @@ services:
 ### influxdb begin
 
   # influxdb-retriever:
-  #   image: dojot/influxdb-retriever:v0.6.1
+  #   image: dojot/influxdb-retriever:${DOJOT_VERSION}
   #   depends_on:
   #     - influxdb
   #   environment:
@@ -706,12 +923,13 @@ services:
   #       max-file: '5'
 
   # influxdb-storer:
-  #   image: dojot/influxdb-storer:v0.6.1
+  #   image: dojot/influxdb-storer:${DOJOT_VERSION}
   #   depends_on:
   #     - kafka
   #     - influxdb
   #   environment:
   #     STORER_LOG_CONSOLE_LEVEL: "info"
+  #     STORER_INFLUX_RETENTION_HRS: 168 # used only for new created tenant after default
   #   restart: always
   #   logging:
   #     driver: json-file
@@ -725,6 +943,8 @@ services:
   #     restart_policy:
   #       condition: on-failure
   #       max_attempts: 3
+  #   environment:
+  #     DEFAULT_RETENTION: "7d" # default (admin) organization expiry time
   #   volumes:
   #     - influxdb-volume:/root/.influxdbv2/
   #     - ./influxdb/init-influx.sh:/init-influx.sh:Z
@@ -756,7 +976,7 @@ services:
 ### influxdb end
 
   # kafka2ftp:
-  #   image: dojot/kafka2ftp:v0.6.1
+  #   image: dojot/kafka2ftp:${DOJOT_VERSION}
   #   environment:
   #     FTP_TENANT: 'admin'
   #     FTP_HOST: 'localhost'
@@ -778,38 +998,86 @@ services:
   #       max-size: 20m
   #       max-file: '5'
 
-# GUI to Kong Admin API - BEGIN
-# Konga GUI will be available at http://localhost:1337
-#
-# konga:
-#   image: dojot/pantsel_konga:0.14.7
-#   depends_on:
-#     - apigw
-#     - mongodb
-#   ports:
-#     - 1337:1337
-#   environment:
-#     DB_ADAPTER: mongo
-#     DB_DATABASE: konga
-#     DB_HOST: mongodb
-#     KONGA_LOG_LEVEL: info
-#     NO_AUTH: "true"
-#     KONGA_SEED_KONG_NODE_DATA_SOURCE_FILE: /konga.js
-#     NODE_ENV: production
-#     BASE_URL: localhost
-#   volumes:
-#     - ./kong/konga.config.js:/konga.js:ro
-#   restart: on-failure
-#   logging:
-#     driver: json-file
-#     options:
-#       max-size: 20m
-#       max-file: '5'
-#
-# GUI to Kong Admin API - END
+  # GUI to Kong Admin API - BEGIN
+  # Konga GUI will be available at http://localhost:1337
+  #
+  # konga:
+  #   image: dojot/pantsel_konga:0.14.7
+  #   depends_on:
+  #     - apigw
+  #     - mongodb
+  #   ports:
+  #     - 1337:1337
+  #   environment:
+  #     DB_ADAPTER: mongo
+  #     DB_DATABASE: konga
+  #     DB_HOST: mongodb
+  #     KONGA_LOG_LEVEL: info
+  #     NO_AUTH: "true"
+  #     KONGA_SEED_KONG_NODE_DATA_SOURCE_FILE: /konga.js
+  #     NODE_ENV: production
+  #     BASE_URL: ${DOJOT_DOMAIN_NAME:-"localhost"}
+  #   volumes:
+  #     - ./kong/konga.config.js:/konga.js:ro
+  #   restart: on-failure
+  #   logging:
+  #     driver: json-file
+  #     options:
+  #       max-size: 20m
+  #       max-file: '5'
+  #
+  # GUI to Kong Admin API - END
+
+  # GUI to Kafka - BEGIN
+  #  kafdrop:
+  #    image: obsidiandynamics/kafdrop:latest
+  #    depends_on:
+  #      - kafka
+  #    ports:
+  #      - 9090:9000
+  #    environment:
+  #      KAFKA_BROKERCONNECT: "kafka:9092"
+  #      JVM_OPTS: "-Xms32M -Xmx64M"
+  #      SERVER_SERVLET_CONTEXTPATH: "/"
+  #    restart: on-failure
+  #    logging:
+  #      driver: json-file
+  #      options:
+  #        max-size: 20m
+  #        max-file: '5'
+  # GUI to Kafka - END
+
+# GUI to mongo - BEGIN
+# GUI will be available at http://${DOJOT_DOMAIN_NAME}:8383
+  # mongo-express-gui:
+  #   image: mongo-express
+  #   depends_on:
+  #     - mongodb
+  #   restart: always
+  #   environment:
+  #     ME_CONFIG_MONGODB_SERVER: mongodb
+  #   ports:
+  #     - "8383:8081"
+# GUI to mongo - END
+
+# GUI to postgres - BEGIN
+# GUI will be available at http://${DOJOT_DOMAIN_NAME}:5050
+  # pgadmin:
+  #   image: dpage/pgadmin4
+  #   environment:
+  #     PGADMIN_DEFAULT_EMAIL: admin@pgadmin.com
+  #     PGADMIN_DEFAULT_PASSWORD: admin
+  #   depends_on:
+  #     postgres:
+  #       condition: service_healthy
+  #   restart: always
+  #   ports:
+  #     - 5050:80
+# GUI to postgres - END
 
 volumes:
   ejbca-volume:
+  ejbca-client-tls-volume:
   postgres-volume:
   mongodb-volume:
   mongodb-cfg-volume:
@@ -823,6 +1091,9 @@ volumes:
   iotagent-mqtt-volume:
   iotagent-mqtt-log-volume:
   iotagent-mqtt-etc-volume:
+  iotagent-mqtt-cert-side-volume:
+  v2k-bridge-cert-side-volume:
+  k2v-bridge-cert-side-volume:
   auth-redis-volume:
   flowbroker-volume:
   flowbroker-redis-volume:
@@ -831,6 +1102,7 @@ volumes:
   kafka-ws-redis-volume:
   mosca-redis-volume:
   influxdb-volume:
+  acl-redis-volume:
 
 networks:
   flowbroker:
