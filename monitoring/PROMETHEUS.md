@@ -105,6 +105,16 @@ Available metrics:
 * Resource Metrics;
 * Dashboard Row;
 
+## InfluxDB
+
+As ``InfluxDB`` officially allows the integration, the process becomes simpler. It is only necessary to declare ``job`` in the Prometheus configuration file to get metrics regarding cloud services to manage, monitor and scale application programming interfaces and microservices.
+
+Available metrics:
+
+* InfluxDB Informations;
+* Request for InfluxDB;
+* GO Metrics;
+
 ## Using the service
 
 Since we are using Docker, it is natural that we will use its metrics. To set the Docker daemon as a Prometheus target, you need to specify the metrics-address in ``/etc/docker/daemon.json``.

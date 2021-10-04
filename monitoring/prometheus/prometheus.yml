@@ -43,3 +43,9 @@ scrape_configs:
     scrape_timeout: 5s
     static_configs:
       - targets: ["mongodb_exporter:9216"]
+
+  - job_name: influxdb
+    scrape_interval: 1m
+    scrape_timeout: 5s
+    static_configs:
+      - targets: ["influxdb:8086"]
