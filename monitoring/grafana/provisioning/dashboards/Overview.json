@@ -21,7 +21,7 @@
   "editable": true,
   "gnetId": null,
   "graphTooltip": 0,
-  "iteration": 1633361239601,
+  "iteration": 1634653228174,
   "links": [],
   "panels": [
     {
@@ -1410,7 +1410,7 @@
       "targets": [
         {
           "exemplar": true,
-          "expr": "histogram_quantile(0.90, sum(rate(kong_latency_bucket{type=\"kong\", service =~ \"gui\",route=~\"$routeKong\",instance=~\"$instanceKong\"}[1m])) by (service,le))",
+          "expr": "histogram_quantile(0.90, sum(rate(kong_latency_bucket{type=\"kong\", service =~ \"gui\",route=~\"gui_route\",instance=~\"$instanceKong\"}[1m])) by (service,le))",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 2,
@@ -2388,8 +2388,8 @@
         "allValue": null,
         "current": {
           "selected": false,
-          "text": "106f850d84d3",
-          "value": "106f850d84d3"
+          "text": "af0228c11f9f",
+          "value": "af0228c11f9f"
         },
         "datasource": null,
         "definition": "label_values(node_uname_info{origin_prometheus=~\"$origin_prometheus\",job=~\"$jobnode\"}, nodename)",
@@ -2592,11 +2592,10 @@
         "type": "query"
       },
       {
-        "allValue": null,
+        "allValue": ".*",
         "current": {
-          "isNone": true,
           "selected": false,
-          "text": "None",
+          "text": "",
           "value": ""
         },
         "datasource": null,
@@ -2604,7 +2603,7 @@
         "description": null,
         "error": null,
         "hide": 0,
-        "includeAll": false,
+        "includeAll": true,
         "label": null,
         "multi": false,
         "name": "serviceKong",
@@ -2616,15 +2615,14 @@
         "refresh": 1,
         "regex": "",
         "skipUrlSync": false,
-        "sort": 1,
+        "sort": 5,
         "type": "query"
       },
       {
-        "allValue": null,
+        "allValue": ".*",
         "current": {
-          "isNone": true,
           "selected": false,
-          "text": "None",
+          "text": "",
           "value": ""
         },
         "datasource": null,
@@ -2632,7 +2630,7 @@
         "description": null,
         "error": null,
         "hide": 0,
-        "includeAll": false,
+        "includeAll": true,
         "label": null,
         "multi": false,
         "name": "routeKong",
@@ -2722,5 +2720,5 @@
   "timezone": "",
   "title": "Overview",
   "uid": "CYEnFW77z",
-  "version": 1
+  "version": 3
 }
