@@ -134,6 +134,16 @@ If the file is empty, paste the following:
 
 If the file is not empty, add these two keys, making sure the resulting file is a valid JSON. Be careful that all lines must end with a comma "," except the last line.
 
+In order for the changes to be applied it is necessary to restart the docker daemon and the docker itself.
+
+```
+sudo systemctl daemon-reload
+```
+
+```
+sudo systemctl restart docker
+```
+
 Since we are running Prometheus on localhost, in case we try to use the docker as localhost as well, Prometheus could understand that the metrics are inside the service itself (Prometheus) and then, could try to access port ``9323`` inside the Promethues container. To prevent this from happening we should use the default IP **172.17.0.1** of the **bridge** docker ``docker0``.
 
 Before running make sure that the ``docker0`` IP is really the default (172.17.0.1) with the following command:
