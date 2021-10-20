@@ -1,6 +1,15 @@
 version: '3.8'
 services:
 
+  create_secrets:
+    # To recreate the secrets, reset the files: KAFKA_WS_TICKET_SECRET, MINIO_ACCESS_KEY, MINIO_SECRET_KEY, S3ACCESSKEY, S3SECRETKEY which are in the docker-compose/secrets folder.
+    image: dojot/ubuntu_openssl:latest
+    command:
+        - "./secrets/create_secrets.sh"
+    restart: on-failure
+    volumes:
+      - ./secrets:/secrets
+
   history:
     image: dojot/history:${DOJOT_VERSION}
     restart: always
@@ -147,6 +156,7 @@ services:
     image: dojot/image-manager:${DOJOT_VERSION}
     restart: always
     depends_on:
+      - create_secrets
       - postgres
       - minio
     logging:
@@ -156,15 +166,18 @@ services:
         max-file: '5'
     environment:
       # TODO: The following should be unique for each environment
-      S3ACCESSKEY: 9HEODSF6WQN5EZ39DM7Z
-      S3SECRETKEY: fT5nAgHR9pkj0yYsBdc4p+PPq6ArjshcPdz0HA6W
       DBHOST: postgres
       DBUSER: imgm
       DBPASS: imgm
+    secrets:
+      - S3SECRETKEY
+      - S3ACCESSKEY
 
   minio:
     image: dojot/minio:2019.09.20
     restart: always
+    depends_on:
+      - create_secrets
     logging:
       driver: json-file
       options:
@@ -175,10 +188,9 @@ services:
       interval: 30s
       timeout: 20s
       retries: 3
-    environment:
-      # TODO: The following should be unique for each environment
-      MINIO_ACCESS_KEY: 9HEODSF6WQN5EZ39DM7Z
-      MINIO_SECRET_KEY: fT5nAgHR9pkj0yYsBdc4p+PPq6ArjshcPdz0HA6W
+    secrets:
+      - MINIO_SECRET_KEY
+      - MINIO_ACCESS_KEY
     command: server /data
     volumes:
       - minio-volume:/data
@@ -230,7 +242,8 @@ services:
     environment:
       POSTGRES_DB: postgres
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
+      # POSTGRES_PASSWORD: postgres
+      POSTGRES_PASSWORD_FILE: /secrets/.POSTGRES_PASSWORD
     healthcheck:
       test: ["CMD", "pg_isready", "-U", "postgres"]
       interval: 10s
@@ -240,6 +253,7 @@ services:
     volumes:
       - ./postgres/init-db.sh:/docker-entrypoint-initdb.d/init-db.sh:Z
       - postgres-volume:/var/lib/postgresql/data
+      - ./secrets:/secrets
     logging:
       driver: json-file
       options:
@@ -257,15 +271,17 @@ services:
       KONG_DATABASE: postgres
       KONG_PG_HOST: postgres
       KONG_PG_USER: kong
-      KONG_PG_PASSWORD: "kong"
       KONG_PG_DATABASE: kong
       KONG_LOG_LEVEL: info
+      KONG_PG_PASSWORD_FILE: /secrets/.KONG_PASSWORD
     restart: on-failure
     logging:
       driver: json-file
       options:
         max-size: 20m
         max-file: '5'
+    volumes:
+      - ./secrets:/secrets
 
   # Run any new migrations and Finish running any pending migrations after 'up'.
   kong-migrations-up:
@@ -278,8 +294,8 @@ services:
       KONG_DATABASE: postgres
       KONG_PG_HOST: postgres
       KONG_PG_USER: kong
-      KONG_PG_PASSWORD: "kong"
       KONG_PG_DATABASE: kong
+      KONG_PG_PASSWORD_FILE: /secrets/.KONG_PASSWORD
       KONG_LOG_LEVEL: info
     restart: on-failure
     logging:
@@ -287,6 +303,8 @@ services:
       options:
         max-size: 20m
         max-file: '5'
+    volumes:
+      - ./secrets:/secrets
 
   apigw:
     image: dojot/kong:${DOJOT_VERSION}
@@ -302,7 +320,7 @@ services:
       KONG_PG_HOST: postgres
       KONG_PG_USER: kong
       KONG_PG_DATABASE: kong
-      KONG_PG_PASSWORD: kong
+      KONG_PG_PASSWORD_FILE: /secrets/.KONG_PASSWORD
       KONG_LOG_LEVEL: info
       # To enable HTTPs external, it is necessary to configure public certificates
       # issued by a public CA, such as lets encrypt in KONG_SSL_CERT.
@@ -335,6 +353,9 @@ services:
       options:
         max-size: 20m
         max-file: '5'
+    volumes:
+      - ./secrets:/secrets
+
 
   kong-config:
     image: dojot/appropriate-curl
@@ -602,14 +623,15 @@ services:
   kafka-ws:
     image: dojot/kafka-ws:${DOJOT_VERSION}
     depends_on:
+      - create_secrets
       - kafka
       - kafka-ws-redis
     environment:
       KAFKA_WS_SERVER_JWT_EXP_TIME: "true"
       KAFKA_WS_REDIS_HOST: kafka-ws-redis
       KAFKA_WS_LOG_CONSOLE_LEVEL: "info"
-      # The KAFKA_WS_TICKET_SECRET should be unique for each environment
-      KAFKA_WS_TICKET_SECRET: fT5nAgHR9pkj0yYsBdc4p+PPq6ArjshcPdz0HA6W
+    secrets:
+      - KAFKA_WS_TICKET_SECRET
     restart: always
     logging:
       driver: json-file
@@ -1156,6 +1178,18 @@ volumes:
   influxdb-volume:
   acl-redis-volume:
   http-agent-cert-sidecar-volume:
+
+secrets:
+  KAFKA_WS_TICKET_SECRET:
+    file: ./secrets/KAFKA_WS_TICKET_SECRET
+  MINIO_SECRET_KEY:
+    file: ./secrets/MINIO_SECRET_KEY
+  MINIO_ACCESS_KEY:
+    file: ./secrets/MINIO_ACCESS_KEY
+  S3SECRETKEY:
+    file: ./secrets/S3SECRETKEY
+  S3ACCESSKEY:
+    file: ./secrets/S3ACCESSKEY
 
 networks:
   flowbroker:
