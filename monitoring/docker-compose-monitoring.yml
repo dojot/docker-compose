@@ -7,8 +7,6 @@ services:
     volumes:
       - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
       - prometheus-volume:/prometheus
-    ports:
-      - 9090:9090
     depends_on:
       - cadvisor
     networks:
@@ -17,8 +15,6 @@ services:
   cadvisor:
     image: google/cadvisor:v0.32.0
     container_name: cadvisor
-    ports:
-      - 8082:8080
     volumes:
       - /:/rootfs:ro
       - /var/run:/var/run:rw
@@ -29,15 +25,11 @@ services:
   redis:
     image: redis:6.2.5
     container_name: redis
-    ports:
-      - 6379:6379
   node_exporter:
     image: prom/node-exporter:v1.2.2
     container_name: node_exporter
     command:
       - "--path.rootfs=/host"
-    ports:
-      - 9100:9100
     restart: unless-stopped
     volumes:
       - "/:/host:ro,rslave"
@@ -45,15 +37,11 @@ services:
     image: danielqsj/kafka-exporter:v1.4.1
     container_name: kafka_exporter
     command: --kafka.server=kafka:9092
-    ports:
-      - 9308:9308
     networks:
       - dojot-monitoring
   mongodb_exporter:
     image: bitnami/mongodb-exporter:0.11.2
     container_name: mongodb_exporter
-    ports:
-      - 8880:9216
     environment:
       - MONGODB_URI=mongodb://mongodb:27017
     networks:
