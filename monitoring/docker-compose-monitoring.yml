@@ -52,7 +52,7 @@ services:
     environment:
       GF_INSTALL_PLUGINS: "grafana-clock-panel,grafana-simple-json-datasource"
     ports:
-      - 3000:3000
+      - '127.0.0.1:3000:3000'
     links:
       - prometheus
     volumes:
