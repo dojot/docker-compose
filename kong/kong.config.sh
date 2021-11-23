@@ -190,5 +190,7 @@ curl -sS -X PATCH \
 
 createEndpoint "kafka-ws-ticket" "http://kafka-ws:8080/"  '"/kafka-ws/v[0-9]+/ticket"' "false"
 addAuthToEndpoint "kafka-ws-ticket"
-    
 
+# service: file-mgmt
+createEndpoint "file-mgmt" "http://file-mgmt:7000"  '"/file-mgmt"' "true"
+addAuthToEndpoint "file-mgmt"
