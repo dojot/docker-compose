@@ -221,11 +221,6 @@ services:
     secrets:
       - MINIO_SECRET_KEY
       - MINIO_ACCESS_KEY
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
-      interval: 30s
-      timeout: 20s
-      retries: 3
     logging:
       driver: json-file
       options:
