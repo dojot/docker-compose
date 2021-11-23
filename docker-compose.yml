@@ -232,6 +232,7 @@ services:
     restart: always
     depends_on:
       - minio-files
+      - kafka
     volumes:
       - ./secrets:/secrets
     environment:
