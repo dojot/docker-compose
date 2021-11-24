@@ -1,0 +1,74 @@
+groups:
+- name: dojot
+  rules:
+  - alert: PrometheusJobMissing
+    expr: absent(up{job="prometheus"})
+    for: 0m
+    labels:
+      severity: warning
+    annotations:
+      summary: Prometheus job missing (instance {{ $labels.instance }})
+      description: "A Prometheus job has disappeared."
+
+  - alert: PrometheusTargetMissing
+    expr: up == 0
+    for: 0m
+    labels:
+      severity: critical
+    annotations:
+      summary: Prometheus target missing (instance {{ $labels.instance }})
+      description: "A Prometheus target has disappeared. An exporter might be crashed."
+
+  - alert: PrometheusAllTargetMissing
+    expr: count by (job) (up) == 0
+    for: 0m
+    labels:
+      severity: critical
+    annotations:
+      summary: Prometheus all targets missing (instance {{ $labels.instance }})
+      description: "A Prometheus job does not have living target anymore."
+
+  - alert: PrometheusConfigurationReloadFailure
+    expr: prometheus_config_last_reload_successful != 1
+    for: 0m
+    labels:
+      severity: warning
+    annotations:
+      summary: Prometheus configuration reload failure (instance {{ $labels.instance }})
+      description: "Prometheus configuration reload error."
+
+  - alert: PrometheusTooManyRestarts
+    expr: changes(process_start_time_seconds{job=~"prometheus|alertmanager"}[10m]) > 2
+    for: 0m
+    labels:
+      severity: warning
+    annotations:
+      summary: Prometheus too many restarts (instance {{ $labels.instance }})
+      description: "Prometheus has restarted more than twice in the last 10 minutes. It might be crashlooping."
+  
+  - alert: PrometheusAlertmanagerConfigurationReloadFailure
+    expr: alertmanager_config_last_reload_successful != 1
+    for: 0m
+    labels:
+      severity: warning
+    annotations:
+      summary: Prometheus AlertManager configuration reload failure (instance {{ $labels.instance }})
+      description: "AlertManager configuration reload error."
+
+  - alert: PrometheusNotConnectedToAlertmanager
+    expr: prometheus_notifications_alertmanagers_discovered < 1
+    for: 0m
+    labels:
+      severity: critical
+    annotations:
+      summary: Prometheus not connected to AlertManager (instance {{ $labels.instance }})
+      description: "Prometheus cannot connect the AlertManager."
+
+  - alert: PrometheusRulesEvaluationFailures
+    expr: increase(prometheus_rule_evaluation_failures_total[3m]) > 0
+    for: 0m
+    labels:
+      severity: critical
+    annotations:
+      summary: Prometheus rule evaluation failures (instance {{ $labels.instance }})
+      description: "Prometheus encountered {{ $value }} rule(s) evaluation failures, leading to potencially ignored alerts."
