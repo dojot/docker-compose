@@ -215,5 +215,6 @@ volumes:
     name: prometheus-volume
 
 networks:
-  dojot:
+  default:
     external: true
+    name: dojot

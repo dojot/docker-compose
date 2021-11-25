@@ -7,3 +7,6 @@ node_modules
 build/
 .vscode/
 .history/
+
+secrets/*.*
+!secrets/create_secrets.sh
