@@ -22,6 +22,11 @@ Create a custom docker network named `dojot`.
 ```bash
 docker network create --attachable --driver bridge dojot
 ```
+
+Now, start the containers with command bellow:
+```bash
+docker-compose up --detach
+```
 > __Note__: To get completely ready, **healthy** :green_heart:, all services in this `docker-compose` take an average of at least `12 minutes`.
 
 For instructions on how to get it up and running, please check [Installation Guide](https://dojotdocs.readthedocs.io/en/latest/installation-guide.html#docker-compose). **Always change the ``admin`` user password to a suitable password and keep it safe.**
