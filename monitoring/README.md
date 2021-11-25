@@ -96,7 +96,7 @@ Available metrics:
 
 ## MongoDB Exporter
 
-[`MongoDB Exporter](https://github.com/percona/mongodb_exporter) is used to get metrics from ``MongoDB`` service.
+[`MongoDB Exporter`](https://github.com/percona/mongodb_exporter) is used to get metrics from ``MongoDB`` service.
 
 Available metrics:
 
@@ -125,12 +125,12 @@ If the file does not exists, you need to create it.
 
 If the file is empty, paste the following:
 
-``
+```json
 {
   "metrics-addr" : "0.0.0.0:9323",
   "experimental" : true
 }
-``
+```
 
 If the file is not empty, add these two keys, making sure the resulting file is a valid JSON. Be careful that all lines must end with a comma "," except the last line.
 
@@ -141,15 +141,15 @@ sudo systemctl daemon-reload
 ```
 
 ```
-sudo systemctl restart docker
+sudo systemctl restart docker.service
 ```
 
-Since we are running Prometheus on localhost, in case we try to use the docker as localhost as well, Prometheus could understand that the metrics are inside the service itself (Prometheus) and then, could try to access port ``9323`` inside the Promethues container. To prevent this from happening we should use the default IP **172.17.0.1** of the **bridge** docker ``docker0``.
+Since we are running Prometheus on localhost, in case we try to use the docker as localhost as well, Prometheus could understand that the metrics are inside the service itself (Prometheus) and then, could try to access port ``9323`` inside the Promethues container. To prevent this from happening we should use the default IP `172.17.0.1` of the **bridge** docker ``docker0``.
 
-Before running make sure that the ``docker0`` IP is really the default (172.17.0.1) with the following command:
+Before running make sure that the `docker0` IP is really the default (172.17.0.1) with the following command:
 
 ```
-ip addr show docker0
+ip address show dev docker0
 ```
 
 The output will be similar to the one shown below, the *IP* will normally appear on the third line after the term ``inet``:
@@ -179,9 +179,8 @@ Example job **docker**:
 As we've already done the configuration, we can start the service:
 
 ```
-cd monitoring
-
-docker-compose -f docker-compose-monitoring.yml up -d
+cd monitoring/
+docker-compose up --detach
 ```
 
 When the process is complete, we can check whether the services have been started:
@@ -194,11 +193,11 @@ Visually, it is possible to check if everything is "UP" by [Prometheus Targets](
 
 ## Viewing metrics in grafana
 
-As the service is declared in [Docker Compose Monitoring](docker-compose-monitoring.yml), it has already been instantiated. Then just access the service at the URL http://localhost:3000.
+As the service is declared in [Docker Compose Monitoring](docker-compose.yml), it has already been instantiated. Then just access the service at the URL http://localhost:3000.
 
-**USER**=``admin``
+**User**: ``admin``
 
-**SENHA**=``admin``
+**Password**: ``admin``
 
 [Grafana](http://localhost:3000)
 
