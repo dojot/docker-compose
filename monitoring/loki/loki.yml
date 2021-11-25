@@ -17,6 +17,8 @@ ingester:
   chunk_idle_period: 1h
   chunk_retain_period: 30s
   max_transfer_retries: 0
+  wal:
+    dir: /loki/wal
 
 # https://grafana.com/docs/loki/latest/configuration/#period_config
 schema_config:
@@ -32,8 +34,8 @@ schema_config:
 # https://grafana.com/docs/loki/latest/configuration/#storage_config
 storage_config:
   boltdb_shipper:
-    active_index_directory: /loki/boltdb-shipper-active
-    cache_location: /loki/boltdb-shipper-cache
+    active_index_directory: /loki/index
+    cache_location: /loki/index_cache
     cache_ttl: 24h
     shared_store: filesystem
   filesystem:
@@ -41,7 +43,7 @@ storage_config:
 
 # https://grafana.com/docs/loki/latest/configuration/#compactor_config
 compactor:
-  working_directory: /loki/boltdb-shipper-compactor
+  working_directory: /loki/compactor
   shared_store: filesystem
 
 # https://grafana.com/docs/loki/latest/configuration/#limits_config
@@ -72,3 +74,4 @@ ruler:
     kvstore:
       store: inmemory
   enable_api: true
+  enable_alertmanager_v2: true

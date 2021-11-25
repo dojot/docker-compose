@@ -1,7 +1,22 @@
 version: "3.8"
 
+# https://docs.docker.com/config/containers/logging/json-file/
+# https://docs.docker.com/config/containers/logging/log_tags/
+x-logging: &monitoring-logging
+  logging:
+    driver: 'json-file'
+    options:
+      max-size: '50m'
+      max-file: '3'
+      labels: 'monitoring'
+      tag: "{{.ImageName}}|{{.Name}}|{{.ImageFullID}}|{{.FullID}}"
+
+x-networking: &dojot-networking
+  networks:
+    - dojot
+
 services:
-  # --- Documentation: https://prometheus.io/
+  # https://prometheus.io/
   prometheus:
     container_name: prometheus
     image: prom/prometheus:v2.31.1
@@ -24,10 +39,10 @@ services:
         source: ./prometheus
         target: /etc/prometheus
         read_only: true
-    networks:
-      - dojot-monitoring
+    <<: *monitoring-logging
+    <<: *dojot-networking
 
-  # --- Documentation: https://prometheus.io/docs/alerting/latest/alertmanager/
+  # https://prometheus.io/docs/alerting/latest/alertmanager/
   alertmanager:
     image: prom/alertmanager:v0.23.0
     container_name: alertmanager
@@ -46,10 +61,10 @@ services:
         read_only: true
     depends_on:
       - prometheus
-    networks:
-      - dojot-monitoring
+    <<: *monitoring-logging
+    <<: *dojot-networking
 
-  # --- Documentation: https://grafana.com/docs/grafana/latest/installation/docker/
+  # https://grafana.com/docs/grafana/latest/installation/docker/
   grafana:
     container_name: grafana
     image: grafana/grafana:8.1.2
@@ -68,10 +83,10 @@ services:
         source: ./grafana/provisioning
         target: /etc/grafana/provisioning
         read_only: true
-    networks:
-      - dojot-monitoring
+    <<: *monitoring-logging
+    <<: *dojot-networking
 
-  # --- Documentation: https://grafana.com/docs/loki/latest/configuration/
+  # https://grafana.com/docs/loki/latest/configuration/
   loki:
     container_name: loki
     image: grafana/loki:2.4.1
@@ -91,29 +106,31 @@ services:
       - type: volume
         source: loki-volume
         target: /loki
-    networks:
-      - dojot-monitoring
-    
+    <<: *monitoring-logging
+    <<: *dojot-networking
+
+  # https://grafana.com/docs/loki/latest/clients/promtail/
   promtail:
     container_name: promtail
-    image: grafana/promtail:2.4.0
+    image: grafana/promtail:2.4.1
     restart: unless-stopped
     command:
       - -config.file=/etc/promtail/promtail.yml
     volumes:
       - type: bind
         source: ./promtail
-        target: /etc/promtail/
+        target: /etc/promtail
       - type: bind
         source: /var/lib/docker/containers
         target: /var/lib/docker/containers
-    networks:
-      - dojot-monitoring
+        read_only: true
+    <<: *monitoring-logging
+    <<: *dojot-networking
 
-  # --- Documentation: https://github.com/google/cadvisor
+  # https://github.com/google/cadvisor
   cadvisor:
-    image: gcr.io/cadvisor/cadvisor:v0.38.8
     container_name: cadvisor
+    image: gcr.io/cadvisor/cadvisor:v0.38.8
     privileged: true
     devices:
       - /dev/kmsg
@@ -138,8 +155,8 @@ services:
         source: /dev/disk
         target: /dev/disk
         read_only: true
-    networks:
-      - dojot-monitoring
+    <<: *monitoring-logging
+    <<: *dojot-networking
   
   # --- Documentation: https://redis.io/
   # redis:
@@ -162,6 +179,7 @@ services:
           propagation: rslave
     network_mode: host
     pid: host
+    <<: *monitoring-logging
 
   # --- Documentation: https://github.com/danielqsj/kafka_exporter
   kafka_exporter:
@@ -169,8 +187,8 @@ services:
     image: danielqsj/kafka-exporter:v1.4.1
     restart: unless-stopped
     command: --kafka.server=kafka:9092
-    networks:
-      - dojot-monitoring
+    <<: *monitoring-logging
+    <<: *dojot-networking
 
   # --- Documentation: https://hub.docker.com/r/bitnami/mongodb-exporter
   mongodb_exporter:
@@ -179,8 +197,8 @@ services:
     restart: unless-stopped
     environment:
       MONGODB_URI: 'mongodb://mongodb:27017'
-    networks:
-      - dojot-monitoring
+    <<: *monitoring-logging
+    <<: *dojot-networking
 
 volumes:
   grafana-volume:
@@ -189,10 +207,13 @@ volumes:
   loki-volume:
     driver: local
     name: loki-volume
+  loki-minio-volume:
+    driver: local
+    name: loki-minio-volume
   prometheus-volume:
     driver: local
     name: prometheus-volume
 
 networks:
-  dojot-monitoring:
+  dojot:
     external: true
