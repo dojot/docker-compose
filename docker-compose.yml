@@ -12,7 +12,7 @@ x-logging: &loki-logging
 
 x-networking: &dojot-networking
   networks:
-    - dojot
+    - default
 
 services:
   
