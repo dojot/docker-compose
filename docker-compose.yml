@@ -15,7 +15,7 @@ x-networking: &dojot-networking
     - default
 
 services:
-  
+
   create_secrets:
     # To recreate the secrets, reset the files: MINIO_ACCESS_KEY, MINIO_SECRET_KEY which are in the docker-compose/secrets folder.
     image: dojot/ubuntu_openssl:latest

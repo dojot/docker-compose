@@ -160,13 +160,13 @@ services:
         read_only: true
     <<: *monitoring-logging
     <<: *dojot-networking
-  
-  # --- Documentation: https://redis.io/
+
+  # https://redis.io/
   # redis:
   #   image: redis:6.2.5
   #   container_name: redis
-  
-  # --- Documentation: https://github.com/prometheus/node_exporter
+
+  # https://github.com/prometheus/node_exporter
   node_exporter:
     image: prom/node-exporter:v1.3.0
     container_name: node_exporter
