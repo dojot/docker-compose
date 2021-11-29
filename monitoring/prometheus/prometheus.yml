@@ -116,3 +116,12 @@ scrape_configs:
         app: influxdb
         env: dev
         stack: dojot
+
+  - job_name: rabbitmq_exporter
+    metrics_path: /metrics
+    static_configs:
+    - targets: ["rabbitmq:15692"]
+      labels:
+        app: rabbitmq_exporter
+        env: dev
+        stack: dojot
