@@ -17,12 +17,7 @@ This repository contains the necessary configuration files for quick deployment 
 
 Before running this deployment it's necessary to define your domain name or IP in [.env](./.env) file, in the `DOJOT_DOMAIN_NAME` variable.
 
-Create a custom docker network named `dojot`.
-```bash
-docker network create --attachable --driver bridge dojot
-```
-
-Now, start the containers with command bellow:
+Start the containers with command bellow:
 ```bash
 docker-compose up --detach
 ```

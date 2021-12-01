@@ -1085,7 +1085,6 @@ secrets:
 
 networks:
   default:
-    external: true
     name: dojot
   flowbroker:
     name: ${FLOWBROKER_NETWORK}

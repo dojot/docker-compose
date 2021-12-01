@@ -209,19 +209,14 @@ services:
 
 volumes:
   grafana-volume:
-    driver: local
     name: grafana-volume
   loki-volume:
-    driver: local
     name: loki-volume
   loki-minio-volume:
-    driver: local
     name: loki-minio-volume
   prometheus-volume:
-    driver: local
     name: prometheus-volume
 
 networks:
   default:
-    external: true
     name: dojot
