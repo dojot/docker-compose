@@ -21,7 +21,6 @@ rule_files:
 scrape_configs:
 
   - job_name: docker
-    metrics_path: /metrics
     static_configs:
     - targets: ['172.17.0.1:9323'] # ip address show dev docker0
       labels:
@@ -30,7 +29,6 @@ scrape_configs:
         stack: dojot
 
   - job_name: prometheus
-    metrics_path: /metrics
     honor_labels: false
     honor_timestamps: true
     scheme: http
@@ -42,7 +40,6 @@ scrape_configs:
         stack: dojot
 
   - job_name: alertmanager
-    metrics_path: /metrics
     static_configs:
     - targets: ['alertmanager:9093']
       labels:
@@ -51,7 +48,6 @@ scrape_configs:
         stack: dojot
 
   - job_name: cadvisor
-    metrics_path: /metrics
     static_configs:
     - targets: ['cadvisor:8080']
       labels:
@@ -60,7 +56,6 @@ scrape_configs:
         stack: dojot
 
   - job_name: node_exporter
-    metrics_path: /metrics
     static_configs:
     - targets: ['node_exporter:9100']
       labels:
@@ -69,7 +64,6 @@ scrape_configs:
         stack: dojot
 
   - job_name: vernemq
-    metrics_path: /metrics
     static_configs:
     - targets: ['iotagent-mqtt:8888']
       labels:
@@ -78,7 +72,6 @@ scrape_configs:
         stack: dojot
 
   - job_name: kafka_exporter
-    metrics_path: /metrics
     static_configs:
     - targets: ['kafka_exporter:9308']
       labels:
@@ -87,7 +80,6 @@ scrape_configs:
         stack: dojot
 
   - job_name: apigw
-    metrics_path: /metrics
     static_configs:
     - targets: ['apigw:8001']
       labels:
@@ -96,7 +88,6 @@ scrape_configs:
         stack: dojot
 
   - job_name: mongodb
-    metrics_path: /metrics
     scrape_interval: 1m
     scrape_timeout: 5s
     static_configs:
@@ -107,7 +98,6 @@ scrape_configs:
         stack: dojot
 
   - job_name: influxdb
-    metrics_path: /metrics
     scrape_interval: 1m
     scrape_timeout: 5s
     static_configs:
@@ -118,7 +108,6 @@ scrape_configs:
         stack: dojot
 
   - job_name: rabbitmq_exporter
-    metrics_path: /metrics
     static_configs:
     - targets: ["rabbitmq:15692"]
       labels:

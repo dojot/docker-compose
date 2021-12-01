@@ -4,8 +4,7 @@ This deployment option is best suited to development and functional environments
 
 ## Getting Started
 
-This repository contains the necessary configuration files
-for quick deployment of the Dojot Platform using `docker-compose`.
+This repository contains the necessary configuration files for quick deployment of the Dojot Platform using `docker-compose`.
 
 ### Requirements
 
