@@ -925,6 +925,7 @@ services:
       - http-agent-cert-sidecar
       - device-manager
       - certificate-acl
+      - basic-auth
     ports:
       - 8080:3000
     restart: always
@@ -943,7 +944,16 @@ services:
         max-size: 20m
         max-file: '5'
 
-
+  http-agent-redis:
+    image: dojot/redis:6.0.4-alpine3.11
+    restart: always
+    volumes:
+      - http-agent-redis-volume:/data
+    logging:
+      driver: json-file
+      options:
+        max-size: 20m
+        max-file: '5'
   ###
   # BEGIN - Legacy mqtt broker based on mosca (https://github.com/moscajs/mosca)
   #
@@ -1206,6 +1216,27 @@ services:
   #     - 5050:80
 # GUI to postgres - END
 
+  basic-auth:
+    image: dojot/device-basic-authentication:${DOJOT_VERSION}
+    restart: always
+    depends_on:
+      - kafka
+      - data-broker
+      - mongodb
+      - auth
+      - device-manager
+    ports:
+      - 3000:3000
+    environment:
+      BASIC_AUTH_LOG_CONSOLE_LEVEL: 'info'
+      BASIC_AUTH_LOG_VERBOSE: "true"
+      BASIC_AUTH_PRODUCER_METADATA_BROKER_LIST: kafka:9092
+    logging:
+      driver: json-file
+      options:
+        max-size: 20m
+        max-file: '5'
+
 volumes:
   ejbca-volume:
   ejbca-client-tls-volume:
@@ -1236,6 +1267,7 @@ volumes:
   influxdb-volume:
   acl-redis-volume:
   http-agent-cert-sidecar-volume:
+  http-agent-redis-volume:
 
 secrets:
   MINIO_SECRET_KEY:
