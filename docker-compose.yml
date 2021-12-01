@@ -918,7 +918,6 @@ services:
 
   http-agent:
     image: dojot/http-agent:${DOJOT_VERSION}
-    # image: dojot/http-agent:v0.7.1-rc.1
     depends_on:
       - kafka
       - data-broker
