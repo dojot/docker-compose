@@ -925,6 +925,7 @@ services:
       - http-agent-cert-sidecar
       - device-manager
       - certificate-acl
+      - basic-auth
     ports:
       - 8080:3000
     restart: always
@@ -1215,7 +1216,7 @@ services:
   #     - 5050:80
 # GUI to postgres - END
 
-  device-basic-auth:
+  basic-auth:
     image: dojot/device-basic-authentication:${DOJOT_VERSION}
     restart: always
     depends_on:
@@ -1226,7 +1227,6 @@ services:
       - device-manager
     ports:
       - 3000:3000
-      - 9229:9229
     environment:
       BASIC_AUTH_LOG_CONSOLE_LEVEL: 'info'
       BASIC_AUTH_LOG_VERBOSE: "true"
