@@ -180,7 +180,7 @@ As we've already done the configuration, we can start the service:
 
 ```
 cd monitoring/
-docker-compose up --detach
+docker-compose --file docker-compose-monitoring.yml up --detach
 ```
 
 When the process is complete, we can check whether the services have been started:
@@ -193,7 +193,7 @@ Visually, it is possible to check if everything is "UP" by [Prometheus Targets](
 
 ## Viewing metrics in grafana
 
-As the service is declared in [Docker Compose Monitoring](docker-compose.yml), it has already been instantiated. Then just access the service at the URL http://localhost:3000.
+As the service is declared in [Docker Compose Monitoring](docker-compose-monitoring.yaml), it has already been instantiated. Then just access the service at the URL http://localhost:3000.
 
 **User**: ``admin``
 
@@ -201,7 +201,7 @@ As the service is declared in [Docker Compose Monitoring](docker-compose.yml), i
 
 [Grafana](http://localhost:3000)
 
-## Graphana Configuration
+## Grafana Configuration
 
 If you need to change or analyze the configuration files, you can find them in [Grafana Configuration Files](grafana/).
 
@@ -213,4 +213,4 @@ As the data and data source have already been imported automatically, you will b
 
 * **System Metrics** refers to exporting Node-Exporter;
 * **Docker Metrics** refers to the CAdvisor exporter;
-* **Overview** has the main panels of each dashboard.
+* **Overview** has the main panels of each dashboard;
