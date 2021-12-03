@@ -182,6 +182,63 @@ services:
     <<: *loki-logging
     <<: *dojot-networking
 
+  minio-files:
+    image: minio/minio:RELEASE.2021-11-09T03-21-45Z
+    restart: always
+    hostname: minio-files
+    command: server /data --console-address ":9001"
+    volumes:
+      - minio-image-volume:/data
+      - ./secrets:/secrets
+    ports:
+      - "9010:9000"
+      - "9011:9001"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9001/minio/health/live"]
+      interval: 30s
+      timeout: 20s
+      retries: 3
+    environment:
+      MINIO_ACCESS_KEY_FILE: MINIO_ACCESS_KEY
+      MINIO_SECRET_KEY_FILE: MINIO_SECRET_KEY
+      MINIO_ROOT_USER_FILE: MINIO_ACCESS_KEY
+      MINIO_ROOT_PASSWORD_FILE: MINIO_SECRET_KEY
+    secrets:
+      - MINIO_SECRET_KEY
+      - MINIO_ACCESS_KEY
+    logging:
+      driver: json-file
+      options:
+        max-size: 20m
+        max-file: '5'
+
+  file-mgmt:
+    image: dojot/file-mgmt:${DOJOT_VERSION}
+    restart: always
+    depends_on:
+      - minio-files
+      - kafka
+    volumes:
+      - ./secrets:/secrets
+    environment:
+      FILEMGMT_SERVER_HOST: file-mgmt
+      FILEMGMT_MINIO_ACCESS_KEY_FILE: MINIO_ACCESS_KEY
+      FILEMGMT_MINIO_SECRET_KEY_FILE: MINIO_SECRET_KEY
+      FILEMGMT_CONSUMER_METADATA_BROKER_LIST: kafka:9092
+    secrets:
+      - MINIO_SECRET_KEY
+      - MINIO_ACCESS_KEY
+    logging:
+      driver: json-file
+      options:
+        max-size: 20m
+        max-file: '5'
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/health"]
+      interval: 30s
+      timeout: 20s
+      retries: 3
+
   device-manager:
     image: dojot/device-manager:${DOJOT_VERSION}
     restart: always
@@ -778,6 +835,7 @@ services:
       - http-agent-cert-sidecar
       - device-manager
       - certificate-acl
+      - basic-auth
     ports:
       - 8080:3000
     restart: always
@@ -790,6 +848,14 @@ services:
       HTTP_AGENT_LOG_CONSOLE_LEVEL: 'info'
     volumes:
       - http-agent-cert-sidecar-volume:/certs
+    <<: *loki-logging
+    <<: *dojot-networking
+
+  http-agent-redis:
+    image: dojot/redis:6.0.4-alpine3.11
+    restart: always
+    volumes:
+      - http-agent-redis-volume:/data
     <<: *loki-logging
     <<: *dojot-networking
 
@@ -1047,6 +1113,27 @@ services:
   #     - 5050:80
 # GUI to postgres - END
 
+  basic-auth:
+    image: dojot/device-basic-authentication:${DOJOT_VERSION}
+    restart: always
+    depends_on:
+      - kafka
+      - data-broker
+      - mongodb
+      - auth
+      - device-manager
+    ports:
+      - 3000:3000
+    environment:
+      BASIC_AUTH_LOG_CONSOLE_LEVEL: 'info'
+      BASIC_AUTH_LOG_VERBOSE: "true"
+      BASIC_AUTH_PRODUCER_METADATA_BROKER_LIST: kafka:9092
+    logging:
+      driver: json-file
+      options:
+        max-size: 20m
+        max-file: '5'
+
 volumes:
   ejbca-volume:
   ejbca-client-tls-volume:
@@ -1054,6 +1141,7 @@ volumes:
   mongodb-volume:
   mongodb-cfg-volume:
   minio-volume:
+  minio-image-volume:
   rabbitmq-volume:
   zookeeper-volume:
   zookeeper-log-volume:
@@ -1076,6 +1164,7 @@ volumes:
   influxdb-volume:
   acl-redis-volume:
   http-agent-cert-sidecar-volume:
+  http-agent-redis-volume:
 
 secrets:
   MINIO_SECRET_KEY:
