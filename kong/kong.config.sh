@@ -194,3 +194,13 @@ addAuthToEndpoint "kafka-ws-ticket"
 # service: file-mgmt
 createEndpoint "file-mgmt" "http://file-mgmt:7000"  '"/file-mgmt"' "true"
 addAuthToEndpoint "file-mgmt"
+
+echo ""
+echo ""
+echo "- add global correlation-id plugin"
+curl  -s  -sS -X POST \
+--url ${kong}/plugins/ \
+    --data "name=correlation-id" \
+    --data "config.header_name=X-Request-Id" \
+    --data "config.generator=uuid" \
+    --data "config.echo_downstream=false"
