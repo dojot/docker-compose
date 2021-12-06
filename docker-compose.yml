@@ -839,6 +839,7 @@ services:
 
   http-agent:
     image: dojot/http-agent:${DOJOT_VERSION}
+    restart: always
     depends_on:
       - kafka
       - data-broker
@@ -848,7 +849,6 @@ services:
       - certificate-acl
     ports:
       - 8080:3000
-    restart: always
     environment:
       HTTP_AGENT_HTTPS_CERT: '/certs/http-agent.crt'
       HTTP_AGENT_HTTPS_KEY: '/certs/http-agent.key'
@@ -947,12 +947,12 @@ services:
 
   cron:
     image: dojot/cron:${DOJOT_VERSION}
+    restart: always
     depends_on:
       - kafka
       - data-broker
       - auth
       - mongodb
-    restart: always
     logging:
       driver: json-file
       options:
