@@ -25,4 +25,19 @@ influx setup \
 
 echo "Successfully initialized InfluxDB..."
 
+HOST=${HOST:-"http://influxdb:8086"}
+DEFAULT_USER="admin_dojot"
+DEFAULT_PASSWORD="admin@dojot"
+
+
+influx user create \
+    --host "$HOST"  \
+    --name "$DEFAULT_USER" \
+    --password "$DEFAULT_PASSWORD"  \
+    # --skip-verify
+    # --org "$DEFAULT_ORGANIZATION" \
+    # --bucket "$DEFAULT_BUCKET"
+
+echo "User admin_dojot created..."
+
 exit 0
