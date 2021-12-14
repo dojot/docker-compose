@@ -19,11 +19,15 @@ fi
 ##############################
 # Secrets keycloak proxy
 ##############################
-if [ ! -s secrets/.KEYCLOAK_PROXY ]; then
-  openssl passwd -5 $(uname -n)$(date +%F%H%M%S).KEYCLOAK_PROXY > secrets/.KEYCLOAK_PROXY
+if [ ! -s secrets/KEYCLOAK_PROXY ]; then
+  openssl passwd -5 $(uname -n)$(date +%F%H%M%S)KEYCLOAK_PROXY > secrets/KEYCLOAK_PROXY
+fi
+
+if [ ! -s secrets/KEYCLOAK_PROXY_USER ]; then
+  openssl passwd -5 $(uname -n)$(date +%F%H%M%S)KEYCLOAK_PROXY_USER > secrets/KEYCLOAK_PROXY_USER
 fi
 
 # Valida criação secret
-if [ ! -s secrets/.KEYCLOAK_PROXY ] || [ ! -s secrets/.KEYCLOAK_PROXY ]; then
+if [ ! -s secrets/KEYCLOAK_PROXY ] || [ ! -s secrets/KEYCLOAK_PROXY_USER ]; then
   exit 1
 fi
