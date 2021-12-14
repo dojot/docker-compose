@@ -185,6 +185,9 @@ services:
   minio-files:
     image: minio/minio:RELEASE.2021-11-09T03-21-45Z
     restart: always
+    depends_on:
+      create_secrets:
+        condition: service_completed_successfully
     hostname: minio-files
     command: server /data --console-address ":9001"
     volumes:
@@ -947,69 +950,75 @@ services:
 
 ### influxdb begin
 
-  # influxdb-retriever:
-  #   image: dojot/influxdb-retriever:${DOJOT_VERSION}
-  #   depends_on:
-  #     - influxdb
-  #   environment:
-  #     RETRIEVER_LOG_CONSOLE_LEVEL: "info"
-  #   restart: always
-  #   logging:
-  #     driver: json-file
-  #     options:
-  #       max-size: 20m
-  #       max-file: '5'
+#   influxdb-retriever:
+#     image: dojot/influxdb-retriever:${DOJOT_VERSION}
+#     depends_on:
+#       - influxdb
+#     environment:
+#       RETRIEVER_LOG_CONSOLE_LEVEL: "info"
+#     restart: always
+#     <<: *loki-logging
+#     <<: *dojot-networking
 
-  # influxdb-storer:
-  #   image: dojot/influxdb-storer:${DOJOT_VERSION}
-  #   depends_on:
-  #     - kafka
-  #     - influxdb
-  #   environment:
-  #     STORER_LOG_CONSOLE_LEVEL: "info"
-  #     STORER_INFLUX_RETENTION_HRS: 168 # used only for new created tenant after default
-  #   restart: always
-  #   logging:
-  #     driver: json-file
-  #     options:
-  #       max-size: 20m
-  #       max-file: '5'
+#   influxdb-storer:
+#     image: dojot/influxdb-storer:${DOJOT_VERSION}
+#     depends_on:
+#       - kafka
+#       - influxdb
+#     environment:
+#       STORER_LOG_CONSOLE_LEVEL: "info"
+#       STORER_INFLUX_RETENTION_HRS: 168 # used only for new created tenant after default
+#     restart: always
+#     <<: *loki-logging
+#     <<: *dojot-networking
 
-  # influxdb-setup:
-  #   image: quay.io/influxdb/influxdb:v2.0.2
-  #   deploy:
-  #     restart_policy:
-  #       condition: on-failure
-  #       max_attempts: 3
-  #   environment:
-  #     DEFAULT_RETENTION: "7d" # default (admin) organization expiry time
-  #   volumes:
-  #     - influxdb-volume:/root/.influxdbv2/
-  #     - ./influxdb/init-influx.sh:/init-influx.sh:Z
-  #   entrypoint:
-  #     - /init-influx.sh
-  #   depends_on:
-  #     influxdb:
-  #       condition: service_healthy
-  #   logging:
-  #     driver: json-file
-  #     options:
-  #       max-size: 20m
-  #       max-file: '5'
+#   influxdb-setup:
+#     image: quay.io/influxdb/influxdb:v2.0.2
+#     deploy:
+#       restart_policy:
+#         condition: on-failure
+#         max_attempts: 3
+#     environment:
+#       DEFAULT_RETENTION: "7d" # default (admin) organization expiry time
+#     volumes:
+#       - influxdb-volume:/root/.influxdbv2/
+#       - ./influxdb/init-influx.sh:/init-influx.sh:Z
+#     entrypoint:
+#       - /init-influx.sh
+#     depends_on:
+#       influxdb:
+#         condition: service_healthy
+#     <<: *loki-logging
+#     <<: *dojot-networking
 
+#   influxdb:
+#     image: quay.io/influxdb/influxdb:v2.0.2
+#     restart: always
+#     ports:
+#       - 8086:8086
+#     volumes:
+#       - influxdb-volume:/root/.influxdbv2
+#     healthcheck:
+#       test: "influx ping"
+#     <<: *loki-logging
+#     <<: *dojot-networking
 
-  # influxdb:
-  #   image: quay.io/influxdb/influxdb:v2.0.2
-  #   restart: always
-  #   volumes:
-  #     - influxdb-volume:/root/.influxdbv2
-  #   healthcheck:
-  #     test: "influx ping"
-  #   logging:
-  #     driver: json-file
-  #     options:
-  #       max-size: 20m
-  #       max-file: '5'
+# ### Interface WEB InfluxDB
+# ### Created user dojot_admin to acess interface WEB InfluxDB
+#   influxdb-chronograf:
+#     image: chronograf:1.9.1
+#     depends_on:
+#       - influxdb
+#     ports:
+#       - '127.0.0.1:8888:8888'
+#     volumes:
+#       - influxdb-chronograf-volume:/var/lib/chronograf
+#     environment:
+#       - INFLUXDB_URL=http://influxdb:8086
+#       - INFLUXDB_USERNAME=admin
+#       - INFLUXDB_PASSWORD=admin
+#     <<: *loki-logging
+#     <<: *dojot-networking
 
 ### influxdb end
 
@@ -1162,6 +1171,7 @@ volumes:
   kafka-ws-redis-volume:
   mosca-redis-volume:
   influxdb-volume:
+  influxdb-chronograf-volume:
   acl-redis-volume:
   http-agent-cert-sidecar-volume:
   http-agent-redis-volume:
