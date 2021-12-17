@@ -181,7 +181,7 @@ services:
       - target: 9100
         published: 9100
         protocol: tcp
-        mode: host 
+        mode: host
     command:
       - --path.procfs=/host/proc
       - --path.rootfs=/rootfs
