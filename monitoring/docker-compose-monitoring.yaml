@@ -132,6 +132,11 @@ services:
     container_name: cadvisor
     image: gcr.io/cadvisor/cadvisor:v0.38.8
     privileged: true
+    ports:
+      - target: 8080
+        published: 8082
+        protocol: tcp
+        mode: host
     devices:
       - /dev/kmsg
     volumes:
@@ -172,6 +177,11 @@ services:
     image: prom/node-exporter:v1.3.0
     container_name: node_exporter
     restart: unless-stopped
+    ports:
+      - target: 9100
+        published: 9100
+        protocol: tcp
+        mode: host 
     command:
       - --path.procfs=/host/proc
       - --path.rootfs=/rootfs
@@ -184,8 +194,6 @@ services:
         read_only: true
         bind:
           propagation: rslave
-    network_mode: host
-    pid: host
     <<: *loki-logging
 
   # https://github.com/danielqsj/kafka_exporter
