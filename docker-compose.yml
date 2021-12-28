@@ -1132,7 +1132,7 @@ services:
       - auth
       - device-manager
     ports:
-      - 3000:3000
+      - 3110:3000
     environment:
       BASIC_AUTH_LOG_CONSOLE_LEVEL: 'info'
       BASIC_AUTH_LOG_VERBOSE: "true"
