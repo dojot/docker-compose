@@ -67,7 +67,7 @@ services:
         max-file: '5'
 
   gui-v2:
-    image: dojot/gui-v2:${DOJOT_VERSION}
+    image: dojot/gui-v2:feature-guinx
     depends_on:
       - backstage
     restart: always
@@ -883,7 +883,7 @@ services:
         max-file: '5'
 
   backstage:
-    image: dojot/backstage:${DOJOT_VERSION}
+    image: dojot/backstage:feature-guinx
     restart: always
     depends_on:
       - postgres
