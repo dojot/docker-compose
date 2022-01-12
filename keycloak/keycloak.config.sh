@@ -7,6 +7,12 @@ KEYCLOAK_CREATE_REALM=${KEYCLOAK_CREATE_REALM:-"admin"}
 KEYCLOAK_MASTER_USER=${KEYCLOAK_MASTER_USER:-"admin"}
 KEYCLOAK_MASTER_PASSWORD=${KEYCLOAK_MASTER_PASSWORD:-"admin"}
 
+# KEYCLOAK_PROXY_CLIENT_ID=${KEYCLOAK_PROXY_CLIENT_ID:-"client-proxy"}
+# KEYCLOAK_PROXY_CLIENT_SECRET=$(cat .KEYCLOAK_PROXY)
+# KEYCLOAK_PROXY_USER=${KEYCLOAK_PROXY_USER:-"user-proxy"}
+# KEYCLOAK_PROXY_USER_SECRET=$(cat .KEYCLOAK_PROXY)
+
+
 # check if Keycloak is started
 if curl --output /dev/null --silent --head --fail "$KEYCLOAK_HOST"; then
   echo "Keycloak is started."
@@ -46,6 +52,37 @@ createRealm() {
     -d "{\"realm\": \"${KEYCLOAK_CREATE_REALM}\", \"enabled\": true}"
 
   echo "...finished realm ${KEYCLOAK_CREATE_REALM} create."
+}
+
+createClient() {
+  echo "Creatting Client in realm master..."
+    curl -X POST "${KEYCLOAK_HOST}/admin/realms/master/clients" \
+    -H "Content-Type:application/json" \
+    -H "Authorization: Bearer ${JWT}" \
+    -d "{\"enabled\":true,\"attributes\":{},\"redirectUris\":[],\"clientId\":\"${KEYCLOAK_PROXY_CLIENT_ID}\",\"rootUrl\":\"http://localhost:8000/\",\"protocol\":\"openid-connect\"}"
+
+  echo "...finished realm Master create."
+}
+
+createUser() {
+  echo "Creatting User in realm master..."
+    curl -X POST "${KEYCLOAK_HOST}/admin/realms/master/users" \
+    -H "Content-Type:application/json" \
+    -H "Authorization: Bearer ${JWT}" \
+    -d "{\"username\": \"${KEYCLOAK_PROXY_USER}\",
+                \"enabled\": true,
+                \"credentials\": [{
+                    \"id\": \"0b06ea86-efbc-4c5e-bac2-f5650397defb\",
+                    \"type\": \"password\",
+                    \"value\": \"${KEYCLOAK_PROXY_USER_SECRET}\",
+                    \"temporary\": false
+                }],
+                \"realmRoles\": [
+                    \"default-roles-master\",
+                    \"admin\"
+                ]
+            }"
+  echo "...finished realm Master create."
 }
 
 getToken
