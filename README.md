@@ -21,10 +21,12 @@
 1. [Issues and help](#issues-and-help)
 
 # Overview
+=======
+# Dojot Deploy - Docker Compose
 
-__Attention__: Before running this deployment, it is necessary to define your domain or IP in the [.env](./.env) file in the variable ``DOJOT_DOMAIN_NAME``.
+This deployment option is best suited to development and functional environments. For production environment we recommend to use [Kubernetes](https://github.com/dojot/ansible-dojot).
 
-__Note__ To get completely ready, **healthy**, all services in this `docker-compose` take an average of at least 12 minutes.
+## Getting Started
 
 This repository contains the necessary configuration files
 for quick deployment of the dojot platform using `docker-compose`.
@@ -51,9 +53,19 @@ __Recommended setting 3:__ The values of secrets must be unique for each environ
 **Before, it is necessary to do the step [`Required setting`](#required-settings-and-recommended-settings) of the previous topic.**
 
 To use this `docker-compose.yml`, you will need:
+=======
+This repository contains the necessary configuration files for quick deployment of the Dojot Platform using `docker-compose`.
 
-- Docker engine > 19.03
-- docker-compose > 1.27
+### Requirements
+
+* Docker Engine >= 19.03 (Installation [here](https://docs.docker.com/engine/install/))
+* Docker Compose >= 1.27 (Installation [here](https://docs.docker.com/compose/install/))
+> __Note__: All tests were performed with Docker CE on Ubuntu [18.04](https://releases.ubuntu.com/18.04/) and [20.04](https://releases.ubuntu.com/20.04/).
+
+
+## Usage
+
+Before running this deployment it's necessary to define your domain name or IP in [.env](./.env) file, in the `DOJOT_DOMAIN_NAME` variable.
 
 Both are available in the [Docker official site](https://docs.docker.com/install/). All tests were performed with Docker CE. And also using Ubuntu 18.04 and 20.04.
 
@@ -84,6 +96,18 @@ After that the dojot must be accessible at `http://localhost:8000`. The tenant w
 ### How to run with HTTPS
 
 #### Secure dojot with Let's Encrypt (recommended)
+=======
+Start the containers with command bellow:
+```bash
+docker-compose up --detach
+```
+> __Note__: To get completely ready, **healthy** :green_heart:, all services in this `docker-compose` take an average of at least `12 minutes`.
+
+For instructions on how to get it up and running, please check [Installation Guide](https://dojotdocs.readthedocs.io/en/latest/installation-guide.html#docker-compose). **Always change the ``admin`` user password to a suitable password and keep it safe.**
+
+Both are available in the [Docker Official Site](https://docs.docker.com/install/).
+
+### How to secure dojot with Nginx and Let's Encrypt
 
 To get dojot running with https and Let's Encrypt you **MUST** ensure you have set up a static public IP address for your server and registered a domain for it.
 
@@ -111,6 +135,12 @@ After changing `letsencrypt-nginx/nginx-challenge.conf`, run the command below t
 
 ``` sh
 sudo docker-compose up -d letsencrypt-nginx
+=======
+```bash
+# Go to the repository letsencrypt-nginx
+cd letsencrypt-nginx
+# Start the Nginx container
+sudo docker-compose --file docker-compose-challenge.yml up --detach
 ```
 
 Run the command below by changing the `<your domain>` and `<youremail@domain.com>` values, to perform domain ownership verification.
@@ -126,6 +156,17 @@ certonly --webroot \
 --email <youremail@domain.com> --agree-tos --no-eff-email \
 --webroot-path=/data/letsencrypt \
 -d <your domain>; sudo chmod -R 0755 /dojot/etc/letsencrypt/{live,archive}
+```bash
+sudo docker container run -it --rm \
+    -v /dojot/etc/letsencrypt:/etc/letsencrypt \
+    -v /dojot/var/lib/letsencrypt:/var/lib/letsencrypt \
+    -v /dojot/letsencrypt-site:/data/letsencrypt \
+    -v /dojot/var/log/letsencrypt:/var/log/letsencrypt \
+    certbot/certbot \
+    certonly --webroot \
+    --email <youremail@domain.com> --agree-tos --no-eff-email \
+    --webroot-path=/data/letsencrypt \
+    -d <your domain>
 ```
 
 Now that you have your certificate, you have to edit the [.env](./.env) again by adding the variables below. Do **not** remove the variables added in the previous step.
@@ -133,12 +174,18 @@ Now that you have your certificate, you have to edit the [.env](./.env) again by
 ``` sh
 KONG_SSL_CERT=/dojot/etc/letsencrypt/live/${DOJOT_DOMAIN_NAME}/fullchain.pem
 KONG_SSL_CERT_KEY=/dojot/etc/letsencrypt/live/${DOJOT_DOMAIN_NAME}/privkey.pem
+=======
+```bash
+sudo docker-compose --file docker-compose-challenge.yml down
 ```
 
 Now run the rest of the dojot services:
 
 ``` sh
 sudo docker-compose  up -d
+=======
+```bash
+sudo docker-compose --file docker-compose-dojot-https.yml up --detach
 ```
 
 After that the dojot must be accessible at `https://<your domain>`. The tenant will be the value of the `KEYCLOAK_DEFAULT_REALM` variable which by default has the value `admin`, the username will be `admin` and the password the value defined in `KEYCLOAK_ADMIN_PASSWORD_TEMP`.
@@ -147,7 +194,7 @@ After that the dojot must be accessible at `https://<your domain>`. The tenant w
 
 Periodically, you need to renew the certificate. The process is very simple, run a Certbot command and restart the Nginx. To automate it with a cron job, run:
 
-``` sh
+```bash
 # open crontab editor
 sudo crontab -e
 ```
@@ -297,4 +344,17 @@ Check the documentation for more information:
 
 If you found a problem or need help, leave an issue in the main
 [dojot repository](https://github.com/dojot/dojot) and we will help you!
+
+=======
+```bash
+0 23 * * * docker container run --rm --name certbot \
+    -v "/dojot/etc/letsencrypt:/etc/letsencrypt" \
+    -v "/dojot/var/lib/letsencrypt:/var/lib/letsencrypt" \
+    -v "/dojot/data/letsencrypt:/data/letsencrypt" \
+    -v "/dojot/var/log/letsencrypt:/var/log/letsencrypt" \
+    certbot/certbot renew --webroot -w /data/letsencrypt --quiet && docker restart https-nginx
+```
+
+The above command will run every night at 23:00, renewing the certificate and forcing Nginx to restart
+if the certificate is due for renewal.
 

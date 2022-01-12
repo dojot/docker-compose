@@ -1,4 +1,19 @@
 version: '3.8'
+
+# https://docs.docker.com/config/containers/logging/json-file/
+# https://docs.docker.com/config/containers/logging/log_tags/
+x-logging: &loki-logging
+  logging:
+    driver: 'json-file'
+    options:
+      max-size: '50m'
+      max-file: '3'
+      tag: "{{.ImageName}}|{{.Name}}|{{.ImageFullID}}|{{.FullID}}"
+
+x-networking: &dojot-networking
+  networks:
+    - default
+
 services:
   create_secrets:
     # To recreate the secrets, reset the files: MINIO_ACCESS_KEY, MINIO_SECRET_KEY which are in the docker-compose/secrets folder.
@@ -78,6 +93,15 @@ services:
         max-size: 20m
         max-file: '5'
 
+  create_secrets:
+    # To recreate the secrets, reset the files: MINIO_ACCESS_KEY, MINIO_SECRET_KEY which are in the docker-compose/secrets folder.
+    image: dojot/ubuntu_openssl:latest
+    command:
+        - "./secrets/create_secrets.sh"
+    restart: on-failure
+    volumes:
+      - ./secrets:/secrets
+
   history:
     image: dojot/history:feature-keycloak #dojot/history:${DOJOT_VERSION}
     restart: always
@@ -87,11 +111,8 @@ services:
       FALCON_SETTINGS_MODULE: 'history.settings.docker'
       DOJOT_MANAGEMENT_USER: 'history'
       LOG_LEVEL: INFO
-    logging:
-      driver: json-file
-      options:
-        max-size: 20m
-        max-file: '5'
+    <<: *loki-logging
+    <<: *dojot-networking
 
   persister:
     image: dojot/persister:feature-keycloak #dojot/persister:${DOJOT_VERSION}
@@ -109,11 +130,8 @@ services:
       KEYCLOAK_USER: ${KEYCLOAK_MASTER_USER:-master}
       KEYCLOAK_PASSWORD: ${KEYCLOAK_MASTER_PASSWORD}
       HISTORY_DB_DATA_EXPIRATION: 604800 #Time in seconds - Set to collection when device is created.
-    logging:
-      driver: json-file
-      options:
-        max-size: 20m
-        max-file: '5'
+    <<: *loki-logging
+    <<: *dojot-networking
 
   mongodb:
     image: dojot/mongo:3.2
@@ -125,36 +143,28 @@ services:
       timeout: 10s
       retries: 5
       start_period: 40s
-    logging:
-      driver: json-file
-      options:
-        max-size: 20m
-        max-file: '5'
     volumes:
       - mongodb-volume:/data/db
       - mongodb-cfg-volume:/data/configdb
+    command: '--wiredTigerCacheSizeGB 1'
+    <<: *loki-logging
+    <<: *dojot-networking
 
   gui:
     image: dojot/gui:feature-keycloak #dojot/gui:${DOJOT_VERSION}
     depends_on:
       - backstage
     restart: always
-    logging:
-      driver: json-file
-      options:
-        max-size: 20m
-        max-file: '5'
+    <<: *loki-logging
+    <<: *dojot-networking
 
   gui-v2:
     image: dojot/gui-v2:feature-keycloak #dojot/gui-v2:${DOJOT_VERSION}
     depends_on:
       - backstage
     restart: always
-    logging:
-      driver: json-file
-      options:
-        max-size: 20m
-        max-file: '5'
+    <<: *loki-logging
+    <<: *dojot-networking
 
   data-broker:
     image: dojot/data-broker:feature-keycloak  #dojot/data-broker:${DOJOT_VERSION}
@@ -178,6 +188,8 @@ services:
       options:
         max-size: 20m
         max-file: '5'
+    <<: *loki-logging
+    <<: *dojot-networking
 
   data-broker-redis:
     image: dojot/redis:5.0.5-alpine3.10
@@ -189,11 +201,8 @@ services:
       retries: 30
     volumes:
       - data-broker-redis-volume:/data
-    logging:
-      driver: json-file
-      options:
-        max-size: 20m
-        max-file: '5'
+    <<: *loki-logging
+    <<: *dojot-networking
 
   iotagent-lwm2m:
     image: dojot/iotagent-leshan:feature-keycloak #dojot/iotagent-leshan:${DOJOT_VERSION}
@@ -216,11 +225,8 @@ services:
       - 5693:5693/udp # file server coap port
       - 5694:5694/udp # file server dtls port
     restart: always
-    logging:
-      driver: json-file
-      options:
-        max-size: 20m
-        max-file: '5'
+    <<: *loki-logging
+    <<: *dojot-networking
 
   image-manager:
     image: dojot/image-manager:feature-keycloak #dojot/image-manager:${DOJOT_VERSION}
@@ -228,11 +234,6 @@ services:
     depends_on:
       - postgres
       - minio
-    logging:
-      driver: json-file
-      options:
-        max-size: 20m
-        max-file: '5'
     environment:
       # TODO: The following should be unique for each environment
       S3ACCESSKEY: 9HEODSF6WQN5EZ39DM7Z
@@ -240,27 +241,88 @@ services:
       DBHOST: postgres
       DBUSER: imgm
       DBPASS: imgm
+    <<: *loki-logging
+    <<: *dojot-networking
 
   minio:
     image: dojot/minio:2019.09.20
     restart: always
-    logging:
-      driver: json-file
-      options:
-        max-size: 20m
-        max-file: '5'
+    depends_on:
+      create_secrets:
+        condition: service_completed_successfully
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
       interval: 30s
       timeout: 20s
       retries: 3
     environment:
-      # TODO: The following should be unique for each environment
-      MINIO_ACCESS_KEY: 9HEODSF6WQN5EZ39DM7Z
-      MINIO_SECRET_KEY: fT5nAgHR9pkj0yYsBdc4p+PPq6ArjshcPdz0HA6W
+      MINIO_ACCESS_KEY_FILE: MINIO_ACCESS_KEY
+      MINIO_SECRET_KEY_FILE: MINIO_SECRET_KEY
+    secrets:
+      - MINIO_SECRET_KEY
+      - MINIO_ACCESS_KEY
     command: server /data
     volumes:
       - minio-volume:/data
+    <<: *loki-logging
+    <<: *dojot-networking
+
+  minio-files:
+    image: minio/minio:RELEASE.2021-11-09T03-21-45Z
+    restart: always
+    hostname: minio-files
+    command: server /data --console-address ":9001"
+    volumes:
+      - minio-image-volume:/data
+      - ./secrets:/secrets
+    ports:
+      - "9010:9000"
+      - "9011:9001"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9001/minio/health/live"]
+      interval: 30s
+      timeout: 20s
+      retries: 3
+    environment:
+      MINIO_ACCESS_KEY_FILE: MINIO_ACCESS_KEY
+      MINIO_SECRET_KEY_FILE: MINIO_SECRET_KEY
+      MINIO_ROOT_USER_FILE: MINIO_ACCESS_KEY
+      MINIO_ROOT_PASSWORD_FILE: MINIO_SECRET_KEY
+    secrets:
+      - MINIO_SECRET_KEY
+      - MINIO_ACCESS_KEY
+    logging:
+      driver: json-file
+      options:
+        max-size: 20m
+        max-file: '5'
+
+  file-mgmt:
+    image: dojot/file-mgmt:${DOJOT_VERSION}
+    restart: always
+    depends_on:
+      - minio-files
+      - kafka
+    volumes:
+      - ./secrets:/secrets
+    environment:
+      FILEMGMT_SERVER_HOST: file-mgmt
+      FILEMGMT_MINIO_ACCESS_KEY_FILE: MINIO_ACCESS_KEY
+      FILEMGMT_MINIO_SECRET_KEY_FILE: MINIO_SECRET_KEY
+      FILEMGMT_CONSUMER_METADATA_BROKER_LIST: kafka:9092
+    secrets:
+      - MINIO_SECRET_KEY
+      - MINIO_ACCESS_KEY
+    logging:
+      driver: json-file
+      options:
+        max-size: 20m
+        max-file: '5'
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/health"]
+      interval: 30s
+      timeout: 20s
+      retries: 3
 
   device-manager:
     image: dojot/device-manager:feature-keycloak # dojot/device-manager:${DOJOT_VERSION
@@ -282,11 +344,8 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
-    logging:
-      driver: json-file
-      options:
-        max-size: 20m
-        max-file: '5'
+    <<: *loki-logging
+    <<: *dojot-networking
 
   device-manager-redis:
     image: dojot/redis:5.0.5-alpine3.10
@@ -298,18 +357,15 @@ services:
       retries: 30
     volumes:
       - device-manager-redis-volume:/data
-    logging:
-      driver: json-file
-      options:
-        max-size: 20m
-        max-file: '5'
+    <<: *loki-logging
+    <<: *dojot-networking
 
   postgres:
     image: dojot/postgres:9.5.21-alpine
     environment:
       POSTGRES_DB: postgres
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
+      POSTGRES_PASSWORD_FILE: /secrets/.POSTGRES_PASSWORD
     healthcheck:
       test: ["CMD", "pg_isready", "-U", "postgres"]
       interval: 10s
@@ -319,11 +375,9 @@ services:
     volumes:
       - ./postgres/init-db.sh:/docker-entrypoint-initdb.d/init-db.sh:Z
       - postgres-volume:/var/lib/postgresql/data
-    logging:
-      driver: json-file
-      options:
-        max-size: 20m
-        max-file: '5'
+      - ./secrets:/secrets
+    <<: *loki-logging
+    <<: *dojot-networking
 
   # Prepare database, Bootstrap the database
   kong-migrations:
@@ -336,15 +390,14 @@ services:
       KONG_DATABASE: postgres
       KONG_PG_HOST: postgres
       KONG_PG_USER: kong
-      KONG_PG_PASSWORD: "kong"
       KONG_PG_DATABASE: kong
       KONG_LOG_LEVEL: info
+      KONG_PG_PASSWORD_FILE: /secrets/.KONG_PASSWORD
     restart: on-failure
-    logging:
-      driver: json-file
-      options:
-        max-size: 20m
-        max-file: '5'
+    volumes:
+      - ./secrets:/secrets
+    <<: *loki-logging
+    <<: *dojot-networking
 
   # Run any new migrations and Finish running any pending migrations after 'up'.
   kong-migrations-up:
@@ -357,15 +410,14 @@ services:
       KONG_DATABASE: postgres
       KONG_PG_HOST: postgres
       KONG_PG_USER: kong
-      KONG_PG_PASSWORD: "kong"
       KONG_PG_DATABASE: kong
+      KONG_PG_PASSWORD_FILE: /secrets/.KONG_PASSWORD
       KONG_LOG_LEVEL: info
     restart: on-failure
-    logging:
-      driver: json-file
-      options:
-        max-size: 20m
-        max-file: '5'
+    volumes:
+      - ./secrets:/secrets
+    <<: *loki-logging
+    <<: *dojot-networking
 
   letsencrypt-nginx:
     depends_on:
@@ -393,6 +445,7 @@ services:
       KONG_PG_DATABASE: kong
       KONG_PROXY_LISTEN:  0.0.0.0:${DOJOT_HTTP_PORT:-8000}, 0.0.0.0:${DOJOT_HTTPS_PORT:-8443} ssl
       KONG_PG_PASSWORD: kong
+      KONG_PG_PASSWORD_FILE: /secrets/.KONG_PASSWORD
       KONG_LOG_LEVEL: info
       # To enable HTTPs external, it is necessary to configure public certificates
       # issued by a public CA, such as lets encrypt in KONG_SSL_CERT.
@@ -444,6 +497,10 @@ services:
       options:
         max-size: 20m
         max-file: '5'
+    volumes:
+      - ./secrets:/secrets
+    <<: *loki-logging
+    <<: *dojot-networking
 
   kong-config:
     image: dojot/appropriate-curl
@@ -456,11 +513,48 @@ services:
       - apigw
     volumes:
       - ./kong/kong.config.sh:/opt/kong.config.sh:Z
+    <<: *loki-logging
+    <<: *dojot-networking
     logging:
       driver: json-file
       options:
         max-size: 20m
         max-file: '5'
+#  auth:
+#    image: dojot/auth:${DOJOT_VERSION}
+#    restart: always
+#    depends_on:
+#      - apigw
+#      - postgres
+#      - auth-redis
+#    environment:
+#      AUTH_DB_HOST: "postgres"
+#      AUTH_DB_USER: "auth"
+#      AUTH_DB_PWD:  "auth"
+#      AUTH_KONG_URL: "http://apigw:8001"
+#      AUTH_CACHE_HOST: "auth-redis"
+#      AUTH_RESET_PWD_VIEW: "http://${DOJOT_DOMAIN_NAME}:8000/#/setPassword/" #When using a front end with Auth, define this link to point to the password reset view.
+#      AUTH_EMAIL_HOST: NOEMAIL # SMTP server to be used. If set to NOEMAIL, this functionality is disabled.
+#      AUTH_EMAIL_PORT: 587 # SMTP server port.
+#      AUTH_EMAIL_TLS: "true" # Whether to enable TLS or not for SMTP server.
+#      AUTH_EMAIL_USER: "" # SMTP user.
+#      AUTH_EMAIL_PASSWD: "" # SMTP password.
+#      AUTH_USER_TMP_PWD: "temppwd" # The default temporary password that is given to new users if AUTH_EMAIL_HOST is set to NOEMAIL.
+#      # This is used to select the type of cache to be used.
+#      # Allowed values are "redis" or "nocache"
+#      AUTH_CACHE_NAME: "redis"
+#      DOJOT_MANAGEMENT_USER: 'auth'
+#      KAFKA_GROUP_ID: 'auth-group'
+#    <<: *loki-logging
+#    <<: *dojot-networking
+#
+#  auth-redis:
+#    image: dojot/redis:5.0.5-alpine3.10
+#    restart: always
+#    volumes:
+#      - auth-redis-volume:/data
+#    <<: *loki-logging
+#    <<: *dojot-networking
 
   flowbroker:
     image: dojot/flowbroker:feature-keycloak # dojot/flowbroker:${DOJOT_VERSION}
@@ -483,15 +577,12 @@ services:
       - data-broker
     networks:
       - default
-      - flowbroker
+      - ${FLOWBROKER_NETWORK}
     volumes:
       - flowbroker-volume:/data
       - /var/run/docker.sock:/var/run/docker.sock:Z
-    logging:
-      driver: json-file
-      options:
-        max-size: 20m
-        max-file: '5'
+    <<: *loki-logging
+    <<: *dojot-networking
 
   flowbroker-redis:
     image: dojot/redis:5.0.5-alpine3.10
@@ -503,11 +594,8 @@ services:
       retries: 30
     volumes:
       - flowbroker-redis-volume:/data
-    logging:
-      driver: json-file
-      options:
-        max-size: 20m
-        max-file: '5'
+    <<: *loki-logging
+    <<: *dojot-networking
 
   flowbroker-context-manager:
     image: dojot/flowbroker-context-manager:${DOJOT_VERSION}
@@ -523,27 +611,32 @@ services:
     networks:
       - default
       - flowbroker
-    logging:
-      driver: json-file
-      options:
-        max-size: 20m
-        max-file: '5'
+    <<: *loki-logging
+    <<: *dojot-networking
 
   rabbitmq:
-    image: dojot/rabbitmq:3.7-alpine
-    restart: always
+    container_name: rabbitmq
+    image: rabbitmq:3.9.10-management-alpine
+    restart: unless-stopped
+    hostname: rabbitmq
+    cap_add:
+      - ALL
+    ulimits:
+      nofile:
+        soft: 2000
+        hard: 2000
     healthcheck:
       test: rabbitmq-diagnostics -q ping
       interval: 30s
       timeout: 10s
       retries: 5
+      start_period: 10s
     volumes:
-      - rabbitmq-volume:/var/lib/rabbitmq
-    logging:
-      driver: json-file
-      options:
-        max-size: 20m
-        max-file: '5'
+      - type: volume
+        source: rabbitmq-volume
+        target: /var/lib/rabbitmq
+    <<: *loki-logging
+    <<: *dojot-networking
 
   zookeeper:
     image: confluentinc/cp-zookeeper:5.5.0
@@ -572,11 +665,8 @@ services:
       - zookeeper-volume:/var/lib/zookeeper/data
       - zookeeper-log-volume:/var/lib/zookeeper/log
       - zookeeper-secrets-volume:/etc/zookeeper/secrets
-    logging:
-      driver: json-file
-      options:
-        max-size: 20m
-        max-file: '5'
+    <<: *loki-logging
+    <<: *dojot-networking
 
   kafka:
     image: confluentinc/cp-kafka:5.5.0
@@ -600,11 +690,8 @@ services:
     volumes:
       - kafka-volume:/var/lib/kafka/data
       - kafka-secrets-volume:/etc/kafka/secrets
-    logging:
-      driver: json-file
-      options:
-        max-size: 20m
-        max-file: '5'
+    <<: *loki-logging
+    <<: *dojot-networking
 
   x509-identity-mgmt:
     build: ../dojot/iam/x509-identity-mgmt/
@@ -618,7 +705,7 @@ services:
     environment:
       NODE_ENV: production
       X509IDMGMT_LOGGER_CONSOLE_LEVEL: info
-      X509IDMGMT_CERTIFICATE_BELONGSTO_APPLICATION: '["iotagent-mqtt", "v2k-bridge", "k2v-bridge"]'
+      X509IDMGMT_CERTIFICATE_BELONGSTO_APPLICATION: '["iotagent-mqtt", "v2k-bridge", "k2v-bridge", "http-agent"]'
       X509IDMGMT_MONGO_CONN_URI: "mongodb://mongodb:27017/x509-identity-mgmt"
       X509IDMGMT_EJBCA_HEALTHCHECK_URL: "http://x509-ejbca:8080/ejbca/publicweb/healthcheck/ejbcahealth"
       X509IDMGMT_EJBCA_WSDL: "https://x509-ejbca:8443/ejbca/ejbcaws/ejbcaws?wsdl"
@@ -632,11 +719,8 @@ services:
       start_period: 2m
     volumes:
       - "ejbca-client-tls-volume:/opt/tls"
-    logging:
-      driver: json-file
-      options:
-        max-size: 20m
-        max-file: '5'
+    <<: *loki-logging
+    <<: *dojot-networking
 
   x509-ejbca: # this service cannot be called 'ejbca'
     image: dojot/ejbca:v0.7.0-rc.1 # dojot/ejbca:${DOJOT_VERSION}
@@ -665,11 +749,8 @@ services:
     volumes:
       - "ejbca-volume:/mnt/persistent"
       - "ejbca-client-tls-volume:/opt/tls"
-    logging:
-      driver: json-file
-      options:
-        max-size: 20m
-        max-file: '5'
+    <<: *loki-logging
+    <<: *dojot-networking
 
   kafka-ws-redis:
     image: dojot/redis:6.0.4-alpine3.11
@@ -699,11 +780,21 @@ services:
       # The KAFKA_WS_TICKET_SECRET should be unique for each environment
       KAFKA_WS_TICKET_SECRET: fT5nAgHR9pkj0yYsBdc4p+PPq6ArjshcPdz0HA6W
     restart: always
-    logging:
-      driver: json-file
-      options:
-        max-size: 20m
-        max-file: '5'
+    <<: *loki-logging
+    <<: *dojot-networking
+
+  kafka-ws-redis:
+    image: dojot/redis:6.0.4-alpine3.11
+    restart: always
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 1s
+      timeout: 3s
+      retries: 30
+    volumes:
+      - kafka-ws-redis-volume:/data
+    <<: *loki-logging
+    <<: *dojot-networking
 
   acl-redis:
     image: dojot/redis:6.0.4-alpine3.11
@@ -715,11 +806,8 @@ services:
       retries: 30
     volumes:
       - acl-redis-volume:/data
-    logging:
-      driver: json-file
-      options:
-        max-size: 20m
-        max-file: '5'
+    <<: *loki-logging
+    <<: *dojot-networking
 
   certificate-acl:
     image: dojot/certificate-acl:v0.7.0-rc.1 # dojot/certificate-acl:${DOJOT_VERSION}
@@ -730,11 +818,8 @@ services:
       - kafka
       - x509-identity-mgmt
     restart: always
-    logging:
-      driver: json-file
-      options:
-        max-size: 20m
-        max-file: '5'
+    <<: *loki-logging
+    <<: *dojot-networking
 
   iotagent-mqtt:
     image: dojot/vernemq-dojot:v0.7.0-rc.1 #dojot/vernemq-dojot:${DOJOT_VERSION}
@@ -746,7 +831,7 @@ services:
       - 1883:1883 # You can comment this line (- 1883:1883) to disable insecure mode without TLS. (this is recommended)
       - 8883:8883
     environment:
-      VERNEMQ_CONF: bWV0YWRhdGFfcGx1Z2luID0gdm1xX3N3YwpwbHVnaW5zLnZtcV9wYXNzd2QgPSBvZmYKcGx1Z2lucy52bXFfYWNsID0gb2ZmCnBsdWdpbnMuZG9qb3RfZGlzY29ubmVjdF9wbHVnaW4ucGF0aCA9IC92ZXJuZW1xL2Rvam90X2Rpc2Nvbm5lY3RfcGx1Z2luL2RlZmF1bHQKcGx1Z2lucy5kb2pvdF9kaXNjb25uZWN0X3BsdWdpbiA9IG9uCnBsdWdpbnMuZG9qb3RfZGlzY29ubmVjdF9wbHVnaW4ucHJpb3JpdHkgPSAyCnBsdWdpbnMuZG9qb3RfYWNsX3BsdWdpbi5wYXRoID0gL3Zlcm5lbXEvZG9qb3RfYWNsX3BsdWdpbi9kZWZhdWx0CnBsdWdpbnMuZG9qb3RfYWNsX3BsdWdpbiA9IG9uCnBsdWdpbnMuZG9qb3RfYWNsX3BsdWdpbi5wcmlvcml0eSA9IDIKbGV2ZWxkYi5tYXhpbXVtX21lbW9yeS5wZXJjZW50ID0gMjAKbG9nLmNvbnNvbGUgPSBjb25zb2xlCmxpc3RlbmVyLm1heF9jb25uZWN0aW9ucyA9IDIwMDAwMApsaXN0ZW5lci5ucl9vZl9hY2NlcHRvcnMgPSAxMDAKbWF4X2luZmxpZ2h0X21lc3NhZ2VzID0gMjAKbWF4X29ubGluZV9tZXNzYWdlcyA9IDEwMDAwCmxpc3RlbmVyLnNzbC5kZWZhdWx0ID0gMC4wLjAuMDo4ODgzCmxpc3RlbmVyLnNzbC5kZWZhdWx0LmNhZmlsZSA9ICAvdmVybmVtcS9jZXJ0L2NhYnVuZGxlLmNydApsaXN0ZW5lci5zc2wuZGVmYXVsdC5jZXJ0ZmlsZSA9IC92ZXJuZW1xL2NlcnQvaW90YWdlbnQtbXF0dC5jcnQKbGlzdGVuZXIuc3NsLmRlZmF1bHQua2V5ZmlsZSA9IC92ZXJuZW1xL2NlcnQvaW90YWdlbnQtbXF0dC5rZXkKbGlzdGVuZXIuc3NsLmRlZmF1bHQuY3JsZmlsZSA9ICAvdmVybmVtcS9jZXJ0L2NhLmNybApsaXN0ZW5lci5zc2wuZGVmYXVsdC51c2VfaWRlbnRpdHlfYXNfdXNlcm5hbWUgPSBvbgpsaXN0ZW5lci5zc2wuZGVmYXVsdC5yZXF1aXJlX2NlcnRpZmljYXRlID0gb24=
+      VERNEMQ_CONF: bWV0YWRhdGFfcGx1Z2luID0gdm1xX3N3YwpwbHVnaW5zLnZtcV9wYXNzd2QgPSBvZmYKcGx1Z2lucy52bXFfYWNsID0gb2ZmCnBsdWdpbnMuZG9qb3RfZGlzY29ubmVjdF9wbHVnaW4ucGF0aCA9IC92ZXJuZW1xL2Rvam90X2Rpc2Nvbm5lY3RfcGx1Z2luL2RlZmF1bHQKcGx1Z2lucy5kb2pvdF9kaXNjb25uZWN0X3BsdWdpbiA9IG9uCnBsdWdpbnMuZG9qb3RfZGlzY29ubmVjdF9wbHVnaW4ucHJpb3JpdHkgPSAyCnBsdWdpbnMuZG9qb3RfYWNsX3BsdWdpbi5wYXRoID0gL3Zlcm5lbXEvZG9qb3RfYWNsX3BsdWdpbi9kZWZhdWx0CnBsdWdpbnMuZG9qb3RfYWNsX3BsdWdpbiA9IG9uCnBsdWdpbnMuZG9qb3RfYWNsX3BsdWdpbi5wcmlvcml0eSA9IDIKbGV2ZWxkYi5tYXhpbXVtX21lbW9yeS5wZXJjZW50ID0gMjAKbG9nLmNvbnNvbGUgPSBjb25zb2xlCmxpc3RlbmVyLm1heF9jb25uZWN0aW9ucyA9IDIwMDAwMApsaXN0ZW5lci5ucl9vZl9hY2NlcHRvcnMgPSAxMDAKbWF4X2luZmxpZ2h0X21lc3NhZ2VzID0gMjAKbWF4X29ubGluZV9tZXNzYWdlcyA9IDEwMDAwCmxpc3RlbmVyLmh0dHAuZGVmYXVsdCA9IDAuMC4wLjA6ODg4OApsaXN0ZW5lci5zc2wuZGVmYXVsdCA9IDAuMC4wLjA6ODg4MwpsaXN0ZW5lci5zc2wuZGVmYXVsdC5jYWZpbGUgPSAgL3Zlcm5lbXEvY2VydC9jYWJ1bmRsZS5jcnQKbGlzdGVuZXIuc3NsLmRlZmF1bHQuY2VydGZpbGUgPSAvdmVybmVtcS9jZXJ0L2lvdGFnZW50LW1xdHQuY3J0Cmxpc3RlbmVyLnNzbC5kZWZhdWx0LmtleWZpbGUgPSAvdmVybmVtcS9jZXJ0L2lvdGFnZW50LW1xdHQua2V5Cmxpc3RlbmVyLnNzbC5kZWZhdWx0LmNybGZpbGUgPSAgL3Zlcm5lbXEvY2VydC9jYS5jcmwKbGlzdGVuZXIuc3NsLmRlZmF1bHQudXNlX2lkZW50aXR5X2FzX3VzZXJuYW1lID0gb24KbGlzdGVuZXIuc3NsLmRlZmF1bHQucmVxdWlyZV9jZXJ0aWZpY2F0ZSA9IG9uCmxpc3RlbmVyLnNzbC5pbnRlcm5hbCA9IDAuMC4wLjA6OTg4MwpsaXN0ZW5lci5zc2wuaW50ZXJuYWwuY2FmaWxlID0gIC92ZXJuZW1xL2NlcnQvY2FidW5kbGUuY3J0Cmxpc3RlbmVyLnNzbC5pbnRlcm5hbC5jZXJ0ZmlsZSA9IC92ZXJuZW1xL2NlcnQvaW90YWdlbnQtbXF0dC5jcnQKbGlzdGVuZXIuc3NsLmludGVybmFsLmtleWZpbGUgPSAvdmVybmVtcS9jZXJ0L2lvdGFnZW50LW1xdHQua2V5Cmxpc3RlbmVyLnNzbC5pbnRlcm5hbC5jcmxmaWxlID0gIC92ZXJuZW1xL2NlcnQvY2EuY3JsCmxpc3RlbmVyLnNzbC5pbnRlcm5hbC5yZXF1aXJlX2NlcnRpZmljYXRlID0gb24=
       VM_ARGS: K1AgMjU2MDAwCi1lbnYgRVJMX01BWF9FVFNfVEFCTEVTIDI1NjAwMAotZW52IEVSTF9DUkFTSF9EVU1QIC92ZXJuZW1xL2xvZy9lcmxfY3Jhc2guZHVtcAotZW52IEVSTF9GVUxMU1dFRVBfQUZURVIgMAotZW52IEVSTF9NQVhfUE9SVFMgMjYyMTQ0CitBIDY0Ci1zZXRjb29raWUgdm1xCi1uYW1lIHZtcUBpb3RhZ2VudC1tcXR0LmRvam90LmlvdAorSyB0cnVlCitXIHcKLXNtcCBlbmFibGU=
     restart: always
     hostname: iotagent-mqtt
@@ -756,11 +841,8 @@ services:
       - iotagent-mqtt-log-volume:/vernemq/log
       - iotagent-mqtt-etc-volume:/vernemq/etc
       - iotagent-mqtt-cert-side-volume:/vernemq/cert
-    logging:
-      driver: json-file
-      options:
-        max-size: 20m
-        max-file: '5'
+    <<: *loki-logging
+    <<: *dojot-networking
 
   iotagent-mqtt-cert-sidecar:
     image: dojot/cert-sidecar:v0.7.0-rc.1 #dojot/cert-sidecar:${DOJOT_VERSION}
@@ -784,11 +866,8 @@ services:
     volumes:
       - iotagent-mqtt-cert-side-volume:/vernemq/cert
     restart: always
-    logging:
-      driver: json-file
-      options:
-        max-size: 20m
-        max-file: '5'
+    <<: *loki-logging
+    <<: *dojot-networking
 
   v2k-bridge:
     image: dojot/v2k-bridge:v0.7.0-rc.1 #dojot/v2k-bridge:${DOJOT_VERSION}
@@ -801,6 +880,7 @@ services:
       V2K_APP_HOSTNAME: "v2k-bridge"
       V2K_APP_USER_CONFIG_FILE: "docker.conf"
       V2K_PRODUCER_METADATA_BROKER_LIST: "kafka:9092"
+      V2K_MQTT_PORT: 9883
       V2K_MQTT_CA: "/certs/ca.crt"
       V2K_MQTT_CERT: "/certs/v2k-bridge.crt"
       V2K_MQTT_KEY:  "/certs/v2k-bridge.key"
@@ -808,11 +888,8 @@ services:
     restart: always
     volumes:
       - v2k-bridge-cert-side-volume:/certs
-    logging:
-      driver: json-file
-      options:
-        max-size: 20m
-        max-file: '5'
+    <<: *loki-logging
+    <<: *dojot-networking
 
   v2k-bridge-cert-sidecar:
     image: dojot/cert-sidecar:v0.7.0-rc.1 #dojot/cert-sidecar:${DOJOT_VERSION}
@@ -831,11 +908,8 @@ services:
     volumes:
       - v2k-bridge-cert-side-volume:/certs
     restart: always
-    logging:
-      driver: json-file
-      options:
-        max-size: 20m
-        max-file: '5'
+    <<: *loki-logging
+    <<: *dojot-networking
 
   k2v-bridge:
     image: dojot/k2v-bridge:v0.7.0-rc.1 #dojot/k2v-bridge:${DOJOT_VERSION}
@@ -848,6 +922,7 @@ services:
       K2V_APP_HOSTNAME: "k2v-bridge"
       K2V_APP_USER_CONFIG_FILE: "docker.conf"
       K2V_CONSUMER_METADATA_BROKER_LIST: "kafka:9092"
+      K2V_MQTT_PORT: 9883
       K2V_MQTT_CA: "/certs/ca.crt"
       K2V_MQTT_CERT: "/certs/k2v-bridge.crt"
       K2V_MQTT_KEY: "/certs/k2v-bridge.key"
@@ -855,11 +930,8 @@ services:
     restart: always
     volumes:
       - k2v-bridge-cert-side-volume:/certs
-    logging:
-      driver: json-file
-      options:
-        max-size: 20m
-        max-file: '5'
+    <<: *loki-logging
+    <<: *dojot-networking
 
   k2v-bridge-cert-sidecar:
     image: dojot/cert-sidecar:v0.7.0-rc.1 #dojot/cert-sidecar:${DOJOT_VERSION}
@@ -878,11 +950,61 @@ services:
     volumes:
       - k2v-bridge-cert-side-volume:/certs
     restart: always
-    logging:
-      driver: json-file
-      options:
-        max-size: 20m
-        max-file: '5'
+    <<: *loki-logging
+    <<: *dojot-networking
+
+  http-agent-cert-sidecar:
+    image: dojot/cert-sidecar:${DOJOT_VERSION}
+    depends_on:
+      - x509-identity-mgmt
+    environment:
+      CERT_SC_APP_SIDECAR_TO: 'http-agent'
+      CERT_SC_LOG_CONSOLE_LEVEL: 'info'
+      CERT_SC_CERTS_HOSTNAMES: '["http-agent", "localhost"]'
+      HOSTNAME: http-agent
+      CERT_SC_CERTS_FILES_BASEPATH: /certs
+      CERT_SC_CERTS_FILES_CA: ca.crt
+      CERT_SC_CERTS_FILES_CERT: http-agent.crt
+      CERT_SC_CERTS_FILES_KEY: http-agent.key
+      CERT_SC_CERTS_FILES_CRL: ca.crl
+    volumes:
+      - http-agent-cert-sidecar-volume:/certs
+    restart: always
+    <<: *loki-logging
+    <<: *dojot-networking
+
+  http-agent:
+    image: dojot/http-agent:${DOJOT_VERSION}
+    depends_on:
+      - kafka
+      - data-broker
+      - auth
+      - http-agent-cert-sidecar
+      - device-manager
+      - certificate-acl
+      - basic-auth
+    ports:
+      - 8080:3000
+    restart: always
+    environment:
+      HTTP_AGENT_HTTPS_CERT: '/certs/http-agent.crt'
+      HTTP_AGENT_HTTPS_KEY: '/certs/http-agent.key'
+      HTTP_AGENT_HTTPS_CA: '/certs/ca.crt'
+      HTTP_AGENT_SECURITY_CRL: '/certs/ca.crl'
+      HTTP_AGENT_SECURITY_CERT_DIRECTORY: '/certs'
+      HTTP_AGENT_LOG_CONSOLE_LEVEL: 'info'
+    volumes:
+      - http-agent-cert-sidecar-volume:/certs
+    <<: *loki-logging
+    <<: *dojot-networking
+
+  http-agent-redis:
+    image: dojot/redis:6.0.4-alpine3.11
+    restart: always
+    volumes:
+      - http-agent-redis-volume:/data
+    <<: *loki-logging
+    <<: *dojot-networking
 
   ###
   # BEGIN - Legacy mqtt broker based on mosca (https://github.com/moscajs/mosca)
@@ -950,11 +1072,9 @@ services:
     depends_on:
       - flowbroker
       - device-manager
-    logging:
-      driver: json-file
-      options:
-        max-size: 20m
-        max-file: '5'
+    <<: *loki-logging
+    <<: *dojot-networking
+
 
   backstage-redis:
     image: dojot/redis:6.0.4-alpine3.11
@@ -1011,7 +1131,8 @@ services:
       options:
         max-size: 20m
         max-file: '5'
-
+    <<: *loki-logging
+    <<: *dojot-networking
 
   cron:
     image: dojot/cron:feature-keycloak  # dojot/cron:${DOJOT_VERSION}
@@ -1024,11 +1145,8 @@ services:
       KEYCLOAK_USER: ${KEYCLOAK_MASTER_USER:-master}
       KEYCLOAK_PASSWORD: ${KEYCLOAK_MASTER_PASSWORD}
     restart: always
-    logging:
-      driver: json-file
-      options:
-        max-size: 20m
-        max-file: '5'
+    <<: *loki-logging
+    <<: *dojot-networking
 
 ### influxdb begin
 
@@ -1211,6 +1329,26 @@ services:
   #       max-file: '5'
 # GUI to postgres - END
 
+  basic-auth:
+    image: dojot/device-basic-authentication:${DOJOT_VERSION}
+    restart: always
+    depends_on:
+      - kafka
+      - data-broker
+      - mongodb
+      - auth
+      - device-manager
+    ports:
+      - 3000:3000
+    environment:
+      BASIC_AUTH_LOG_CONSOLE_LEVEL: 'info'
+      BASIC_AUTH_LOG_VERBOSE: "true"
+      BASIC_AUTH_PRODUCER_METADATA_BROKER_LIST: kafka:9092
+    logging:
+      driver: json-file
+      options:
+        max-size: 20m
+        max-file: '5'
 
 volumes:
   ejbca-volume:
@@ -1219,6 +1357,7 @@ volumes:
   mongodb-volume:
   mongodb-cfg-volume:
   minio-volume:
+  minio-image-volume:
   rabbitmq-volume:
   zookeeper-volume:
   zookeeper-log-volume:
@@ -1240,6 +1379,14 @@ volumes:
   influxdb-volume:
   backstage-redis-volume:
   acl-redis-volume:
+  http-agent-cert-sidecar-volume:
+  http-agent-redis-volume:
+
+secrets:
+  MINIO_SECRET_KEY:
+    file: ./secrets/MINIO_SECRET_KEY
+  MINIO_ACCESS_KEY:
+    file: ./secrets/MINIO_ACCESS_KEY
 
 networks:
 ## ## **`Gateway-static-dojot_default-3`**
@@ -1258,5 +1405,7 @@ networks:
 #       config:
 #       - subnet: 172.18.18.0/20
 #         gateway: 172.18.18.1
+  default:
+    name: dojot
   flowbroker:
     name: ${FLOWBROKER_NETWORK}
