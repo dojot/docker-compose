@@ -1,0 +1,14 @@
+{
+    "username": "user-proxy",
+    "enabled": true,
+    "credentials": [{
+        "id": "0b06ea86-efbc-4c5e-bac2-f5650397defb",
+        "type": "password",
+        "value": "teste2",
+        "temporary": false
+    }],
+    "realmRoles": [
+        "admin",
+        "default-roles-master"
+    ]
+}
