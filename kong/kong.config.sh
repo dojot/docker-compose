@@ -1,6 +1,15 @@
 #!/bin/sh
-
 kong="http://apigw:8001"
+dojot_domain_name=${DOJOT_DOMAIN_NAME:-localhost}
+route_allow_only_https=${DOJOT_KONG_ROUTE_ALLOW_ONLY_HTTPS:-false}
+
+
+route_allow_protocol='"http","https"'
+
+if [ "$route_allow_only_https" = "true" ]; then
+    echo "Allow onlyhttps"
+    route_allow_protocol='"https"'
+fi;
 
 # check if kong is started
 if curl --output /dev/null --silent --head --fail "$kong"; then
@@ -18,14 +27,21 @@ addAuthToEndpoint() {
 echo ""
 echo ""
 echo "- addAuthToEndpoint: ServiceName=${1}"
-curl  -sS  -X POST \
+
+# To understand about lua patterns and its limitations http://lua-users.org/wiki/PatternsTutorial
+# This regex is to guarantee whether or not it has port 443 and 80, it will be able to validate the issuer
+allowed_iss_url="https?://${dojot_domain_name}:?(%d*)/auth/realms/(.+)"
+
+curl -sS -X POST \
+--url ${kong}/services/"${1}"/plugins \
+--data "name=jwt-keycloak" \
+--data-urlencode "config.allowed_iss=${allowed_iss_url}"
+
+curl -sS -X POST \
 --url ${kong}/services/"${1}"/plugins/ \
 --data "name=pepkong" \
---data "config.pdpUrl=http://auth:5000/pdp"
+--data "config.resource=${1}"
 
-curl  -sS  -X POST \
---url ${kong}/services/"${1}"/plugins/ \
---data "name=jwt"
 }
 
 # add a Service
@@ -57,7 +73,9 @@ echo "-- createRoute: ServiceName=${1} Url=${2} PathS=${3} StripPath=${4}"
     -d @- ) <<PAYLOAD
 {
     "paths": [${3}],
-    "strip_path": ${4}
+    "strip_path": ${4},
+    "protocols": [${route_allow_protocol}],
+    "https_redirect_status_code": 301
 }
 PAYLOAD
 }
@@ -77,6 +95,19 @@ createService "${1}" "${2}"
 createRoute "${1}" "${1}_route" "${3}" "${4}"
 }
 
+
+# service: letsencrypt-nginx
+
+curl  -sS -X PUT \
+--url ${kong}/services/letsencrypt-nginx \
+--data "name=letsencrypt-nginx" \
+--data "url=http://letsencrypt-nginx:80"
+
+curl  -sS -X PUT \
+--url ${kong}/services/letsencrypt-nginx/routes/letsencrypt-nginx_route \
+--data "paths=/.well-known/acme-challenge" \
+--data "strip_path=false"
+
 # service: gui
 
 createEndpoint "gui" "http://gui:80"  '"/"' "false"
@@ -90,50 +121,27 @@ createEndpoint "gui-v2" "http://gui-v2:80"  '"/v2"' "true"
 createEndpoint  "data-broker" "http://data-broker:80"  '"/device/(.*)/latest", "/subscription"' "false"
 addAuthToEndpoint "data-broker"
 
-createEndpoint "data-streams" "http://data-broker:80"  '"/stream"' "true"
-addAuthToEndpoint "data-streams"
+createEndpoint "data-broker-streams" "http://data-broker:80"  '"/stream"' "true"
+addAuthToEndpoint "data-broker-streams"
 
 createEndpoint "ws-http" "http://data-broker:80"  '"/socket.io"' "false"
 
 # service: device-manager
 
-createEndpoint "device-manager" "http://device-manager:5000"  '"/device", "/template"' "false"
-addAuthToEndpoint "device-manager"
+createEndpoint "device-manager-template" "http://device-manager:5000"  '"/template"' "false"
+addAuthToEndpoint "device-manager-template"
+
+createEndpoint "device-manager-devices" "http://device-manager:5000"  '"/device"' "false"
+addAuthToEndpoint "device-manager-devices"
 
 # service: image-manager
 
 createEndpoint "image" "http://image-manager:5000"  '"/fw-image"' "true"
 addAuthToEndpoint "image"
 
-# service: auth
+# service: keycloak
 
-createEndpoint "auth-permissions-service" "http://auth:5000/pap"  '"/auth/pap"' "true"
-addAuthToEndpoint "auth-permissions-service"
-
-createEndpoint "auth-service" "http://auth:5000"  '"/auth"' "true"
-echo ""
-echo ""
-echo "- add plugin rate-limiting in auth-service"
-curl  -s  -sS -X POST \
---url ${kong}/services/auth-service/plugins/ \
---data "name=rate-limiting" \
---data "config.minute=5" \
---data "config.hour=40" \
---data "config.policy=local"
-
-createEndpoint "auth-revoke" "http://auth:5000"  '"/auth/revoke"' "false"
-# rate plugin limit to avoid brute-force atacks
-echo ""
-echo ""
-echo "- add plugin request-termination in auth-revoke"
-curl  -s  -sS -X POST \
---url ${kong}/services/auth-revoke/plugins/ \
-    --data "name=request-termination" \
-    --data "config.status_code=403" \
-    --data "config.message=Not authorized"
-
-createEndpoint "user-service" "http://auth:5000/user"  '"/auth/user"' "true"
-addAuthToEndpoint "user-service"
+createEndpoint "keycloak" "http://keycloak:8080/auth"  '"/auth"' "true"
 
 # service: flowbroker
 
@@ -151,15 +159,15 @@ addAuthToEndpoint "history"
 
 # service: data-manager
 
-createEndpoint "data-manager" "http://data-manager:3000/"  '"/export", "/import"' "false"
-addAuthToEndpoint "data-manager"
+createEndpoint "data-manager-import" "http://data-manager:3000/"  '"/import"' "false"
+addAuthToEndpoint "data-manager-import"
+
+createEndpoint "data-manager-export" "http://data-manager:3000/"  '"/export"' "false"
+addAuthToEndpoint "data-manager-export"
 
 # service: backstage
 
-createEndpoint "backstage_graphql_auth" "http://backstage:3005/"  '"/graphql-auth"' "false"
-
-createEndpoint "backstage_graphql" "http://backstage:3005/"  '"/graphql"' "false"
-addAuthToEndpoint "backstage_graphql"
+createEndpoint "backstage" "http://backstage:3000"  '"/backstage"' "false"
 
 # service: cron
 
