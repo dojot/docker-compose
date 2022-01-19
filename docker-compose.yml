@@ -947,7 +947,6 @@ services:
       - data-broker
       - auth
       - mongodb
-    restart: always
     <<: *loki-logging
     <<: *dojot-networking
 
