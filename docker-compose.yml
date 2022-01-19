@@ -821,13 +821,15 @@ services:
     environment:
       CERT_SC_APP_SIDECAR_TO: 'http-agent'
       CERT_SC_LOG_CONSOLE_LEVEL: 'info'
-      CERT_SC_CERTS_HOSTNAMES: '["http-agent", "localhost"]'
+      CERT_SC_CERTS_HOSTNAMES: '["http-agent", "${DOJOT_DOMAIN_NAME:-localhost}"]'
       HOSTNAME: http-agent
       CERT_SC_CERTS_FILES_BASEPATH: /certs
       CERT_SC_CERTS_FILES_CA: ca.crt
       CERT_SC_CERTS_FILES_CERT: http-agent.crt
       CERT_SC_CERTS_FILES_KEY: http-agent.key
       CERT_SC_CERTS_FILES_CRL: ca.crl
+      CERT_SC_CERTS_FILES_CABUNDLE: cabundle.crt
+      CERT_SC_CRON_CABUNDLE: "true"
     volumes:
       - http-agent-cert-sidecar-volume:/certs
     restart: always
@@ -852,7 +854,7 @@ services:
     environment:
       HTTP_AGENT_HTTPS_CERT: '/certs/http-agent.crt'
       HTTP_AGENT_HTTPS_KEY: '/certs/http-agent.key'
-      HTTP_AGENT_HTTPS_CA: '/certs/ca.crt'
+      HTTP_AGENT_HTTPS_CA: '/certs/cabundle.crt'
       HTTP_AGENT_SECURITY_CRL: '/certs/ca.crl'
       HTTP_AGENT_SECURITY_CERT_DIRECTORY: '/certs'
       HTTP_AGENT_LOG_CONSOLE_LEVEL: 'info'
