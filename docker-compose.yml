@@ -61,6 +61,8 @@ services:
       - zookeeper
     restart: always
     hostname: "kafka"
+    ports: 
+      - "9092:9092"
     environment:
       KAFKA_BROKER_ID: "1"
       KAFKA_ZOOKEEPER_CONNECT: "zookeeper:2181"
@@ -112,6 +114,7 @@ services:
       - "8000:8080"
     volumes:
       - ./keycloak/customRealmRepresentation.json:/opt/dojot/customRealmRepresentation.json:Z
+      - ./secrets:/secrets
     environment:
       JAVA_OPTS_APPEND: "-Dkeycloak.profile.feature.impersonation=disabled -Dkeycloak.profile.feature.upload_scripts=enabled"
       DB_VENDOR: postgres
@@ -132,6 +135,7 @@ services:
       DOJOT_REALM_SSL_MODE: 'NONE' #${KEYCLOAK_REALM_SSL_MODE:-NONE}
       DOJOT_KAFKA_SERVERS: kafka:9092
       DOJOT_CUSTOM_REALM_REP_FILE: "/opt/dojot/customRealmRepresentation.json"
+      DOJOT_SECRETS_PATH: "/secrets/" 
       # DOJOT_SMTP_HOST: smtp.gmail.com
       # DOJOT_SMTP_PORT: "587"
       # DOJOT_SMTP_SSL: "false"
@@ -173,8 +177,6 @@ services:
   keycloak-proxy:
     image: dojot/keycloak-proxy:dev
     restart: always
-    ports:
-      - "9229:9229"
     environment:
       KEYCLOAKPROXY_KEYCLOAK_URI: http://keycloak:8080
       KEYCLOAKPROXY_KEYCLOAK_REALM: master
@@ -233,6 +235,8 @@ services:
     depends_on:
       - minio-files
       - kafka
+    ports:
+      - "9229:9229"
     volumes:
       - ./secrets:/secrets
     environment:
@@ -242,8 +246,8 @@ services:
       FILEMGMT_CONSUMER_METADATA_BROKER_LIST: kafka:9092
       FILEMGMT_KEYCLOAK_TENANTS_URL: "http://keycloak-proxy:8081/api/v1/tenant"
       FILEMGMT_KEYCLOAK_URL: "http://keycloak:8080"
-      FILEMGMT_KEYCLOAK_CLIENT_ID: "file-mgmt"
-      FILEMGMT_KEYCLOAK_CLIENT_SECRET: "086ace15-86de-4aab-9fbd-1aef0fb4dbb6"
+      FILEMGMT_KEYCLOAK_CLIENT_ID: "dojot-file-mgmt"
+      FILEMGMT_KEYCLOAK_CLIENT_SECRET_FILE: "dojot-file-mgmt"
       FILEMGMT_LOGGER_CONSOLE_LEVEL: "debug"
     secrets:
       - MINIO_SECRET_KEY
