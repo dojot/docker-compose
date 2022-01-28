@@ -82,6 +82,12 @@ services:
     <<: *loki-logging
     <<: *dojot-networking
 
+  device-manager:
+    image: dojot/mockdevicemanager:dev
+    ports:
+      - "5000:5000"
+
+  ## Security
   postgres:
     image: dojot/postgres:9.5.21-alpine
     environment:
@@ -186,17 +192,37 @@ services:
       KEYCLOAKPROXY_KEYCLOAK_PROXY_PASSWORD_FILE: ${KEYCLOAK_PROXY_USER_PASSWORD_FILE:-KEYCLOAK_PROXY_USER}
     volumes:
       - ./secrets:/secrets
-  
-  cmd:
-    image: dojot/cmd:dev
     
-  ## device-manager mock
-  device-manager:
-    image: dojot/mockdevicemanager:dev
-    ports:
-      - "5000:5000"
+    ## iot-agent
+  
+  acl-redis:
+    image: dojot/redis:6.0.4-alpine3.11
+    restart: always
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 1s
+      timeout: 3s
+      retries: 30
+    volumes:
+      - acl-redis-volume:/data
+    <<: *loki-logging
+    <<: *dojot-networking
 
-  ## File-mgmt
+  certificate-acl:
+    image: dojot/certificate-acl:dev
+    environment:
+      CERTIFICATE_ACL_LOGGER_CONSOLE_LEVEL: "info"
+    volumes:
+      - ./secrets:/secrets
+    depends_on:
+      - acl-redis
+      - kafka
+      # - x509-identity-mgmt
+    restart: always
+    <<: *loki-logging
+    <<: *dojot-networking
+
+  ## file storage
   minio-files:
     image: minio/minio:RELEASE.2021-11-09T03-21-45Z
     restart: always
@@ -235,8 +261,6 @@ services:
     depends_on:
       - minio-files
       - kafka
-    ports:
-      - "9229:9229"
     volumes:
       - ./secrets:/secrets
     environment:
@@ -263,17 +287,21 @@ services:
       timeout: 20s
       retries: 3
 
-  ## influxdb begin
+  ## timeseries storage
   influxdb-retriever:
-    image: dojot/influxdb-retriever:${DOJOT_VERSION}
+    image: dojot/influxdb-retriever:dev
     depends_on:
       - influxdb
     environment:
       RETRIEVER_LOG_CONSOLE_LEVEL: "info"
       RETRIEVER_KEYCLOAK_URI: "http://keycloak:8080"
-      RETRIEVER_KEYCLOAK_CLIENT_ID: "influxdb-retriever"
-      RETRIEVER_KEYCLOAK_CLIENT_SECRET: "20d57c1b-766c-428a-8e2a-aaca3cdf0bda"
+      RETRIEVER_KEYCLOAK_CLIENT_ID: "dojot-influxdb-retriever"
+      RETRIEVER_KEYCLOAK_CLIENT_SECRET_FILE: "dojot-influxdb-retriever"
     restart: always
+    ports:
+      - "9229:9229"
+    volumes:
+      - ./secrets:/secrets
     logging:
       driver: json-file
       options:
@@ -330,32 +358,6 @@ services:
         max-size: 20m
         max-file: '5'
   
-  ## iot-agent
-  acl-redis:
-    image: dojot/redis:6.0.4-alpine3.11
-    restart: always
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 1s
-      timeout: 3s
-      retries: 30
-    volumes:
-      - acl-redis-volume:/data
-    <<: *loki-logging
-    <<: *dojot-networking
-
-  certificate-acl:
-    image: dojot/certificate-acl:dev
-    environment:
-      CERTIFICATE_ACL_LOGGER_CONSOLE_LEVEL: "info"
-    depends_on:
-      - acl-redis
-      - kafka
-      # - x509-identity-mgmt
-    restart: always
-    <<: *loki-logging
-    <<: *dojot-networking
-
 volumes:
   # ejbca-volume:
   # ejbca-client-tls-volume:
