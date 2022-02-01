@@ -20,9 +20,10 @@ services:
     # To recreate the secrets, reset the files: MINIO_ACCESS_KEY, MINIO_SECRET_KEY which are in the docker-compose/secrets folder.
     image: dojot/ubuntu_openssl:latest
     command:
-        - "./secrets/create_secrets.sh"
+      - "./secrets/create_secrets.sh"
     restart: on-failure
     volumes:
+      - ./keycloak/customRealmRepresentation.json:/opt/dojot/customRealmRepresentation.json:Z
       - ./secrets:/secrets
 
   zookeeper:
@@ -183,6 +184,8 @@ services:
   keycloak-proxy:
     image: dojot/keycloak-proxy:dev
     restart: always
+    depends_on:
+      - keycloak
     environment:
       KEYCLOAKPROXY_KEYCLOAK_URI: http://keycloak:8080
       KEYCLOAKPROXY_KEYCLOAK_REALM: master
@@ -211,12 +214,15 @@ services:
   certificate-acl:
     image: dojot/certificate-acl:dev
     environment:
-      CERTIFICATE_ACL_LOGGER_CONSOLE_LEVEL: "info"
+      CERTIFICATE_ACL_LOGGER_CONSOLE_LEVEL: "debug"
+      CERTIFICATE_ACL_KEYCLOAK_CLIENT_SECRET_FILE: "dojot-certificate-acl"
     volumes:
       - ./secrets:/secrets
     depends_on:
       - acl-redis
       - kafka
+      - keycloak
+      - keycloak-proxy
       # - x509-identity-mgmt
     restart: always
     <<: *loki-logging
@@ -261,6 +267,8 @@ services:
     depends_on:
       - minio-files
       - kafka
+      - keycloak
+      - keycloak-proxy
     volumes:
       - ./secrets:/secrets
     environment:
@@ -292,6 +300,8 @@ services:
     image: dojot/influxdb-retriever:dev
     depends_on:
       - influxdb
+      - keycloak
+      - keycloak-proxy
     environment:
       RETRIEVER_LOG_CONSOLE_LEVEL: "info"
       RETRIEVER_KEYCLOAK_URI: "http://keycloak:8080"
