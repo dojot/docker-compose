@@ -497,6 +497,7 @@ services:
     ports:
       - 3000:3000
       - 3001:3001
+
     environment:
       HTTP_AGENT_HTTPS_CERT: '/certs/http-agent.crt'
       HTTP_AGENT_SECURITY_AUTHORIZATION_MODE: 'basic-auth'
@@ -600,6 +601,7 @@ services:
         max-size: 20m
         max-file: '5'
 
+
   influxdb-storer:
     image: dojot/influxdb-storer:${DOJOT_VERSION}
     depends_on:
@@ -609,6 +611,7 @@ services:
       STORER_LOG_CONSOLE_LEVEL: "info"
       STORER_INFLUX_RETENTION_HRS: 168 # used only for new created tenant after default
     restart: always
+
     logging:
       driver: json-file
       options:
