@@ -220,14 +220,6 @@ services:
     depends_on:
       - minio-files
       - create_secrets
-    environment:
-      MINIO_ACCESS_KEY_FILE: MINIO_ACCESS_KEY
-      MINIO_SECRET_KEY_FILE: MINIO_SECRET_KEY
-      MINIO_ROOT_USER_FILE: MINIO_ACCESS_KEY
-      MINIO_ROOT_PASSWORD_FILE: MINIO_SECRET_KEY
-    secrets:
-      - MINIO_SECRET_KEY
-      - MINIO_ACCESS_KEY
     volumes:
       - ./secrets:/secrets
     entrypoint: >
