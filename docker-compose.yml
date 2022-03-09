@@ -215,6 +215,21 @@ services:
         max-size: 20m
         max-file: '5'
 
+  createbuckets:
+    image: minio/mc
+    depends_on:
+      - minio-files
+      - create_secrets
+    volumes:
+      - ./secrets:/secrets
+    entrypoint: >
+      /bin/sh -c "
+      ACCESS_KEY=$$(cat /secrets/MINIO_ACCESS_KEY);
+      SECRET_KEY=$$(cat /secrets/MINIO_SECRET_KEY);
+      /usr/bin/mc config host add myminio http://minio-files:9000 $$ACCESS_KEY $$SECRET_KEY;
+      /usr/bin/mc mb myminio/${MINIO_BUCKET_SUFFIX}admin
+      "
+
   file-mgmt:
     image: dojot/file-mgmt:${DOJOT_VERSION}
     restart: always
@@ -228,6 +243,7 @@ services:
       FILEMGMT_MINIO_ACCESS_KEY_FILE: MINIO_ACCESS_KEY
       FILEMGMT_MINIO_SECRET_KEY_FILE: MINIO_SECRET_KEY
       FILEMGMT_CONSUMER_METADATA_BROKER_LIST: kafka:9092
+      FILEMGMT_MINIO_BUCKET_SUFFIX: ${MINIO_BUCKET_SUFFIX}
     secrets:
       - MINIO_SECRET_KEY
       - MINIO_ACCESS_KEY
