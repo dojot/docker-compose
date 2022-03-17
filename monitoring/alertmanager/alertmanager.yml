@@ -1,0 +1,21 @@
+global:
+  smtp_smarthost: 'smtp.meudominio.local:465'
+  smtp_from: 'alert@meudominio.local'
+  smtp_auth_username: 'alert'
+  smtp_auth_password: '6jxDMjWvisKSXqwFh6U7dOg7J1rs8K'
+  smtp_require_tls: false
+
+templates:
+#- "/etc/alertmanager/template/*.tmpl"
+
+route:
+  repeat_interval: 5m
+  receiver: dojot-team
+
+receivers:
+- name: 'dojot-team'
+  email_configs:
+  - to: 'dojot-team@meudominio.local'
+    auth_username: 'alert@meudominio.local'
+    auth_password: '6jxDMjWvisKSXqwFh6U7dOg7J1rs8K'
+    send_resolved: true

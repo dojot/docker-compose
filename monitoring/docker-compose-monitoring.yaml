@@ -1,0 +1,222 @@
+version: "3.8"
+
+# https://docs.docker.com/config/containers/logging/json-file/
+# https://docs.docker.com/config/containers/logging/log_tags/
+x-logging: &loki-logging
+  logging:
+    driver: 'json-file'
+    options:
+      max-size: '50m'
+      max-file: '3'
+      tag: "{{.ImageName}}|{{.Name}}|{{.ImageFullID}}|{{.FullID}}"
+
+x-networking: &dojot-networking
+  networks:
+    - default
+
+services:
+  # https://prometheus.io/
+  prometheus:
+    container_name: prometheus
+    image: prom/prometheus:v2.31.1
+    restart: unless-stopped
+    ports:
+      - target: 9090
+        published: 9090
+        protocol: tcp
+        mode: host
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.path=/prometheus
+      - --storage.tsdb.retention.time=15d
+      - --web.enable-lifecycle
+      - --web.enable-admin-api
+    volumes:
+      - type: volume
+        source: prometheus-volume
+        target: /prometheus
+      - type: bind
+        source: ./prometheus
+        target: /etc/prometheus
+        read_only: true
+    <<: *loki-logging
+    <<: *dojot-networking
+
+  # https://prometheus.io/docs/alerting/latest/alertmanager/
+  alertmanager:
+    image: prom/alertmanager:v0.23.0
+    container_name: alertmanager
+    restart: unless-stopped
+    ports:
+      - target: 9093
+        published: 9093
+        protocol: tcp
+        mode: host
+    command:
+      - --config.file=/etc/alertmanager/alertmanager.yml
+    volumes:
+      - type: bind
+        source: ./alertmanager
+        target: /etc/alertmanager
+        read_only: true
+    depends_on:
+      - prometheus
+    <<: *loki-logging
+    <<: *dojot-networking
+
+  # https://grafana.com/docs/grafana/latest/installation/docker/
+  grafana:
+    container_name: grafana
+    image: grafana/grafana:8.1.2
+    ports:
+      - target: 3000
+        published: 3000
+        protocol: tcp
+        mode: host
+    environment:
+      GF_INSTALL_PLUGINS: "grafana-clock-panel,grafana-simple-json-datasource"
+    volumes:
+      - type: volume
+        source: grafana-volume
+        target: /var/lib/grafana
+      - type: bind
+        source: ./grafana/provisioning
+        target: /etc/grafana/provisioning
+        read_only: true
+    <<: *loki-logging
+    <<: *dojot-networking
+
+  # https://grafana.com/docs/loki/latest/configuration/
+  loki:
+    container_name: loki
+    image: grafana/loki:2.4.1
+    restart: unless-stopped
+    ports:
+      - target: 3100
+        published: 3100
+        protocol: tcp
+        mode: host
+    command:
+      - -config.file=/etc/loki/loki.yml
+    volumes:
+      - type: bind
+        source: ./loki
+        target: /etc/loki
+        read_only: true
+      - type: volume
+        source: loki-volume
+        target: /loki
+    <<: *loki-logging
+    <<: *dojot-networking
+
+  # https://grafana.com/docs/loki/latest/clients/promtail/
+  promtail:
+    container_name: promtail
+    image: grafana/promtail:2.4.1
+    restart: unless-stopped
+    command:
+      - -config.file=/etc/promtail/promtail.yml
+    volumes:
+      - type: bind
+        source: ./promtail
+        target: /etc/promtail
+      - type: bind
+        source: /var/lib/docker/containers
+        target: /var/lib/docker/containers
+        read_only: true
+    <<: *loki-logging
+    <<: *dojot-networking
+
+  # https://github.com/google/cadvisor
+  cadvisor:
+    container_name: cadvisor
+    image: gcr.io/cadvisor/cadvisor:v0.38.8
+    privileged: true
+    devices:
+      - /dev/kmsg
+    volumes:
+      - type: bind
+        source: /
+        target: /rootfs
+        read_only: true
+      - type: bind
+        source: /var/run
+        target: /var/run
+      - type: bind
+        source: /sys
+        target: /sys
+        read_only: true
+      - type: bind
+        source: /sys/fs/cgroup
+        target: /sys/fs/cgroup
+        read_only: true
+      - type: bind
+        source: /var/lib/docker
+        target: /var/lib/docker
+        read_only: true
+      - type: bind
+        source: /dev/disk
+        target: /dev/disk
+        read_only: true
+    <<: *loki-logging
+    <<: *dojot-networking
+
+  # https://redis.io/
+  # redis:
+  #   image: redis:6.2.5
+  #   container_name: redis
+
+  # https://github.com/prometheus/node_exporter
+
+  node_exporter:
+    image: prom/node-exporter:v1.3.0
+    container_name: node_exporter
+    restart: unless-stopped
+    command:
+      - --path.procfs=/host/proc
+      - --path.rootfs=/rootfs
+      - --path.sysfs=/host/sys
+      - --collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)
+    volumes:
+      - type: bind
+        source: /
+        target: /host
+        read_only: true
+        bind:
+          propagation: rslave
+    network_mode: host
+    pid: host
+    <<: *loki-logging
+
+  # https://github.com/danielqsj/kafka_exporter
+  kafka_exporter:
+    container_name: kafka_exporter
+    image: danielqsj/kafka-exporter:v1.4.1
+    restart: unless-stopped
+    command: --kafka.server=kafka:9092
+    <<: *loki-logging
+    <<: *dojot-networking
+
+  # https://hub.docker.com/r/bitnami/mongodb-exporter
+  mongodb_exporter:
+    container_name: mongodb_exporter
+    image: bitnami/mongodb-exporter:0.11.2
+    restart: unless-stopped
+    environment:
+      MONGODB_URI: 'mongodb://mongodb:27017'
+    <<: *loki-logging
+    <<: *dojot-networking
+
+volumes:
+  grafana-volume:
+    name: grafana-volume
+  loki-volume:
+    name: loki-volume
+  loki-minio-volume:
+    name: loki-minio-volume
+  prometheus-volume:
+    name: prometheus-volume
+
+networks:
+  default:
+    name: dojot
