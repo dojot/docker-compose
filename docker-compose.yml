@@ -209,11 +209,8 @@ services:
     secrets:
       - MINIO_SECRET_KEY
       - MINIO_ACCESS_KEY
-    logging:
-      driver: json-file
-      options:
-        max-size: 20m
-        max-file: '5'
+    <<: *loki-logging
+    <<: *dojot-networking
 
   createbuckets:
     image: minio/mc
@@ -247,16 +244,13 @@ services:
     secrets:
       - MINIO_SECRET_KEY
       - MINIO_ACCESS_KEY
-    logging:
-      driver: json-file
-      options:
-        max-size: 20m
-        max-file: '5'
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:9000/health"]
       interval: 30s
       timeout: 20s
       retries: 3
+    <<: *loki-logging
+    <<: *dojot-networking
 
   device-manager:
     image: dojot/device-manager:${DOJOT_VERSION}
