@@ -498,7 +498,6 @@ services:
     <<: *dojot-networking
 
   rabbitmq:
-    container_name: rabbitmq
     image: rabbitmq:3.9.10-management-alpine
     restart: unless-stopped
     hostname: rabbitmq
@@ -1033,28 +1032,28 @@ services:
 
 ### influxdb end
 
-  # kafka2ftp:
-  #   image: dojot/kafka2ftp:${DOJOT_VERSION}
-  #   environment:
-  #     FTP_TENANT: 'admin'
-  #     FTP_HOST: 'localhost'
-  #     FTP_PORT: 21
-  #     FTP_USER: 'anonymous'
-  #     FTP_PASSWORD: 'guest'
-  #     MAX_CONCURRENT_CONNECTIONS: 10
-  #     FTP_REMOTE_DIR: "/"
-  #     RETRIES: 13
-  #     LOG_CONSOLE_LEVEL: info
-  #   depends_on:
-  #     - kafka
-  #     - data-broker
-  #     - flowbroker
-  #   restart: always
-  #   logging:
-  #     driver: json-file
-  #     options:
-  #       max-size: 20m
-  #       max-file: '5'
+#   kafka2ftp:
+#     image: dojot/kafka2ftp:${DOJOT_VERSION}
+#     environment:
+#       FTP_TENANT: 'admin'
+#       FTP_HOST: 'localhost'
+#       FTP_PORT: 21
+#       FTP_USER: 'anonymous'
+#       FTP_PASSWORD: 'guest'
+#       MAX_CONCURRENT_CONNECTIONS: 10
+#       FTP_REMOTE_DIR: "/"
+#       RETRIES: 13
+#       LOG_CONSOLE_LEVEL: info
+#     depends_on:
+#       - kafka
+#       - data-broker
+#       - flowbroker
+#     restart: always
+#     logging:
+#       driver: json-file
+#       options:
+#         max-size: 20m
+#         max-file: '5'
 
   # GUI to Kong Admin API - BEGIN
   # Konga GUI will be available at http://localhost:1337
