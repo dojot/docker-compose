@@ -11,13 +11,15 @@ KEYCLOAK_PROXY_CLIENT_SECRET=$(cat ../secrets/${KEYCLOAK_PROXY_SECRET_FILE:-"KEY
 KEYCLOAK_PROXY_USER=${KEYCLOAK_PROXY_USER:-"user-keycloak-proxy"}
 KEYCLOAK_PROXY_USER_SECRET=$(cat ../secrets/${KEYCLOAK_PROXY_PASSWORD_FILE:-"KEYCLOAK_PROXY_USER"})
 
+CERT_SUPPORT_CLIENT_ID=${CERT_SUPPORT_CLIENT_ID:-"dojot-cert-support"}
+CERT_SUPPORT_CLIENT_SECRET=$(cat ../secrets/${CERT_SUPPORT_CLIENT_SECRET_FILE:-"dojot-cert-support"})
+
+
 echo KEYCLOAK_HOST=$KEYCLOAK_HOST
 echo KEYCLOAK_MASTER_USER=$KEYCLOAK_MASTER_USER
-echo KEYCLOAK_MASTER_PASSWORD=$KEYCLOAK_MASTER_PASSWORD
-echo KEYCLOAK_PROXY_CLIENT_ID=${KEYCLOAK_PROXY_CLIENT_ID:-"keycloak-proxy"}
-echo KEYCLOAK_PROXY_CLIENT_SECRET=${KEYCLOAK_PROXY_CLIENT_SECRET}
-echo KEYCLOAK_PROXY_USER=${KEYCLOAK_PROXY_USER:-"user-keycloak-proxy"}
-echo KEYCLOAK_PROXY_USER_SECRET=${KEYCLOAK_PROXY_USER_SECRET}
+echo KEYCLOAK_PROXY_CLIENT_ID=${KEYCLOAK_PROXY_CLIENT_ID}
+echo KEYCLOAK_PROXY_USER=${KEYCLOAK_PROXY_USER}
+echo CERT_SUPPORT_CLIENT_ID=${CERT_SUPPORT_CLIENT_ID}
 
 # check if Keycloak is started
 if curl --output /dev/null --silent --head --fail "$KEYCLOAK_HOST"; then
@@ -51,7 +53,7 @@ getToken() {
   fi
 }
 
-createClientKeycloakProxy() {
+createKeycloakProxyClient() {
   echo "Creatting Client in realm master..."
     curl -X POST "${KEYCLOAK_HOST}/admin/realms/master/clients" \
     -H "Content-Type:application/json" \
@@ -72,7 +74,7 @@ createClientKeycloakProxy() {
   echo "...finished client in realm create."
 }
 
-createUserKeycloakProxy() {
+createKeycloakProxyUser() {
   echo "Creatting User in realm master..."
     curl -X POST "${KEYCLOAK_HOST}/admin/realms/master/users" \
     -H "Content-Type:application/json" \
@@ -112,17 +114,28 @@ createUserKeycloakProxy() {
   echo "...finished user create."
 }
 
+createCertSupportClient() {
+  echo "Creatting Client in realm master..."
+  curl -X POST "${KEYCLOAK_HOST}/admin/realms/master/clients" \
+  -H "Content-Type:application/json" \
+  -H "Authorization: Bearer ${JWT}" \
+  -d "{
+        \"enabled\":true,
+        \"attributes\":{},
+        \"redirectUris\":[],
+        \"clientId\":\"${CERT_SUPPORT_CLIENT_ID}\",
+        \"rootUrl\":\"http://localhost:8000/\",
+        \"protocol\":\"openid-connect\",
+        \"publicClient\":false,
+        \"secret\":\"${CERT_SUPPORT_CLIENT_SECRET}\",
+        \"authorizationServicesEnabled\":true,
+        \"serviceAccountsEnabled\":true
+      }"
+
+  echo "...finished client in realm create."
+}
+
 getToken
-createClientKeycloakProxy
-createUserKeycloakProxy
-
-# createRealm() {
-#   echo "Creating realm ${KEYCLOAK_CREATE_REALM}..."
-
-#   curl -X POST "${KEYCLOAK_HOST}/admin/realms" \
-#     -H "Content-Type:application/json" \
-#     -H "Authorization: Bearer ${JWT}" \
-#     -d "{\"realm\": \"${KEYCLOAK_CREATE_REALM}\", \"enabled\": true}"
-
-#   echo "...finished realm ${KEYCLOAK_CREATE_REALM} create."
-# }
+createKeycloakProxyClient
+createKeycloakProxyUser
+createCertSupportClient
