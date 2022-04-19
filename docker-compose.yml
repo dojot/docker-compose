@@ -110,6 +110,8 @@ services:
       postgres:
         condition: service_healthy
     restart: always
+    ports:
+      - "8080:8080"
     volumes:
       - ./keycloak/customRealmRepresentation.json:/opt/dojot/customRealmRepresentation.json:Z
       - ./secrets:/secrets
@@ -173,7 +175,7 @@ services:
         max-file: '5'
 
   keycloak-proxy:
-    image: dojot/keycloak-proxy:feature/keycloak-v2
+    image: dojot/keycloak-proxy:${DOJOT_VERSION}
     restart: always
     depends_on:
       - keycloak
@@ -188,7 +190,7 @@ services:
       - ./secrets:/secrets
   
   device-manager:
-    image: dojot/device-manager:${DOJOT_VERSION} #${DOJOT_VERSION}
+    image: dojot/device-manager:${DOJOT_VERSION} 
     restart: always
     environment:
       # TODO: Fill these env variables with suitable values
@@ -236,6 +238,9 @@ services:
       - keycloak
       - keycloak-proxy
       - device-manager
+    ports:
+      - "5000:5000"
+      - "9229:9229"
     environment:
       KEYCLOAKMICROSERVICESIDECAR_PROXY_PORT: "5000"
       KEYCLOAKMICROSERVICESIDECAR_SERVER_URL: http://device-manager:5000
@@ -244,9 +249,11 @@ services:
       KEYCLOAKMICROSERVICESIDECAR_KEYCLOAK_CLIENT_SECRET_FILE: dojot-device-manager-sidecar
       KEYCLOAKMICROSERVICESIDECAR_KEYCLOAK_TENANTS_URL: http://keycloak-proxy:8081/api/v1/tenant
       KEYCLOAKMICROSERVICESIDECAR_CONSUMER_GROUP_ID: device-manager-sidecar
+      KEYCLOAKMICROSERVICESIDECAR_PROXY_AUTH_MODE: "keycloak"
+      KEYCLOAKMICROSERVICESIDECAR_PROXY_TOKEN_INSERT: "legacy"
     volumes:
       - ./secrets:/secrets
-    
+ 
 ## Security
   mongodb:
     image: dojot/mongo:3.2
@@ -270,7 +277,7 @@ services:
       - mongodb-cfg-volume:/data/configdb
 
   x509-ejbca: # this service cannot be called 'ejbca'
-    image: dojot/ejbca:${DOJOT_VERSION} # dojot/ejbca:${DOJOT_VERSION}
+    image: dojot/ejbca:${DOJOT_VERSION} 
     depends_on:
       - postgres
     restart: always
@@ -303,7 +310,7 @@ services:
         max-file: '5'
 
   x509-identity-mgmt:
-    image: dojot/x509-identity-mgmt:${DOJOT_VERSION} #dojot/x509-identity-mgmt:${DOJOT_VERSION}
+    image: dojot/x509-identity-mgmt:${DOJOT_VERSION} 
     depends_on:
       - x509-ejbca
       - postgres
@@ -602,7 +609,7 @@ services:
       BS_PROXY_SECURE: ${DOJOT_BACKSTAGE_PROXY_SECURE:-false}
 
   gui-v2:
-    image: dojot/gui-nx:${DOJOT_VERSION} #dojot/gui-v2:${DOJOT_VERSION}
+    image: dojot/gui-nx:${DOJOT_VERSION} 
     depends_on:
       - backstage
     restart: always
@@ -622,11 +629,9 @@ services:
     <<: *dojot-networking
 
   http-agent-cert-sidecar:
-    image: dojot/cert-sidecar:${DOJOT_VERSION} #${DOJOT_VERSION}
+    image: dojot/cert-sidecar:${DOJOT_VERSION}
     depends_on:
       - x509-identity-mgmt
-    ports:
-      - "9229:9229"
     environment:
       CERT_SC_APP_SIDECAR_TO: 'http-agent'
       CERT_SC_LOG_CONSOLE_LEVEL: 'debug'
@@ -672,6 +677,176 @@ services:
       - ./secrets:/secrets
     <<: *loki-logging
     <<: *dojot-networking
+
+  iotagent-mqtt:
+    image: dojot/vernemq-dojot:${DOJOT_VERSION}
+    command: ["/bin/bash", "-c", "echo $$VERNEMQ_CONF | base64 -d > /etc/vernemq/vernemq.conf; echo $$VM_ARGS | base64 -d > /etc/vernemq/vm.args; start_vernemq"]
+    depends_on:
+      - iotagent-mqtt-cert-sidecar
+      - certificate-acl
+    ports:
+      - 1883:1883 # You can comment this line (- 1883:1883) to disable insecure mode without TLS. (this is recommended)
+      - 8883:8883
+    environment:
+      VERNEMQ_CONF: bWV0YWRhdGFfcGx1Z2luID0gdm1xX3N3YwpwbHVnaW5zLnZtcV9wYXNzd2QgPSBvZmYKcGx1Z2lucy52bXFfYWNsID0gb2ZmCnBsdWdpbnMuZG9qb3RfZGlzY29ubmVjdF9wbHVnaW4ucGF0aCA9IC92ZXJuZW1xL2Rvam90X2Rpc2Nvbm5lY3RfcGx1Z2luL2RlZmF1bHQKcGx1Z2lucy5kb2pvdF9kaXNjb25uZWN0X3BsdWdpbiA9IG9uCnBsdWdpbnMuZG9qb3RfZGlzY29ubmVjdF9wbHVnaW4ucHJpb3JpdHkgPSAyCnBsdWdpbnMuZG9qb3RfYWNsX3BsdWdpbi5wYXRoID0gL3Zlcm5lbXEvZG9qb3RfYWNsX3BsdWdpbi9kZWZhdWx0CnBsdWdpbnMuZG9qb3RfYWNsX3BsdWdpbiA9IG9uCnBsdWdpbnMuZG9qb3RfYWNsX3BsdWdpbi5wcmlvcml0eSA9IDIKbGV2ZWxkYi5tYXhpbXVtX21lbW9yeS5wZXJjZW50ID0gMjAKbG9nLmNvbnNvbGUgPSBjb25zb2xlCmxpc3RlbmVyLm1heF9jb25uZWN0aW9ucyA9IDIwMDAwMApsaXN0ZW5lci5ucl9vZl9hY2NlcHRvcnMgPSAxMDAKbWF4X2luZmxpZ2h0X21lc3NhZ2VzID0gMjAKbWF4X29ubGluZV9tZXNzYWdlcyA9IDEwMDAwCmxpc3RlbmVyLmh0dHAuZGVmYXVsdCA9IDAuMC4wLjA6ODg4OApsaXN0ZW5lci5zc2wuZGVmYXVsdCA9IDAuMC4wLjA6ODg4MwpsaXN0ZW5lci5zc2wuZGVmYXVsdC5jYWZpbGUgPSAgL3Zlcm5lbXEvY2VydC9jYWJ1bmRsZS5jcnQKbGlzdGVuZXIuc3NsLmRlZmF1bHQuY2VydGZpbGUgPSAvdmVybmVtcS9jZXJ0L2lvdGFnZW50LW1xdHQuY3J0Cmxpc3RlbmVyLnNzbC5kZWZhdWx0LmtleWZpbGUgPSAvdmVybmVtcS9jZXJ0L2lvdGFnZW50LW1xdHQua2V5Cmxpc3RlbmVyLnNzbC5kZWZhdWx0LmNybGZpbGUgPSAgL3Zlcm5lbXEvY2VydC9jYS5jcmwKbGlzdGVuZXIuc3NsLmRlZmF1bHQudXNlX2lkZW50aXR5X2FzX3VzZXJuYW1lID0gb24KbGlzdGVuZXIuc3NsLmRlZmF1bHQucmVxdWlyZV9jZXJ0aWZpY2F0ZSA9IG9uCmxpc3RlbmVyLnNzbC5pbnRlcm5hbCA9IDAuMC4wLjA6OTg4MwpsaXN0ZW5lci5zc2wuaW50ZXJuYWwuY2FmaWxlID0gIC92ZXJuZW1xL2NlcnQvY2FidW5kbGUuY3J0Cmxpc3RlbmVyLnNzbC5pbnRlcm5hbC5jZXJ0ZmlsZSA9IC92ZXJuZW1xL2NlcnQvaW90YWdlbnQtbXF0dC5jcnQKbGlzdGVuZXIuc3NsLmludGVybmFsLmtleWZpbGUgPSAvdmVybmVtcS9jZXJ0L2lvdGFnZW50LW1xdHQua2V5Cmxpc3RlbmVyLnNzbC5pbnRlcm5hbC5jcmxmaWxlID0gIC92ZXJuZW1xL2NlcnQvY2EuY3JsCmxpc3RlbmVyLnNzbC5pbnRlcm5hbC5yZXF1aXJlX2NlcnRpZmljYXRlID0gb24=
+      VM_ARGS: K1AgMjU2MDAwCi1lbnYgRVJMX01BWF9FVFNfVEFCTEVTIDI1NjAwMAotZW52IEVSTF9DUkFTSF9EVU1QIC92ZXJuZW1xL2xvZy9lcmxfY3Jhc2guZHVtcAotZW52IEVSTF9GVUxMU1dFRVBfQUZURVIgMAotZW52IEVSTF9NQVhfUE9SVFMgMjYyMTQ0CitBIDY0Ci1zZXRjb29raWUgdm1xCi1uYW1lIHZtcUBpb3RhZ2VudC1tcXR0LmRvam90LmlvdAorSyB0cnVlCitXIHcKLXNtcCBlbmFibGU=
+    restart: always
+    hostname: iotagent-mqtt
+    domainname: dojot.iot
+    volumes:
+      - iotagent-mqtt-volume:/vernemq/data
+      - iotagent-mqtt-log-volume:/vernemq/log
+      - iotagent-mqtt-etc-volume:/vernemq/etc
+      - iotagent-mqtt-cert-side-volume:/vernemq/cert
+    logging:
+      driver: json-file
+      options:
+        max-size: 20m
+        max-file: '5'
+
+  iotagent-mqtt-keycloak-sidecar:
+    image: dojot/keycloak-microservice-sidecar:${DOJOT_VERSION}
+    ports:
+      - "3003:3000"
+    environment:
+      KEYCLOAKMICROSERVICESIDECAR_LOGGER_CONSOLE_LEVEL: "debug"
+      KEYCLOAKMICROSERVICESIDECAR_SERVER_URL: 'http://certificate-acl:3000'
+      KEYCLOAKMICROSERVICESIDECAR_PROXY_PORT: "3000"
+      KEYCLOAKMICROSERVICESIDECAR_KEYCLOAK_URL: http://keycloak:8080
+      KEYCLOAKMICROSERVICESIDECAR_KEYCLOAK_CLIENT_ID: dojot-iotagent-mqtt-sidecar
+      KEYCLOAKMICROSERVICESIDECAR_KEYCLOAK_CLIENT_SECRET_FILE: dojot-iotagent-mqtt-sidecar
+      KEYCLOAKMICROSERVICESIDECAR_KEYCLOAK_TENANTS_URL: http://keycloak-proxy:8081/api/v1/tenant
+      KEYCLOAKMICROSERVICESIDECAR_CONSUMER_GROUP_ID: dojot-iotagent-mqtt-sidecar
+      KEYCLOAKMICROSERVICESIDECAR_PROXY_AUTH_MODE: "legacy"
+      KEYCLOAKMICROSERVICESIDECAR_PROXY_TOKEN_INSERT: "keycloak"
+
+    volumes:
+      - ./secrets:/secrets
+    
+  iotagent-mqtt-cert-sidecar:
+    image: dojot/cert-sidecar:${DOJOT_VERSION}
+    depends_on:
+      - x509-identity-mgmt
+    environment:
+      CERT_SC_APP_SIDECAR_TO: 'iotagent-mqtt'
+      CERT_SC_LOG_CONSOLE_LEVEL: 'info'
+      # About CERT_SC_CERTS_HOSTNAMES
+      #     Servers hostname/ip (the list of host to which the device connects); The value "iotagent-mqtt" is mandatory, it is used by v2k and k2v.
+      #     It's the old EXTERNAL_SERVER_HOSTNAME and equivalent to MOSCA_TLS_DNS_LIST.
+      CERT_SC_CERTS_HOSTNAMES: '["iotagent-mqtt", "${DOJOT_DOMAIN_NAME:-localhost}"]'
+      HOSTNAME: iotagent-mqtt
+      CERT_SC_CERTS_FILES_BASEPATH: /vernemq/cert
+      CERT_SC_CERTS_FILES_CA: ca.crt
+      CERT_SC_CERTS_FILES_CERT: iotagent-mqtt.crt
+      CERT_SC_CERTS_FILES_KEY: iotagent-mqtt.key
+      CERT_SC_CERTS_FILES_CRL: ca.crl
+      CERT_SC_CERTS_FILES_CABUNDLE: cabundle.crt
+      CERT_SC_CRON_CABUNDLE: "true"
+    volumes:
+      - iotagent-mqtt-cert-side-volume:/vernemq/cert
+      - ./secrets:/secrets
+    restart: always
+    logging:
+      driver: json-file
+      options:
+        max-size: 20m
+        max-file: '5'
+
+  v2k-bridge:
+    image: dojot/v2k-bridge:${DOJOT_VERSION}
+    depends_on:
+      - iotagent-mqtt
+      - kafka
+      - v2k-bridge-cert-sidecar
+    environment:
+      V2K_APP_HOSTNAME: "v2k-bridge"
+      V2K_APP_USER_CONFIG_FILE: "docker.conf"
+      V2K_PRODUCER_METADATA_BROKER_LIST: "kafka:9092"
+      V2K_MQTT_PORT: 9883
+      V2K_MQTT_CA: "/certs/ca.crt"
+      V2K_MQTT_CERT: "/certs/v2k-bridge.crt"
+      V2K_MQTT_KEY:  "/certs/v2k-bridge.key"
+      V2K_LOG_CONSOLE_LEVEL: "info"
+    restart: always
+    volumes:
+      - v2k-bridge-cert-side-volume:/certs
+    logging:
+      driver: json-file
+      options:
+        max-size: 20m
+        max-file: '5'
+
+  v2k-bridge-cert-sidecar:
+    image: dojot/cert-sidecar:${DOJOT_VERSION}
+    depends_on:
+      - x509-identity-mgmt     
+    environment:
+      CERT_SC_APP_SIDECAR_TO: 'v2k-bridge'
+      CERT_SC_LOG_CONSOLE_LEVEL: 'info'
+      CERT_SC_CERTS_CRL: 'false'
+      CERT_SC_CERTS_HOSTNAMES: '["v2k-bridge"]'
+      HOSTNAME: v2k-bridge
+      CERT_SC_CERTS_FILES_BASEPATH: /certs
+      CERT_SC_CERTS_FILES_CA: ca.crt
+      CERT_SC_CERTS_FILES_CERT: v2k-bridge.crt
+      CERT_SC_CERTS_FILES_KEY: v2k-bridge.key
+    volumes:
+      - v2k-bridge-cert-side-volume:/certs
+      - ./secrets:/secrets
+    restart: always
+    logging:
+      driver: json-file
+      options:
+        max-size: 20m
+        max-file: '5'
+
+  k2v-bridge:
+    image: dojot/k2v-bridge:${DOJOT_VERSION}
+    depends_on:
+      - iotagent-mqtt
+      - kafka
+      - k2v-bridge-cert-sidecar
+    environment:
+      K2V_APP_HOSTNAME: "k2v-bridge"
+      K2V_APP_USER_CONFIG_FILE: "docker.conf"
+      K2V_CONSUMER_METADATA_BROKER_LIST: "kafka:9092"
+      K2V_MQTT_PORT: 9883
+      K2V_MQTT_CA: "/certs/ca.crt"
+      K2V_MQTT_CERT: "/certs/k2v-bridge.crt"
+      K2V_MQTT_KEY: "/certs/k2v-bridge.key"
+      K2V_LOG_CONSOLE_LEVEL: "info"
+    restart: always
+    volumes:
+      - k2v-bridge-cert-side-volume:/certs
+    logging:
+      driver: json-file
+      options:
+        max-size: 20m
+        max-file: '5'
+
+  k2v-bridge-cert-sidecar:
+    image: dojot/cert-sidecar:${DOJOT_VERSION}
+    depends_on:
+      - x509-identity-mgmt
+    volumes:
+      - k2v-bridge-cert-side-volume:/certs
+      - ./secrets:/secrets
+    environment:
+      CERT_SC_APP_SIDECAR_TO: 'k2v-bridge'
+      CERT_SC_LOG_CONSOLE_LEVEL: 'info'
+      CERT_SC_CERTS_CRL: 'false'
+      CERT_SC_CERTS_HOSTNAMES: '["k2v-bridge"]'
+      HOSTNAME: k2v-bridge
+      CERT_SC_CERTS_FILES_BASEPATH: /certs
+      CERT_SC_CERTS_FILES_CA: ca.crt
+      CERT_SC_CERTS_FILES_CERT: k2v-bridge.crt
+      CERT_SC_CERTS_FILES_KEY: k2v-bridge.key     
+    restart: always
+    logging:
+      driver: json-file
+      options:
+        max-size: 20m
+        max-file: '5'
 
 ## file storage
   minio-files:
@@ -740,6 +915,7 @@ services:
       interval: 30s
       timeout: 20s
       retries: 3
+
 
 ## timeseries storage
   influxdb-retriever:
@@ -827,6 +1003,7 @@ services:
     environment:
       KEYCLOAKMICROSERVICESIDECAR_PROXY_PORT: "8000"
       KEYCLOAKMICROSERVICESIDECAR_SERVER_URL: http://influxdb-retriever:4000
+      KEYCLOAKMICROSERVICESIDECAR_PROXY_FAKETOKEN_GENERATE: 'true'
 
 volumes:
   ejbca-volume:
@@ -846,12 +1023,14 @@ volumes:
   http-agent-redis-volume:
   certs:
   ca:
-  # iotagent-mqtt-volume:
+  iotagent-mqtt-cert-side-volume:
+  iotagent-mqtt-volume:
+  iotagent-mqtt-log-volume:
+  iotagent-mqtt-etc-volume:
   # iotagent-mqtt-log-volume:
   # iotagent-mqtt-etc-volume:
-  # iotagent-mqtt-cert-side-volume:
-  # v2k-bridge-cert-side-volume:
-  # k2v-bridge-cert-side-volume:
+  v2k-bridge-cert-side-volume:
+  k2v-bridge-cert-side-volume:
   # auth-redis-volume:
   # flowbroker-volume:
   # flowbroker-redis-volume:
