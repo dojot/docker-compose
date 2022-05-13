@@ -190,7 +190,7 @@ services:
       - ./secrets:/secrets
   
   device-manager:
-    image: dojot/device-manager:${DOJOT_VERSION} 
+    image: dojot/device-manager:development
     restart: always
     environment:
       # TODO: Fill these env variables with suitable values
@@ -238,9 +238,6 @@ services:
       - keycloak
       - keycloak-proxy
       - device-manager
-    ports:
-      - "5000:5000"
-      - "9229:9229"
     environment:
       KEYCLOAKMICROSERVICESIDECAR_PROXY_PORT: "5000"
       KEYCLOAKMICROSERVICESIDECAR_SERVER_URL: http://device-manager:5000
@@ -253,8 +250,7 @@ services:
       KEYCLOAKMICROSERVICESIDECAR_PROXY_TOKEN_INSERT: "legacy"
     volumes:
       - ./secrets:/secrets
- 
-## Security
+
   mongodb:
     image: dojot/mongo:3.2
     restart: always
@@ -276,6 +272,7 @@ services:
       - mongodb-volume:/data/db
       - mongodb-cfg-volume:/data/configdb
 
+  ## Security
   x509-ejbca: # this service cannot be called 'ejbca'
     image: dojot/ejbca:${DOJOT_VERSION} 
     depends_on:
@@ -394,43 +391,7 @@ services:
         max-size: 20m
         max-file: '5'
 
-##kafka-ws
-
-  kafka-ws:
-    image: dojot/kafka-ws:${DOJOT_VERSION}
-    depends_on:
-      - kafka
-      - kafka-ws-redis
-    environment:
-      KAFKA_WS_SERVER_JWT_EXP_TIME: "true"
-      KAFKA_WS_REDIS_HOST: kafka-ws-redis
-      KAFKA_WS_LOG_CONSOLE_LEVEL: "info"
-      # The KAFKA_WS_TICKET_SECRET should be unique for each environment
-      KAFKA_WS_TICKET_SECRET: fT5nAgHR9pkj0yYsBdc4p+PPq6ArjshcPdz0HA6W
-    restart: always
-    logging:
-      driver: json-file
-      options:
-        max-size: 20m
-        max-file: '5'
-
-  kafka-ws-redis:
-    image: dojot/redis:6.0.4-alpine3.11
-    restart: always
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 1s
-      timeout: 3s
-      retries: 30
-    volumes:
-      - kafka-ws-redis-volume:/data
-    logging:
-      driver: json-file
-      options:
-        max-size: 20m
-        max-file: '5'
-  
-## kong
+  ## kong
   kong-migrations:
     image: dojot/kong:feature-api-gateway-kong  #dojot/kong:${DOJOT_VERSION}
     command: kong migrations bootstrap
@@ -566,7 +527,42 @@ services:
         max-size: 20m
         max-file: '5'
 
-## GUI
+  ##kafka-ws
+  kafka-ws:
+    image: dojot/kafka-ws:${DOJOT_VERSION}
+    depends_on:
+      - kafka
+      - kafka-ws-redis
+    environment:
+      KAFKA_WS_SERVER_JWT_EXP_TIME: "true"
+      KAFKA_WS_REDIS_HOST: kafka-ws-redis
+      KAFKA_WS_LOG_CONSOLE_LEVEL: "info"
+      # The KAFKA_WS_TICKET_SECRET should be unique for each environment
+      KAFKA_WS_TICKET_SECRET: fT5nAgHR9pkj0yYsBdc4p+PPq6ArjshcPdz0HA6W
+    restart: always
+    logging:
+      driver: json-file
+      options:
+        max-size: 20m
+        max-file: '5'
+
+  kafka-ws-redis:
+    image: dojot/redis:6.0.4-alpine3.11
+    restart: always
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 1s
+      timeout: 3s
+      retries: 30
+    volumes:
+      - kafka-ws-redis-volume:/data
+    logging:
+      driver: json-file
+      options:
+        max-size: 20m
+        max-file: '5'
+
+  ## GUI
   backstage-redis:
     image: dojot/redis:6.0.4-alpine3.11
     healthcheck:
@@ -608,7 +604,7 @@ services:
       BS_PROXY_TARGET: ${DOJOT_URL:-http://apigw:8000}
       BS_PROXY_SECURE: ${DOJOT_BACKSTAGE_PROXY_SECURE:-false}
 
-  gui-v2:
+  gui-nx:
     image: dojot/gui-nx:${DOJOT_VERSION} 
     depends_on:
       - backstage
@@ -619,7 +615,7 @@ services:
         max-size: 20m
         max-file: '5'
 
-## IoT-Agent
+  ## IoT-Agent
   http-agent-redis:
     image: dojot/redis:6.0.4-alpine3.11
     restart: always
@@ -848,7 +844,7 @@ services:
         max-size: 20m
         max-file: '5'
 
-## file storage
+  ## file storage
   minio-files:
     image: minio/minio:RELEASE.2021-11-09T03-21-45Z
     restart: always
@@ -916,8 +912,7 @@ services:
       timeout: 20s
       retries: 3
 
-
-## timeseries storage
+  ## storage
   influxdb-retriever:
     image: dojot/influxdb-retriever:${DOJOT_VERSION}
     depends_on:
@@ -996,7 +991,7 @@ services:
         max-file: '5'
 
   history:
-    image: dojot/history-sidecar:${DOJOT_VERSION}
+    image: dojot/history-sidecar:temp
     restart: always
     depends_on:
       - influxdb-retriever
@@ -1004,6 +999,31 @@ services:
       KEYCLOAKMICROSERVICESIDECAR_PROXY_PORT: "8000"
       KEYCLOAKMICROSERVICESIDECAR_SERVER_URL: http://influxdb-retriever:4000
       KEYCLOAKMICROSERVICESIDECAR_PROXY_FAKETOKEN_GENERATE: 'true'
+
+  ## Cron
+  cron:
+    image: dojot/cron:dev
+    restart: always
+    environment:
+      CRON_KEYCLOAK_URI: "http://keycloak:8080"
+      CRON_KEYCLOAK_CLIENT_ID: "dojot-cron"
+      CRON_KEYCLOAK_CLIENT_SECRET_FILE: "dojot-cron"
+      CRON_LOGGER_CONSOLE_LEVEL: "debug"
+    volumes:
+      - ./secrets:/secrets
+    ports:
+      - "5000:5000"
+      - "9229:9229"
+    depends_on:
+      - kafka
+      - mongodb
+    <<: *loki-logging
+    <<: *dojot-networking
+
+  api-mock:
+    image: dojot/api-temp:dev
+    ports:
+      - "5002:5000"
 
 volumes:
   ejbca-volume:
@@ -1027,22 +1047,16 @@ volumes:
   iotagent-mqtt-volume:
   iotagent-mqtt-log-volume:
   iotagent-mqtt-etc-volume:
-  # iotagent-mqtt-log-volume:
-  # iotagent-mqtt-etc-volume:
   v2k-bridge-cert-side-volume:
   k2v-bridge-cert-side-volume:
-  # auth-redis-volume:
   # flowbroker-volume:
   # flowbroker-redis-volume:
   data-broker-redis-volume:
   device-manager-redis-volume:
   kafka-ws-redis-volume:
-  # mosca-redis-volume: 
   backstage-redis-volume:
   influxdb-volume:
   acl-redis-volume:
-  # http-agent-cert-sidecar-volume:
-  # http-agent-redis-volume:
 
 secrets:
   MINIO_SECRET_KEY:
