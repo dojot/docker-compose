@@ -78,7 +78,7 @@ services:
     <<: *dojot-networking
     profiles:
       - "basic"
-      - "complete"   
+      - "complete"
 
   gui:
     image: dojot/gui:${DOJOT_VERSION}
@@ -980,7 +980,7 @@ services:
     profiles:
       - "basic"
       - "complete"
-      
+
   ###
   # BEGIN - Legacy mqtt broker based on mosca (https://github.com/moscajs/mosca)
   #
@@ -1213,7 +1213,6 @@ services:
   #     - "complete"
   #
   # GUI to Kong Admin API - END
-  
 
   # GUI to Kafka - BEGIN
   #  kafdrop:
