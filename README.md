@@ -17,10 +17,15 @@ This repository contains the necessary configuration files for quick deployment 
 
 Before running this deployment it's necessary to define your domain name or IP in [.env](./.env) file, in the `DOJOT_DOMAIN_NAME` variable.
 
-Start the containers with command bellow:
+Start the containers with the minimum services using the command below:
 ```bash
-docker-compose up --detach
+docker-compose --profile basic up --detach
 ```
+Or start all services with below command:
+```
+docker-compose --profile complete up --detach
+```
+
 > __Note__: To get completely ready, **healthy** :green_heart:, all services in this `docker-compose` take an average of at least `12 minutes`.
 
 For instructions on how to get it up and running, please check [Installation Guide](https://dojotdocs.readthedocs.io/en/latest/installation-guide.html#docker-compose). **Always change the ``admin`` user password to a suitable password and keep it safe.**

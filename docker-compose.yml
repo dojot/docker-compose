@@ -36,6 +36,9 @@ services:
       LOG_LEVEL: INFO
     <<: *loki-logging
     <<: *dojot-networking
+    profiles:
+      - "basic"
+      - "complete"
 
   persister:
     image: dojot/persister:${DOJOT_VERSION}
@@ -53,6 +56,9 @@ services:
       HISTORY_DB_DATA_EXPIRATION: 604800 #Time in seconds - Set to collection when device is created.
     <<: *loki-logging
     <<: *dojot-networking
+    profiles:
+      - "basic"
+      - "complete"
 
   mongodb:
     image: dojot/mongo:3.2
@@ -70,6 +76,9 @@ services:
     command: '--wiredTigerCacheSizeGB 1'
     <<: *loki-logging
     <<: *dojot-networking
+    profiles:
+      - "basic"
+      - "complete"   
 
   gui:
     image: dojot/gui:${DOJOT_VERSION}
@@ -78,6 +87,9 @@ services:
     restart: always
     <<: *loki-logging
     <<: *dojot-networking
+    profiles:
+      - "basic"
+      - "complete"
 
   gui-v2:
     image: dojot/gui-v2:${DOJOT_VERSION}
@@ -86,6 +98,8 @@ services:
     restart: always
     <<: *loki-logging
     <<: *dojot-networking
+    profiles:
+      - "complete"
 
   data-broker:
     image: dojot/data-broker:${DOJOT_VERSION}
@@ -104,6 +118,9 @@ services:
       KAFKA_REPLICATION_FACTOR: 1
     <<: *loki-logging
     <<: *dojot-networking
+    profiles:
+      - "basic"
+      - "complete"
 
   data-broker-redis:
     image: dojot/redis:5.0.5-alpine3.10
@@ -117,6 +134,9 @@ services:
       - data-broker-redis-volume:/data
     <<: *loki-logging
     <<: *dojot-networking
+    profiles:
+      - "basic"
+      - "complete"
 
 ################
 # iot-agent lwm2m
@@ -142,6 +162,8 @@ services:
     restart: always
     <<: *loki-logging
     <<: *dojot-networking
+    profiles:
+      - "complete"
 
   image-manager:
     image: dojot/image-manager:${DOJOT_VERSION}
@@ -158,6 +180,8 @@ services:
       DBPASS: imgm
     <<: *loki-logging
     <<: *dojot-networking
+    profiles:
+      - "complete"
 
   minio:
     image: dojot/minio:2019.09.20
@@ -181,6 +205,8 @@ services:
       - minio-volume:/data
     <<: *loki-logging
     <<: *dojot-networking
+    profiles:
+      - "complete"
 
   minio-files:
     image: minio/minio:RELEASE.2021-11-09T03-21-45Z
@@ -211,6 +237,8 @@ services:
       - MINIO_ACCESS_KEY
     <<: *loki-logging
     <<: *dojot-networking
+    profiles:
+      - "complete"
 
   createbuckets:
     image: minio/mc
@@ -226,6 +254,8 @@ services:
       /usr/bin/mc config host add myminio http://minio-files:9000 $$ACCESS_KEY $$SECRET_KEY;
       /usr/bin/mc mb myminio/${MINIO_BUCKET_SUFFIX}admin
       "
+    profiles:
+      - "complete"
 
   file-mgmt:
     image: dojot/file-mgmt:${DOJOT_VERSION}
@@ -251,6 +281,8 @@ services:
       retries: 3
     <<: *loki-logging
     <<: *dojot-networking
+    profiles:
+      - "complete"
 
   device-manager:
     image: dojot/device-manager:${DOJOT_VERSION}
@@ -274,6 +306,9 @@ services:
         condition: service_healthy
     <<: *loki-logging
     <<: *dojot-networking
+    profiles:
+      - "basic"
+      - "complete"
 
   device-manager-redis:
     image: dojot/redis:5.0.5-alpine3.10
@@ -287,6 +322,8 @@ services:
       - device-manager-redis-volume:/data
     <<: *loki-logging
     <<: *dojot-networking
+    profiles:
+      - "complete"
 
   postgres:
     image: dojot/postgres:9.5.21-alpine
@@ -306,6 +343,9 @@ services:
       - ./secrets:/secrets
     <<: *loki-logging
     <<: *dojot-networking
+    profiles:
+      - "basic"
+      - "complete"
 
   # Prepare database, Bootstrap the database
   kong-migrations:
@@ -326,6 +366,9 @@ services:
       - ./secrets:/secrets
     <<: *loki-logging
     <<: *dojot-networking
+    profiles:
+      - "basic"
+      - "complete"
 
   # Run any new migrations and Finish running any pending migrations after 'up'.
   kong-migrations-up:
@@ -346,6 +389,9 @@ services:
       - ./secrets:/secrets
     <<: *loki-logging
     <<: *dojot-networking
+    profiles:
+      - "basic"
+      - "complete"
 
   apigw:
     image: dojot/kong:${DOJOT_VERSION}
@@ -393,6 +439,9 @@ services:
       - ./secrets:/secrets
     <<: *loki-logging
     <<: *dojot-networking
+    profiles:
+      - "basic"
+      - "complete"
 
   kong-config:
     image: dojot/appropriate-curl
@@ -404,6 +453,9 @@ services:
       - ./kong/kong.config.sh:/opt/kong.config.sh:Z
     <<: *loki-logging
     <<: *dojot-networking
+    profiles:
+      - "basic"
+      - "complete"
 
   auth:
     image: dojot/auth:${DOJOT_VERSION}
@@ -432,6 +484,9 @@ services:
       KAFKA_GROUP_ID: 'auth-group'
     <<: *loki-logging
     <<: *dojot-networking
+    profiles:
+      - "basic"
+      - "complete"
 
   auth-redis:
     image: dojot/redis:5.0.5-alpine3.10
@@ -440,6 +495,9 @@ services:
       - auth-redis-volume:/data
     <<: *loki-logging
     <<: *dojot-networking
+    profiles:
+      - "basic"
+      - "complete"
 
   flowbroker:
     image: dojot/flowbroker:${DOJOT_VERSION}
@@ -466,6 +524,8 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock:Z
     <<: *loki-logging
     <<: *dojot-networking
+    profiles:
+      - "complete"
 
   flowbroker-redis:
     image: dojot/redis:5.0.5-alpine3.10
@@ -479,6 +539,8 @@ services:
       - flowbroker-redis-volume:/data
     <<: *loki-logging
     <<: *dojot-networking
+    profiles:
+      - "complete"
 
   flowbroker-context-manager:
     image: dojot/flowbroker-context-manager:${DOJOT_VERSION}
@@ -496,6 +558,8 @@ services:
       - flowbroker
     <<: *loki-logging
     <<: *dojot-networking
+    profiles:
+      - "complete"
 
   rabbitmq:
     image: rabbitmq:3.9.10-management-alpine
@@ -519,6 +583,8 @@ services:
         target: /var/lib/rabbitmq
     <<: *loki-logging
     <<: *dojot-networking
+    profiles:
+      - "complete"
 
   zookeeper:
     image: "confluentinc/cp-zookeeper:5.5.0"
@@ -549,6 +615,9 @@ services:
       - zookeeper-secrets-volume:/etc/zookeeper/secrets
     <<: *loki-logging
     <<: *dojot-networking
+    profiles:
+      - "basic"
+      - "complete"
 
   kafka:
     image: confluentinc/cp-kafka:5.5.0
@@ -574,6 +643,9 @@ services:
       - kafka-secrets-volume:/etc/kafka/secrets
     <<: *loki-logging
     <<: *dojot-networking
+    profiles:
+      - "basic"
+      - "complete"
 
   x509-identity-mgmt:
     image: dojot/x509-identity-mgmt:${DOJOT_VERSION}
@@ -602,6 +674,9 @@ services:
       - "ejbca-client-tls-volume:/opt/tls"
     <<: *loki-logging
     <<: *dojot-networking
+    profiles:
+      - "basic"
+      - "complete"
 
   x509-ejbca: # this service cannot be called 'ejbca'
     image: dojot/ejbca:${DOJOT_VERSION}
@@ -632,6 +707,9 @@ services:
       - "ejbca-client-tls-volume:/opt/tls"
     <<: *loki-logging
     <<: *dojot-networking
+    profiles:
+      - "basic"
+      - "complete"
 
   kafka-ws:
     image: dojot/kafka-ws:${DOJOT_VERSION}
@@ -647,6 +725,8 @@ services:
     restart: always
     <<: *loki-logging
     <<: *dojot-networking
+    profiles:
+      - "complete"
 
   kafka-ws-redis:
     image: dojot/redis:6.0.4-alpine3.11
@@ -660,6 +740,8 @@ services:
       - kafka-ws-redis-volume:/data
     <<: *loki-logging
     <<: *dojot-networking
+    profiles:
+      - "complete"
 
   acl-redis:
     image: dojot/redis:6.0.4-alpine3.11
@@ -673,6 +755,9 @@ services:
       - acl-redis-volume:/data
     <<: *loki-logging
     <<: *dojot-networking
+    profiles:
+      - "basic"
+      - "complete"
 
   certificate-acl:
     image: dojot/certificate-acl:${DOJOT_VERSION}
@@ -685,6 +770,9 @@ services:
     restart: always
     <<: *loki-logging
     <<: *dojot-networking
+    profiles:
+      - "basic"
+      - "complete"
 
   iotagent-mqtt:
     image: dojot/vernemq-dojot:${DOJOT_VERSION}
@@ -708,6 +796,8 @@ services:
       - iotagent-mqtt-cert-side-volume:/vernemq/cert
     <<: *loki-logging
     <<: *dojot-networking
+    profiles:
+      - "complete"
 
   iotagent-mqtt-cert-sidecar:
     image: dojot/cert-sidecar:${DOJOT_VERSION}
@@ -733,6 +823,8 @@ services:
     restart: always
     <<: *loki-logging
     <<: *dojot-networking
+    profiles:
+      - "complete"
 
   v2k-bridge:
     image: dojot/v2k-bridge:${DOJOT_VERSION}
@@ -755,6 +847,8 @@ services:
       - v2k-bridge-cert-side-volume:/certs
     <<: *loki-logging
     <<: *dojot-networking
+    profiles:
+      - "complete"
 
   v2k-bridge-cert-sidecar:
     image: dojot/cert-sidecar:${DOJOT_VERSION}
@@ -775,6 +869,8 @@ services:
     restart: always
     <<: *loki-logging
     <<: *dojot-networking
+    profiles:
+      - "complete"
 
   k2v-bridge:
     image: dojot/k2v-bridge:${DOJOT_VERSION}
@@ -797,6 +893,8 @@ services:
       - k2v-bridge-cert-side-volume:/certs
     <<: *loki-logging
     <<: *dojot-networking
+    profiles:
+      - "complete"
 
   k2v-bridge-cert-sidecar:
     image: dojot/cert-sidecar:${DOJOT_VERSION}
@@ -817,6 +915,8 @@ services:
     restart: always
     <<: *loki-logging
     <<: *dojot-networking
+    profiles:
+      - "complete"
 
   http-agent-cert-sidecar:
     image: dojot/cert-sidecar:${DOJOT_VERSION}
@@ -839,6 +939,9 @@ services:
     restart: always
     <<: *loki-logging
     <<: *dojot-networking
+    profiles:
+      - "basic"
+      - "complete"
 
   http-agent:
     image: dojot/http-agent:${DOJOT_VERSION}
@@ -863,6 +966,9 @@ services:
       - http-agent-cert-sidecar-volume:/certs
     <<: *loki-logging
     <<: *dojot-networking
+    profiles:
+      - "basic"
+      - "complete"
 
   http-agent-redis:
     image: dojot/redis:6.0.4-alpine3.11
@@ -871,7 +977,10 @@ services:
       - http-agent-redis-volume:/data
     <<: *loki-logging
     <<: *dojot-networking
-
+    profiles:
+      - "basic"
+      - "complete"
+      
   ###
   # BEGIN - Legacy mqtt broker based on mosca (https://github.com/moscajs/mosca)
   #
@@ -937,7 +1046,8 @@ services:
       - device-manager
     <<: *loki-logging
     <<: *dojot-networking
-
+    profiles:
+      - "complete"
 
   backstage:
     image: dojot/backstage:${DOJOT_VERSION}
@@ -946,6 +1056,9 @@ services:
       - postgres
     <<: *loki-logging
     <<: *dojot-networking
+    profiles:
+      - "basic"
+      - "complete"
 
   cron:
     image: dojot/cron:${DOJOT_VERSION}
@@ -957,6 +1070,8 @@ services:
       - mongodb
     <<: *loki-logging
     <<: *dojot-networking
+    profiles:
+      - "complete"
 
 ### influxdb begin
 
@@ -969,6 +1084,8 @@ services:
 #     restart: always
 #     <<: *loki-logging
 #     <<: *dojot-networking
+#     profiles:
+#       - "complete"
 
 #   influxdb-storer:
 #     image: dojot/influxdb-storer:${DOJOT_VERSION}
@@ -981,6 +1098,8 @@ services:
 #     restart: always
 #     <<: *loki-logging
 #     <<: *dojot-networking
+#     profiles:
+#       - "complete"
 
 #   influxdb-setup:
 #     image: quay.io/influxdb/influxdb:v2.0.2
@@ -1000,6 +1119,8 @@ services:
 #         condition: service_healthy
 #     <<: *loki-logging
 #     <<: *dojot-networking
+#     profiles:
+#       - "complete"
 
 #   influxdb:
 #     image: quay.io/influxdb/influxdb:v2.0.2
@@ -1012,6 +1133,8 @@ services:
 #       test: "influx ping"
 #     <<: *loki-logging
 #     <<: *dojot-networking
+#     profiles:
+#       - "complete"
 
 # ### Interface WEB InfluxDB
 # ### Created user dojot_admin to acess interface WEB InfluxDB
@@ -1029,6 +1152,8 @@ services:
 #       - INFLUXDB_PASSWORD=admin
 #     <<: *loki-logging
 #     <<: *dojot-networking
+#     profiles:
+#       - "complete"
 
 ### influxdb end
 
@@ -1054,6 +1179,8 @@ services:
 #       options:
 #         max-size: 20m
 #         max-file: '5'
+#     profiles:
+#       - "complete"
 
   # GUI to Kong Admin API - BEGIN
   # Konga GUI will be available at http://localhost:1337
@@ -1082,8 +1209,11 @@ services:
   #     options:
   #       max-size: 20m
   #       max-file: '5'
+  #   profiles:
+  #     - "complete"
   #
   # GUI to Kong Admin API - END
+  
 
   # GUI to Kafka - BEGIN
   #  kafdrop:
@@ -1102,6 +1232,8 @@ services:
   #      options:
   #        max-size: 20m
   #        max-file: '5'
+  #    profiles:
+  #      - "complete"
   # GUI to Kafka - END
 
 # GUI to mongo - BEGIN
@@ -1115,6 +1247,8 @@ services:
   #     ME_CONFIG_MONGODB_SERVER: mongodb
   #   ports:
   #     - "8383:8081"
+  #   profiles:
+  #     - "complete"
 # GUI to mongo - END
 
 # GUI to postgres - BEGIN
@@ -1130,6 +1264,8 @@ services:
   #   restart: always
   #   ports:
   #     - 5050:80
+  #   profiles:
+  #   - "complete"
 # GUI to postgres - END
 
 volumes:
