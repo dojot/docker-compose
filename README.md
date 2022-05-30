@@ -17,6 +17,27 @@ This repository contains the necessary configuration files for quick deployment 
 
 Before running this deployment it's necessary to define your domain name or IP in [.env](./.env) file, in the `DOJOT_DOMAIN_NAME` variable.
 
+To start the containers, the following profiles are available:
+
+- basic (minimum services)
+- mongodb-pesistence
+- data-processing
+- cron-job
+- x509-certificates
+- front-end
+- lwm2m-iot-agent
+- device-management
+- api-gateway
+- user-management
+- data-processing-context
+- websocket-real-time
+- iot-agent-mqtt
+- iot-agent-http
+- import-export-configuration
+- influxdb-persistence
+- file-management
+- complete (all services)
+
 Start the containers with the minimum services using the command below:
 ```bash
 docker-compose --profile basic up --detach
