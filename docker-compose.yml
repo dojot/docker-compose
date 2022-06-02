@@ -36,6 +36,10 @@ services:
       LOG_LEVEL: INFO
     <<: *loki-logging
     <<: *dojot-networking
+    profiles:
+      - "basic"
+      - "mongodb-persistence"
+      - "complete"
 
   persister:
     image: dojot/persister:${DOJOT_VERSION}
@@ -53,6 +57,10 @@ services:
       HISTORY_DB_DATA_EXPIRATION: 604800 #Time in seconds - Set to collection when device is created.
     <<: *loki-logging
     <<: *dojot-networking
+    profiles:
+      - "basic"
+      - "mongodb-persistence"
+      - "complete"
 
   mongodb:
     image: dojot/mongo:3.2
@@ -70,6 +78,16 @@ services:
     command: '--wiredTigerCacheSizeGB 1'
     <<: *loki-logging
     <<: *dojot-networking
+    profiles:
+      - "basic"
+      - "mongodb-persistence"
+      - "data-processing"
+      - "cron-job"
+      - "x509-certificates"
+      - "iot-agent-mqtt"
+      - "iot-agent-http"
+      - "import-export-configuration"
+      - "complete"
 
   gui:
     image: dojot/gui:${DOJOT_VERSION}
@@ -78,6 +96,10 @@ services:
     restart: always
     <<: *loki-logging
     <<: *dojot-networking
+    profiles:
+      - "basic"
+      - "front-end"
+      - "complete"
 
   gui-v2:
     image: dojot/gui-v2:${DOJOT_VERSION}
@@ -86,6 +108,9 @@ services:
     restart: always
     <<: *loki-logging
     <<: *dojot-networking
+    profiles:
+      - "front-end"
+      - "complete"
 
   data-broker:
     image: dojot/data-broker:${DOJOT_VERSION}
@@ -104,6 +129,16 @@ services:
       KAFKA_REPLICATION_FACTOR: 1
     <<: *loki-logging
     <<: *dojot-networking
+    profiles:
+      - "basic"
+      - "mongodb-persistence"
+      - "data-processing"
+      - "cron-job"
+      - "lwm2m-iot-agent"
+      - "iot-agent-mqtt"
+      - "iot-agent-http"
+      - "import-export-configuration"
+      - "complete"
 
   data-broker-redis:
     image: dojot/redis:5.0.5-alpine3.10
@@ -117,6 +152,16 @@ services:
       - data-broker-redis-volume:/data
     <<: *loki-logging
     <<: *dojot-networking
+    profiles:
+      - "basic"
+      - "mongodb-persistence"
+      - "data-processing"
+      - "cron-job"
+      - "lwm2m-iot-agent"
+      - "iot-agent-mqtt"
+      - "iot-agent-http"
+      - "import-export-configuration"
+      - "complete"
 
 ################
 # iot-agent lwm2m
@@ -142,6 +187,9 @@ services:
     restart: always
     <<: *loki-logging
     <<: *dojot-networking
+    profiles:
+      - "lwm2m-iot-agent"
+      - "complete"
 
   image-manager:
     image: dojot/image-manager:${DOJOT_VERSION}
@@ -158,6 +206,9 @@ services:
       DBPASS: imgm
     <<: *loki-logging
     <<: *dojot-networking
+    profiles:
+      - "lwm2m-iot-agent"
+      - "complete"
 
   minio:
     image: dojot/minio:2019.09.20
@@ -181,6 +232,9 @@ services:
       - minio-volume:/data
     <<: *loki-logging
     <<: *dojot-networking
+    profiles:
+      - "lwm2m-iot-agent"
+      - "complete"
 
   minio-files:
     image: minio/minio:RELEASE.2021-11-09T03-21-45Z
@@ -211,6 +265,9 @@ services:
       - MINIO_ACCESS_KEY
     <<: *loki-logging
     <<: *dojot-networking
+    profiles:
+      - "file-management"
+      - "complete"
 
   createbuckets:
     image: minio/mc
@@ -226,6 +283,9 @@ services:
       /usr/bin/mc config host add myminio http://minio-files:9000 $$ACCESS_KEY $$SECRET_KEY;
       /usr/bin/mc mb myminio/${MINIO_BUCKET_SUFFIX}admin
       "
+    profiles:
+      - "file-management"
+      - "complete"
 
   file-mgmt:
     image: dojot/file-mgmt:${DOJOT_VERSION}
@@ -251,6 +311,9 @@ services:
       retries: 3
     <<: *loki-logging
     <<: *dojot-networking
+    profiles:
+      - "file-management"
+      - "complete"
 
   device-manager:
     image: dojot/device-manager:${DOJOT_VERSION}
@@ -274,6 +337,12 @@ services:
         condition: service_healthy
     <<: *loki-logging
     <<: *dojot-networking
+    profiles:
+      - "basic"
+      - "device-management"
+      - "iot-agent-http"
+      - "import-export-configuration"
+      - "complete"
 
   device-manager-redis:
     image: dojot/redis:5.0.5-alpine3.10
@@ -287,6 +356,8 @@ services:
       - device-manager-redis-volume:/data
     <<: *loki-logging
     <<: *dojot-networking
+    profiles:
+      - "complete"
 
   postgres:
     image: dojot/postgres:9.5.21-alpine
@@ -306,6 +377,21 @@ services:
       - ./secrets:/secrets
     <<: *loki-logging
     <<: *dojot-networking
+    profiles:
+      - "basic"
+      - "device-management"
+      - "x509-certificates"
+      - "mongodb-persistence"
+      - "front-end"
+      - "data-processing"
+      - "cron-job"
+      - "lwm2m-iot-agent"
+      - "api-gateway"
+      - "user-management"
+      - "iot-agent-mqtt"
+      - "iot-agent-http"
+      - "import-export-configuration"
+      - "complete"
 
   # Prepare database, Bootstrap the database
   kong-migrations:
@@ -326,6 +412,19 @@ services:
       - ./secrets:/secrets
     <<: *loki-logging
     <<: *dojot-networking
+    profiles:
+      - "basic"
+      - "api-gateway"
+      - "front-end"
+      - "mongodb-persistence"
+      - "data-processing"
+      - "cron-job"
+      - "lwm2m-iot-agent"
+      - "user-management"
+      - "iot-agent-mqtt"
+      - "iot-agent-http"
+      - "import-export-configuration"
+      - "complete"
 
   # Run any new migrations and Finish running any pending migrations after 'up'.
   kong-migrations-up:
@@ -346,6 +445,19 @@ services:
       - ./secrets:/secrets
     <<: *loki-logging
     <<: *dojot-networking
+    profiles:
+      - "basic"
+      - "api-gateway"
+      - "front-end"
+      - "mongodb-persistence"
+      - "data-processing"
+      - "cron-job"
+      - "lwm2m-iot-agent"
+      - "user-management"
+      - "iot-agent-mqtt"
+      - "iot-agent-http"
+      - "import-export-configuration"
+      - "complete"
 
   apigw:
     image: dojot/kong:${DOJOT_VERSION}
@@ -393,6 +505,19 @@ services:
       - ./secrets:/secrets
     <<: *loki-logging
     <<: *dojot-networking
+    profiles:
+      - "basic"
+      - "front-end"
+      - "api-gateway"
+      - "mongodb-persistence"
+      - "data-processing"
+      - "cron-job"
+      - "lwm2m-iot-agent"
+      - "user-management"
+      - "iot-agent-mqtt"
+      - "iot-agent-http"
+      - "import-export-configuration"
+      - "complete"
 
   kong-config:
     image: dojot/appropriate-curl
@@ -404,6 +529,10 @@ services:
       - ./kong/kong.config.sh:/opt/kong.config.sh:Z
     <<: *loki-logging
     <<: *dojot-networking
+    profiles:
+      - "basic"
+      - "api-gateway"
+      - "complete"
 
   auth:
     image: dojot/auth:${DOJOT_VERSION}
@@ -432,6 +561,18 @@ services:
       KAFKA_GROUP_ID: 'auth-group'
     <<: *loki-logging
     <<: *dojot-networking
+    profiles:
+      - "basic"
+      - "user-management"
+      - "mongodb-persistence"
+      - "data-processing"
+      - "cron-job"
+      - "front-end"
+      - "lwm2m-iot-agent"
+      - "iot-agent-mqtt"
+      - "iot-agent-http"
+      - "import-export-configuration"
+      - "complete"
 
   auth-redis:
     image: dojot/redis:5.0.5-alpine3.10
@@ -440,6 +581,18 @@ services:
       - auth-redis-volume:/data
     <<: *loki-logging
     <<: *dojot-networking
+    profiles:
+      - "basic"
+      - "user-management"
+      - "mongodb-persistence"
+      - "data-processing"
+      - "cron-job"
+      - "front-end"
+      - "lwm2m-iot-agent"
+      - "iot-agent-mqtt"
+      - "iot-agent-http"
+      - "import-export-configuration"
+      - "complete"
 
   flowbroker:
     image: dojot/flowbroker:${DOJOT_VERSION}
@@ -466,6 +619,10 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock:Z
     <<: *loki-logging
     <<: *dojot-networking
+    profiles:
+      - "data-processing"
+      - "import-export-configuration"
+      - "complete"
 
   flowbroker-redis:
     image: dojot/redis:5.0.5-alpine3.10
@@ -479,6 +636,10 @@ services:
       - flowbroker-redis-volume:/data
     <<: *loki-logging
     <<: *dojot-networking
+    profiles:
+      - "data-processing"
+      - "import-export-configuration"
+      - "complete"
 
   flowbroker-context-manager:
     image: dojot/flowbroker-context-manager:${DOJOT_VERSION}
@@ -496,9 +657,13 @@ services:
       - flowbroker
     <<: *loki-logging
     <<: *dojot-networking
+    profiles:
+      - "data-processing"
+      - "data-processing-context"
+      - "import-export-configuration"
+      - "complete"
 
   rabbitmq:
-    container_name: rabbitmq
     image: rabbitmq:3.9.10-management-alpine
     restart: unless-stopped
     hostname: rabbitmq
@@ -520,6 +685,10 @@ services:
         target: /var/lib/rabbitmq
     <<: *loki-logging
     <<: *dojot-networking
+    profiles:
+      - "data-processing"
+      - "import-export-configuration"
+      - "complete"
 
   zookeeper:
     image: "confluentinc/cp-zookeeper:5.5.0"
@@ -550,6 +719,21 @@ services:
       - zookeeper-secrets-volume:/etc/zookeeper/secrets
     <<: *loki-logging
     <<: *dojot-networking
+    profiles:
+      - "basic"
+      - "data-processing-context"
+      - "data-processing"
+      - "mongodb-persistence"
+      - "cron-job"
+      - "x509-certificates"
+      - "lwm2m-iot-agent"
+      - "websocket-real-time"
+      - "iot-agent-mqtt"
+      - "iot-agent-http"
+      - "import-export-configuration"
+      - "file-management"
+      - "influxdb-persistence"
+      - "complete"
 
   kafka:
     image: confluentinc/cp-kafka:5.5.0
@@ -575,6 +759,20 @@ services:
       - kafka-secrets-volume:/etc/kafka/secrets
     <<: *loki-logging
     <<: *dojot-networking
+    profiles:
+      - "basic"
+      - "mongodb-persistence"
+      - "data-processing"
+      - "cron-job"
+      - "x509-certificates"
+      - "lwm2m-iot-agent"
+      - "websocket-real-time"
+      - "iot-agent-mqtt"
+      - "iot-agent-http"
+      - "import-export-configuration"
+      - "file-management"
+      - "influxdb-persistence"
+      - "complete"
 
   x509-identity-mgmt:
     image: dojot/x509-identity-mgmt:${DOJOT_VERSION}
@@ -603,6 +801,12 @@ services:
       - "ejbca-client-tls-volume:/opt/tls"
     <<: *loki-logging
     <<: *dojot-networking
+    profiles:
+      - "basic"
+      - "x509-certificates"
+      - "iot-agent-mqtt"
+      - "iot-agent-http"
+      - "complete"
 
   x509-ejbca: # this service cannot be called 'ejbca'
     image: dojot/ejbca:${DOJOT_VERSION}
@@ -633,6 +837,12 @@ services:
       - "ejbca-client-tls-volume:/opt/tls"
     <<: *loki-logging
     <<: *dojot-networking
+    profiles:
+      - "basic"
+      - "x509-certificates"
+      - "iot-agent-mqtt"
+      - "iot-agent-http"
+      - "complete"
 
   kafka-ws:
     image: dojot/kafka-ws:${DOJOT_VERSION}
@@ -648,6 +858,9 @@ services:
     restart: always
     <<: *loki-logging
     <<: *dojot-networking
+    profiles:
+      - "websocket-real-time"
+      - "complete"
 
   kafka-ws-redis:
     image: dojot/redis:6.0.4-alpine3.11
@@ -661,6 +874,9 @@ services:
       - kafka-ws-redis-volume:/data
     <<: *loki-logging
     <<: *dojot-networking
+    profiles:
+      - "websocket-real-time"
+      - "complete"
 
   acl-redis:
     image: dojot/redis:6.0.4-alpine3.11
@@ -674,6 +890,12 @@ services:
       - acl-redis-volume:/data
     <<: *loki-logging
     <<: *dojot-networking
+    profiles:
+      - "basic"
+      - "x509-certificates"
+      - "iot-agent-mqtt"
+      - "complete"
+      - "iot-agent-http"
 
   certificate-acl:
     image: dojot/certificate-acl:${DOJOT_VERSION}
@@ -686,6 +908,12 @@ services:
     restart: always
     <<: *loki-logging
     <<: *dojot-networking
+    profiles:
+      - "basic"
+      - "x509-certificates"
+      - "iot-agent-mqtt"
+      - "complete"
+      - "iot-agent-http"
 
   iotagent-mqtt:
     image: dojot/vernemq-dojot:${DOJOT_VERSION}
@@ -709,6 +937,9 @@ services:
       - iotagent-mqtt-cert-side-volume:/vernemq/cert
     <<: *loki-logging
     <<: *dojot-networking
+    profiles:
+      - "iot-agent-mqtt"
+      - "complete"
 
   iotagent-mqtt-cert-sidecar:
     image: dojot/cert-sidecar:${DOJOT_VERSION}
@@ -734,6 +965,10 @@ services:
     restart: always
     <<: *loki-logging
     <<: *dojot-networking
+    profiles:
+      - "iot-agent-mqtt"
+      - "x509-certificates"
+      - "complete"
 
   v2k-bridge:
     image: dojot/v2k-bridge:${DOJOT_VERSION}
@@ -756,6 +991,9 @@ services:
       - v2k-bridge-cert-side-volume:/certs
     <<: *loki-logging
     <<: *dojot-networking
+    profiles:
+      - "iot-agent-mqtt"
+      - "complete"
 
   v2k-bridge-cert-sidecar:
     image: dojot/cert-sidecar:${DOJOT_VERSION}
@@ -776,6 +1014,10 @@ services:
     restart: always
     <<: *loki-logging
     <<: *dojot-networking
+    profiles:
+      - "iot-agent-mqtt"
+      - "x509-certificates"
+      - "complete"
 
   k2v-bridge:
     image: dojot/k2v-bridge:${DOJOT_VERSION}
@@ -798,6 +1040,9 @@ services:
       - k2v-bridge-cert-side-volume:/certs
     <<: *loki-logging
     <<: *dojot-networking
+    profiles:
+      - "iot-agent-mqtt"
+      - "complete"
 
   k2v-bridge-cert-sidecar:
     image: dojot/cert-sidecar:${DOJOT_VERSION}
@@ -818,6 +1063,10 @@ services:
     restart: always
     <<: *loki-logging
     <<: *dojot-networking
+    profiles:
+      - "iot-agent-mqtt"
+      - "x509-certificates"
+      - "complete"
 
   http-agent-cert-sidecar:
     image: dojot/cert-sidecar:${DOJOT_VERSION}
@@ -840,6 +1089,11 @@ services:
     restart: always
     <<: *loki-logging
     <<: *dojot-networking
+    profiles:
+      - "basic"
+      - "iot-agent-http"
+      - "x509-certificates"
+      - "complete"
 
   http-agent:
     image: dojot/http-agent:${DOJOT_VERSION}
@@ -864,6 +1118,10 @@ services:
       - http-agent-cert-sidecar-volume:/certs
     <<: *loki-logging
     <<: *dojot-networking
+    profiles:
+      - "basic"
+      - "iot-agent-http"
+      - "complete"
 
   http-agent-redis:
     image: dojot/redis:6.0.4-alpine3.11
@@ -872,6 +1130,10 @@ services:
       - http-agent-redis-volume:/data
     <<: *loki-logging
     <<: *dojot-networking
+    profiles:
+      - "basic"
+      - "iot-agent-http"
+      - "complete"
 
   ###
   # BEGIN - Legacy mqtt broker based on mosca (https://github.com/moscajs/mosca)
@@ -910,7 +1172,8 @@ services:
   #     options:
   #       max-size: 20m
   #       max-file: '5'
-
+  #   profiles:
+  #     - "complete"
   # mosca-redis:
   #   image: dojot/redis:5.0.5-alpine3.10
   #   restart: always
@@ -926,6 +1189,8 @@ services:
   #     options:
   #       max-size: 20m
   #       max-file: '5'
+  #   profiles:
+  #     - "complete"
   ###
   # END - Legacy mqtt broker based on https://github.com/moscajs/mosca
   ###
@@ -938,7 +1203,9 @@ services:
       - device-manager
     <<: *loki-logging
     <<: *dojot-networking
-
+    profiles:
+      - "import-export-configuration"
+      - "complete"
 
   backstage:
     image: dojot/backstage:${DOJOT_VERSION}
@@ -947,6 +1214,10 @@ services:
       - postgres
     <<: *loki-logging
     <<: *dojot-networking
+    profiles:
+      - "basic"
+      - "front-end"
+      - "complete"
 
   cron:
     image: dojot/cron:${DOJOT_VERSION}
@@ -958,103 +1229,124 @@ services:
       - mongodb
     <<: *loki-logging
     <<: *dojot-networking
+    profiles:
+      - "data-processing"
+      - "cron-job"
+      - "complete"
 
 ### influxdb begin
 
-#   influxdb-retriever:
-#     image: dojot/influxdb-retriever:${DOJOT_VERSION}
-#     depends_on:
-#       - influxdb
-#     environment:
-#       RETRIEVER_LOG_CONSOLE_LEVEL: "info"
-#     restart: always
-#     <<: *loki-logging
-#     <<: *dojot-networking
+#  influxdb-retriever:
+#    image: dojot/influxdb-retriever:${DOJOT_VERSION}
+#    depends_on:
+#      - influxdb
+#    environment:
+#      RETRIEVER_LOG_CONSOLE_LEVEL: "info"
+#    restart: always
+#    <<: *loki-logging
+#    <<: *dojot-networking
+#    profiles:
+#      - "influxdb-persistence"
+#      - "complete"
 
-#   influxdb-storer:
-#     image: dojot/influxdb-storer:${DOJOT_VERSION}
-#     depends_on:
-#       - kafka
-#       - influxdb
-#     environment:
-#       STORER_LOG_CONSOLE_LEVEL: "info"
-#       STORER_INFLUX_RETENTION_HRS: 168 # used only for new created tenant after default
-#     restart: always
-#     <<: *loki-logging
-#     <<: *dojot-networking
+#  influxdb-storer:
+#    image: dojot/influxdb-storer:${DOJOT_VERSION}
+#    depends_on:
+#      - kafka
+#      - influxdb
+#    environment:
+#      STORER_LOG_CONSOLE_LEVEL: "info"
+#      STORER_INFLUX_RETENTION_HRS: 168 # used only for new created tenant after default
+#    restart: always
+#    <<: *loki-logging
+#    <<: *dojot-networking
+#    profiles:
+#      - "influxdb-persistence"
+#      - "complete"
 
-#   influxdb-setup:
-#     image: quay.io/influxdb/influxdb:v2.0.2
-#     deploy:
-#       restart_policy:
-#         condition: on-failure
-#         max_attempts: 3
-#     environment:
-#       DEFAULT_RETENTION: "7d" # default (admin) organization expiry time
-#     volumes:
-#       - influxdb-volume:/root/.influxdbv2/
-#       - ./influxdb/init-influx.sh:/init-influx.sh:Z
-#     entrypoint:
-#       - /init-influx.sh
-#     depends_on:
-#       influxdb:
-#         condition: service_healthy
-#     <<: *loki-logging
-#     <<: *dojot-networking
+#  influxdb-setup:
+#    image: quay.io/influxdb/influxdb:v2.0.2
+#    deploy:
+#      restart_policy:
+#        condition: on-failure
+#        max_attempts: 3
+#    environment:
+#      DEFAULT_RETENTION: "7d" # default (admin) organization expiry time
+#    volumes:
+#      - influxdb-volume:/root/.influxdbv2/
+#      - ./influxdb/init-influx.sh:/init-influx.sh:Z
+#    entrypoint:
+#      - /init-influx.sh
+#    depends_on:
+#      influxdb:
+#        condition: service_healthy
+#    <<: *loki-logging
+#    <<: *dojot-networking
+#    profiles:
+#      - "influxdb-persistence"
+#      - "complete"
 
-#   influxdb:
-#     image: quay.io/influxdb/influxdb:v2.0.2
-#     restart: always
-#     ports:
-#       - 8086:8086
-#     volumes:
-#       - influxdb-volume:/root/.influxdbv2
-#     healthcheck:
-#       test: "influx ping"
-#     <<: *loki-logging
-#     <<: *dojot-networking
+#  influxdb:
+#    image: quay.io/influxdb/influxdb:v2.0.2
+#    restart: always
+#    ports:
+#      - 8086:8086
+#    volumes:
+#      - influxdb-volume:/root/.influxdbv2
+#    healthcheck:
+#      test: "influx ping"
+#    <<: *loki-logging
+#    <<: *dojot-networking
+#    profiles:
+#      - "influxdb-persistence"
+#      - "complete"
 
 # ### Interface WEB InfluxDB
 # ### Created user dojot_admin to acess interface WEB InfluxDB
-#   influxdb-chronograf:
-#     image: chronograf:1.9.1
-#     depends_on:
-#       - influxdb
-#     ports:
-#       - '127.0.0.1:8888:8888'
-#     volumes:
-#       - influxdb-chronograf-volume:/var/lib/chronograf
-#     environment:
-#       - INFLUXDB_URL=http://influxdb:8086
-#       - INFLUXDB_USERNAME=admin
-#       - INFLUXDB_PASSWORD=admin
-#     <<: *loki-logging
-#     <<: *dojot-networking
+#  influxdb-chronograf:
+#    image: chronograf:1.9.1
+#    depends_on:
+#      - influxdb
+#    ports:
+#      - '127.0.0.1:8888:8888'
+#    volumes:
+#      - influxdb-chronograf-volume:/var/lib/chronograf
+#    environment:
+#      - INFLUXDB_URL=http://influxdb:8086
+#      - INFLUXDB_USERNAME=admin
+#      - INFLUXDB_PASSWORD=admin
+#    <<: *loki-logging
+#    <<: *dojot-networking
+#    profiles:
+#      - "influxdb-persistence"
+#      - "complete"
 
 ### influxdb end
 
-  # kafka2ftp:
-  #   image: dojot/kafka2ftp:${DOJOT_VERSION}
-  #   environment:
-  #     FTP_TENANT: 'admin'
-  #     FTP_HOST: 'localhost'
-  #     FTP_PORT: 21
-  #     FTP_USER: 'anonymous'
-  #     FTP_PASSWORD: 'guest'
-  #     MAX_CONCURRENT_CONNECTIONS: 10
-  #     FTP_REMOTE_DIR: "/"
-  #     RETRIES: 13
-  #     LOG_CONSOLE_LEVEL: info
-  #   depends_on:
-  #     - kafka
-  #     - data-broker
-  #     - flowbroker
-  #   restart: always
-  #   logging:
-  #     driver: json-file
-  #     options:
-  #       max-size: 20m
-  #       max-file: '5'
+#   kafka2ftp:
+#     image: dojot/kafka2ftp:${DOJOT_VERSION}
+#     environment:
+#       FTP_TENANT: 'admin'
+#       FTP_HOST: 'localhost'
+#       FTP_PORT: 21
+#       FTP_USER: 'anonymous'
+#       FTP_PASSWORD: 'guest'
+#       MAX_CONCURRENT_CONNECTIONS: 10
+#       FTP_REMOTE_DIR: "/"
+#       RETRIES: 13
+#       LOG_CONSOLE_LEVEL: info
+#     depends_on:
+#       - kafka
+#       - data-broker
+#       - flowbroker
+#     restart: always
+#     logging:
+#       driver: json-file
+#       options:
+#         max-size: 20m
+#         max-file: '5'
+#     profiles:
+#       - "complete"
 
   # GUI to Kong Admin API - BEGIN
   # Konga GUI will be available at http://localhost:1337
@@ -1083,6 +1375,8 @@ services:
   #     options:
   #       max-size: 20m
   #       max-file: '5'
+  #   profiles:
+  #     - "complete"
   #
   # GUI to Kong Admin API - END
 
@@ -1103,6 +1397,8 @@ services:
   #      options:
   #        max-size: 20m
   #        max-file: '5'
+  #    profiles:
+  #      - "complete"
   # GUI to Kafka - END
 
 # GUI to mongo - BEGIN
@@ -1116,6 +1412,8 @@ services:
   #     ME_CONFIG_MONGODB_SERVER: mongodb
   #   ports:
   #     - "8383:8081"
+  #   profiles:
+  #     - "complete"
 # GUI to mongo - END
 
 # GUI to postgres - BEGIN
@@ -1131,6 +1429,8 @@ services:
   #   restart: always
   #   ports:
   #     - 5050:80
+  #   profiles:
+  #   - "complete"
 # GUI to postgres - END
 
 volumes:
