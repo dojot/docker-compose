@@ -272,8 +272,10 @@ services:
   createbuckets:
     image: minio/mc
     depends_on:
-      - minio-files
-      - create_secrets
+      create_secrets:
+        condition: service_completed_successfully
+      minio-files:
+        condition: service_healthy
     volumes:
       - ./secrets:/secrets
     entrypoint: >
