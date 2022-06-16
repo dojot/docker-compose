@@ -67,7 +67,7 @@ services:
   # https://grafana.com/docs/grafana/latest/installation/docker/
   grafana:
     container_name: grafana
-    image: grafana/grafana:8.1.2
+    image: grafana/grafana:8.3.3
     ports:
       - target: 3000
         published: 3000
@@ -172,6 +172,11 @@ services:
     image: prom/node-exporter:v1.3.0
     container_name: node_exporter
     restart: unless-stopped
+    ports:
+      - target: 9100
+        published: 9100
+        protocol: tcp
+        mode: host
     command:
       - --path.procfs=/host/proc
       - --path.rootfs=/rootfs
@@ -184,8 +189,6 @@ services:
         read_only: true
         bind:
           propagation: rslave
-    network_mode: host
-    pid: host
     <<: *loki-logging
 
   # https://github.com/danielqsj/kafka_exporter

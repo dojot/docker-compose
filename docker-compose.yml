@@ -55,6 +55,10 @@ services:
       - zookeeper-secrets-volume:/etc/zookeeper/secrets
     <<: *loki-logging
     <<: *dojot-networking
+    profiles:
+      - "basic"
+      - "front-end"
+      - "complete"
 
   kafka:
     image: confluentinc/cp-kafka:5.5.0
@@ -80,6 +84,9 @@ services:
       - kafka-secrets-volume:/etc/kafka/secrets
     <<: *loki-logging
     <<: *dojot-networking
+    profiles:
+      - "lwm2m-iot-agent"
+      - "complete"
 
   postgres:
     image: dojot/postgres:9.5.21-alpine
@@ -623,6 +630,12 @@ services:
       - http-agent-redis-volume:/data
     <<: *loki-logging
     <<: *dojot-networking
+    profiles:
+      - "basic"
+      - "x509-certificates"
+      - "iot-agent-mqtt"
+      - "complete"
+      - "iot-agent-http"
 
   http-agent-cert-sidecar:
     image: dojot/cert-sidecar:${DOJOT_VERSION}
@@ -673,6 +686,12 @@ services:
       - ./secrets:/secrets
     <<: *loki-logging
     <<: *dojot-networking
+    profiles:
+      - "basic"
+      - "x509-certificates"
+      - "iot-agent-mqtt"
+      - "complete"
+      - "iot-agent-http"
 
   iotagent-mqtt:
     image: dojot/vernemq-dojot:${DOJOT_VERSION}
@@ -1056,6 +1075,7 @@ volumes:
   kafka-ws-redis-volume:
   backstage-redis-volume:
   influxdb-volume:
+  influxdb-chronograf-volume:
   acl-redis-volume:
 
 secrets:
