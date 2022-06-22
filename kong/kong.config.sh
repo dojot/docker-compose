@@ -110,7 +110,7 @@ curl  -sS -X PUT \
 
 # service: gui
 
-createEndpoint "gui" "http://gui:80"  '"/"' "false"
+# createEndpoint "gui" "http://gui:80"  '"/"' "false"
 
 # service: gui-v2
 
@@ -128,10 +128,10 @@ createEndpoint "ws-http" "http://data-broker:80"  '"/socket.io"' "false"
 
 # service: device-manager
 
-createEndpoint "device-manager-template" "http://device-manager:5000"  '"/template"' "false"
+createEndpoint "device-manager-template" "http://device-manager-sidecar:5000"  '"/template"' "false"
 addAuthToEndpoint "device-manager-template"
 
-createEndpoint "device-manager-devices" "http://device-manager:5000"  '"/device"' "false"
+createEndpoint "device-manager-devices" "http://device-manager-sidecar:5000"  '"/device"' "false"
 addAuthToEndpoint "device-manager-devices"
 
 # service: image-manager
@@ -167,7 +167,7 @@ addAuthToEndpoint "data-manager-export"
 
 # service: backstage
 
-createEndpoint "backstage" "http://backstage:3000"  '"/backstage"' "false"
+createEndpoint "backstage" "http://backstage:3005"  '"/backstage"' "false"
 
 # service: cron
 

@@ -27,6 +27,17 @@ if [ ! -s secrets/KEYCLOAK_PROXY_USER ]; then
   openssl passwd -5 $(uname -n)$(date +%F%H%M%S)KEYCLOAK_PROXY_USER > secrets/KEYCLOAK_PROXY_USER
 fi
 
+##############################
+# Secrets Cert Support Client
+##############################
+if [ ! -s secrets/dojot-cert-support ]; then
+  openssl passwd -5 $(uname -n)$(date +%F%H%M%S)dojot-cert-support > secrets/dojot-cert-support
+fi
+
+if [ ! -s secrets/dojot-cert-support ]; then
+  openssl passwd -5 $(uname -n)$(date +%F%H%M%S)dojot-cert-support > secrets/dojot-cert-support
+fi
+
 ###########################################################
 # Secrets clients keycloak 
 #
