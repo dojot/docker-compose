@@ -26,7 +26,7 @@ services:
       - ./secrets:/secrets
 
   history:
-    image: dojot/history:${DOJOT_VERSION}
+    image: dojot/history:${DOJOT_BACKEND_VERSION}
     restart: always
     depends_on:
       - mongodb
@@ -42,7 +42,7 @@ services:
       - "complete"
 
   persister:
-    image: dojot/persister:${DOJOT_VERSION}
+    image: dojot/persister:${DOJOT_BACKEND_VERSION}
     restart: always
     depends_on:
       - mongodb
@@ -90,7 +90,7 @@ services:
       - "complete"
 
   gui:
-    image: dojot/gui:${DOJOT_VERSION}
+    image: dojot/gui:${DOJOT_FRONTEND_VERSION}
     depends_on:
       - backstage
     restart: always
@@ -102,7 +102,7 @@ services:
       - "complete"
 
   gui-v2:
-    image: dojot/gui-v2:${DOJOT_VERSION}
+    image: dojot/gui-v2:${DOJOT_FRONTEND_VERSION}
     depends_on:
       - backstage
     restart: always
@@ -113,7 +113,7 @@ services:
       - "complete"
 
   data-broker:
-    image: dojot/data-broker:${DOJOT_VERSION}
+    image: dojot/data-broker:${DOJOT_BACKEND_VERSION}
     restart: always
     depends_on:
       - kafka
@@ -167,7 +167,7 @@ services:
 # iot-agent lwm2m
 ################
   iotagent-lwm2m:
-    image: dojot/iotagent-leshan:${DOJOT_VERSION}
+    image: dojot/iotagent-leshan:${DOJOT_BACKEND_VERSION}
     depends_on:
       - kafka
       - data-broker
@@ -192,7 +192,7 @@ services:
       - "complete"
 
   image-manager:
-    image: dojot/image-manager:${DOJOT_VERSION}
+    image: dojot/image-manager:${DOJOT_BACKEND_VERSION}
     restart: always
     depends_on:
       - postgres
@@ -290,7 +290,7 @@ services:
       - "complete"
 
   file-mgmt:
-    image: dojot/file-mgmt:${DOJOT_VERSION}
+    image: dojot/file-mgmt:${DOJOT_BACKEND_VERSION}
     restart: always
     depends_on:
       - minio-files
@@ -318,7 +318,7 @@ services:
       - "complete"
 
   device-manager:
-    image: dojot/device-manager:${DOJOT_VERSION}
+    image: dojot/device-manager:${DOJOT_BACKEND_VERSION}
     restart: always
     environment:
       # TODO: Fill these env variables with suitable values
@@ -397,7 +397,7 @@ services:
 
   # Prepare database, Bootstrap the database
   kong-migrations:
-    image: dojot/kong:${DOJOT_VERSION}
+    image: dojot/kong:${DOJOT_BACKEND_VERSION}
     command: kong migrations bootstrap
     depends_on:
       postgres:
@@ -430,7 +430,7 @@ services:
 
   # Run any new migrations and Finish running any pending migrations after 'up'.
   kong-migrations-up:
-    image:  dojot/kong:${DOJOT_VERSION}
+    image:  dojot/kong:${DOJOT_BACKEND_VERSION}
     command: kong migrations up && kong migrations finish
     depends_on:
       postgres:
@@ -462,7 +462,7 @@ services:
       - "complete"
 
   apigw:
-    image: dojot/kong:${DOJOT_VERSION}
+    image: dojot/kong:${DOJOT_BACKEND_VERSION}
     depends_on:
       postgres:
         condition: service_healthy
@@ -537,7 +537,7 @@ services:
       - "complete"
 
   auth:
-    image: dojot/auth:${DOJOT_VERSION}
+    image: dojot/auth:${DOJOT_BACKEND_VERSION}
     restart: always
     depends_on:
       - apigw
@@ -597,7 +597,7 @@ services:
       - "complete"
 
   flowbroker:
-    image: dojot/flowbroker:${DOJOT_VERSION}
+    image: dojot/flowbroker:${DOJOT_BACKEND_VERSION}
     restart: always
     environment:
       DEPLOY_ENGINE: "docker"
@@ -644,7 +644,7 @@ services:
       - "complete"
 
   flowbroker-context-manager:
-    image: dojot/flowbroker-context-manager:${DOJOT_VERSION}
+    image: dojot/flowbroker-context-manager:${DOJOT_BACKEND_VERSION}
     restart: always
     environment:
       ZOOKEEPER_HOST: zookeeper
@@ -777,7 +777,7 @@ services:
       - "complete"
 
   x509-identity-mgmt:
-    image: dojot/x509-identity-mgmt:${DOJOT_VERSION}
+    image: dojot/x509-identity-mgmt:${DOJOT_BACKEND_VERSION}
     depends_on:
       - x509-ejbca
       - postgres
@@ -811,7 +811,7 @@ services:
       - "complete"
 
   x509-ejbca: # this service cannot be called 'ejbca'
-    image: dojot/ejbca:${DOJOT_VERSION}
+    image: dojot/ejbca:${DOJOT_BACKEND_VERSION}
     depends_on:
       - postgres
     restart: always
@@ -847,7 +847,7 @@ services:
       - "complete"
 
   kafka-ws:
-    image: dojot/kafka-ws:${DOJOT_VERSION}
+    image: dojot/kafka-ws:${DOJOT_BACKEND_VERSION}
     depends_on:
       - kafka
       - kafka-ws-redis
@@ -900,7 +900,7 @@ services:
       - "iot-agent-http"
 
   certificate-acl:
-    image: dojot/certificate-acl:${DOJOT_VERSION}
+    image: dojot/certificate-acl:${DOJOT_BACKEND_VERSION}
     environment:
       CERTIFICATE_ACL_LOGGER_CONSOLE_LEVEL: "info"
     depends_on:
@@ -918,7 +918,7 @@ services:
       - "iot-agent-http"
 
   iotagent-mqtt:
-    image: dojot/vernemq-dojot:${DOJOT_VERSION}
+    image: dojot/vernemq-dojot:${DOJOT_BACKEND_VERSION}
     command: ["/bin/bash", "-c", "echo $$VERNEMQ_CONF | base64 -d > /etc/vernemq/vernemq.conf; echo $$VM_ARGS | base64 -d > /etc/vernemq/vm.args; start_vernemq"]
     depends_on:
       - iotagent-mqtt-cert-sidecar
@@ -944,7 +944,7 @@ services:
       - "complete"
 
   iotagent-mqtt-cert-sidecar:
-    image: dojot/cert-sidecar:${DOJOT_VERSION}
+    image: dojot/cert-sidecar:${DOJOT_BACKEND_VERSION}
     depends_on:
       - x509-identity-mgmt
     environment:
@@ -973,7 +973,7 @@ services:
       - "complete"
 
   v2k-bridge:
-    image: dojot/v2k-bridge:${DOJOT_VERSION}
+    image: dojot/v2k-bridge:${DOJOT_BACKEND_VERSION}
     depends_on:
       - iotagent-mqtt
       - kafka
@@ -998,7 +998,7 @@ services:
       - "complete"
 
   v2k-bridge-cert-sidecar:
-    image: dojot/cert-sidecar:${DOJOT_VERSION}
+    image: dojot/cert-sidecar:${DOJOT_BACKEND_VERSION}
     depends_on:
       - x509-identity-mgmt
     environment:
@@ -1022,7 +1022,7 @@ services:
       - "complete"
 
   k2v-bridge:
-    image: dojot/k2v-bridge:${DOJOT_VERSION}
+    image: dojot/k2v-bridge:${DOJOT_BACKEND_VERSION}
     depends_on:
       - iotagent-mqtt
       - kafka
@@ -1047,7 +1047,7 @@ services:
       - "complete"
 
   k2v-bridge-cert-sidecar:
-    image: dojot/cert-sidecar:${DOJOT_VERSION}
+    image: dojot/cert-sidecar:${DOJOT_BACKEND_VERSION}
     depends_on:
       - x509-identity-mgmt
     environment:
@@ -1071,7 +1071,7 @@ services:
       - "complete"
 
   http-agent-cert-sidecar:
-    image: dojot/cert-sidecar:${DOJOT_VERSION}
+    image: dojot/cert-sidecar:${DOJOT_BACKEND_VERSION}
     depends_on:
       - x509-identity-mgmt
     environment:
@@ -1098,7 +1098,7 @@ services:
       - "complete"
 
   http-agent:
-    image: dojot/http-agent:${DOJOT_VERSION}
+    image: dojot/http-agent:${DOJOT_BACKEND_VERSION}
     restart: always
     depends_on:
       - kafka
@@ -1151,7 +1151,7 @@ services:
   #
   ###
   # iotagent-mqtt-mosca:
-  #   image: dojot/iotagent-mosca:${DOJOT_VERSION}
+  #   image: dojot/iotagent-mosca:${DOJOT_BACKEND_VERSION}
   #   depends_on:
   #     - mosca-redis
   #     - kafka
@@ -1198,7 +1198,7 @@ services:
   ###
 
   data-manager:
-    image: dojot/data-manager:${DOJOT_VERSION}
+    image: dojot/data-manager:${DOJOT_BACKEND_VERSION}
     restart: always
     depends_on:
       - flowbroker
@@ -1210,7 +1210,7 @@ services:
       - "complete"
 
   backstage:
-    image: dojot/backstage:${DOJOT_VERSION}
+    image: dojot/backstage:${DOJOT_FRONTEND_VERSION}
     restart: always
     depends_on:
       - postgres
@@ -1222,7 +1222,7 @@ services:
       - "complete"
 
   cron:
-    image: dojot/cron:${DOJOT_VERSION}
+    image: dojot/cron:${DOJOT_BACKEND_VERSION}
     restart: always
     depends_on:
       - kafka
@@ -1239,7 +1239,7 @@ services:
 ### influxdb begin
 
 #  influxdb-retriever:
-#    image: dojot/influxdb-retriever:${DOJOT_VERSION}
+#    image: dojot/influxdb-retriever:${DOJOT_BACKEND_VERSION}
 #    depends_on:
 #      - influxdb
 #    environment:
@@ -1252,7 +1252,7 @@ services:
 #      - "complete"
 
 #  influxdb-storer:
-#    image: dojot/influxdb-storer:${DOJOT_VERSION}
+#    image: dojot/influxdb-storer:${DOJOT_BACKEND_VERSION}
 #    depends_on:
 #      - kafka
 #      - influxdb
@@ -1326,7 +1326,7 @@ services:
 ### influxdb end
 
 #   kafka2ftp:
-#     image: dojot/kafka2ftp:${DOJOT_VERSION}
+#     image: dojot/kafka2ftp:${DOJOT_BACKEND_VERSION}
 #     environment:
 #       FTP_TENANT: 'admin'
 #       FTP_HOST: 'localhost'
