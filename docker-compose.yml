@@ -1107,6 +1107,7 @@ services:
       - http-agent-cert-sidecar
       - device-manager
       - certificate-acl
+      - basic-auth
     ports:
       - 8080:3000
     environment:
@@ -1434,6 +1435,28 @@ services:
   #   profiles:
   #   - "complete"
 # GUI to postgres - END
+
+  basic-auth:
+    image: dojot/device-basic-authentication:${DOJOT_BACKEND_VERSION}
+    restart: always
+    depends_on:
+      - kafka
+      - data-broker
+      - mongodb
+      - auth
+      - device-manager
+    ports:
+      - 3000:3000
+    environment:
+      BASIC_AUTH_LOG_CONSOLE_LEVEL: 'info'
+      BASIC_AUTH_LOG_VERBOSE: "true"
+      BASIC_AUTH_PRODUCER_METADATA_BROKER_LIST: kafka:9092
+    <<: *loki-logging
+    <<: *dojot-networking
+    profiles:
+      - "basic"
+      - "iot-agent-http"
+      - "complete"
 
 volumes:
   ejbca-volume:
