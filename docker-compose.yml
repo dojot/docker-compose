@@ -1,4 +1,4 @@
-version: '3.8'
+version: '3.3'
 
 # https://docs.docker.com/config/containers/logging/json-file/
 # https://docs.docker.com/config/containers/logging/log_tags/
@@ -611,16 +611,16 @@ services:
       BS_PROXY_TARGET: ${DOJOT_URL:-http://apigw:8000}
       BS_PROXY_SECURE: ${DOJOT_BACKSTAGE_PROXY_SECURE:-false}
 
-  gui-nx:
-    image: dojot/gui-nx:${DOJOT_VERSION} 
-    depends_on:
-      - backstage
-    restart: always
-    logging:
-      driver: json-file
-      options:
-        max-size: 20m
-        max-file: '5'
+  # gui-nx:
+  #   image: dojot/gui-nx:${DOJOT_VERSION} 
+  #   depends_on:
+  #     - backstage
+  #   restart: always
+  #   logging:
+  #     driver: json-file
+  #     options:
+  #       max-size: 20m
+  #       max-file: '5'
 
   ## IoT-Agent
   http-agent-redis:
@@ -1009,19 +1009,9 @@ services:
         max-size: 20m
         max-file: '5'
 
-  history:
-    image: dojot/history-sidecar:temp
-    restart: always
-    depends_on:
-      - influxdb-retriever
-    environment:
-      KEYCLOAKMICROSERVICESIDECAR_PROXY_PORT: "8000"
-      KEYCLOAKMICROSERVICESIDECAR_SERVER_URL: http://influxdb-retriever:4000
-      KEYCLOAKMICROSERVICESIDECAR_PROXY_FAKETOKEN_GENERATE: 'true'
-
   ## Cron
   cron:
-    image: dojot/cron:dev
+    image: dojot/cron:${DOJOT_VERSION}
     restart: always
     environment:
       CRON_KEYCLOAK_URI: "http://keycloak:8080"
@@ -1038,11 +1028,6 @@ services:
       - mongodb
     <<: *loki-logging
     <<: *dojot-networking
-
-  api-mock:
-    image: dojot/api-temp:dev
-    ports:
-      - "5002:5000"
 
 volumes:
   ejbca-volume:
