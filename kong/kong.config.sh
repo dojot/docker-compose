@@ -3,7 +3,6 @@ kong="http://apigw:8001"
 dojot_domain_name=${DOJOT_DOMAIN_NAME:-localhost}
 route_allow_only_https=${DOJOT_KONG_ROUTE_ALLOW_ONLY_HTTPS:-false}
 
-
 route_allow_protocol='"http","https"'
 
 if [ "$route_allow_only_https" = "true" ]; then
@@ -95,9 +94,7 @@ createService "${1}" "${2}"
 createRoute "${1}" "${1}_route" "${3}" "${4}"
 }
 
-
 # service: letsencrypt-nginx
-
 curl  -sS -X PUT \
 --url ${kong}/services/letsencrypt-nginx \
 --data "name=letsencrypt-nginx" \
@@ -108,57 +105,20 @@ curl  -sS -X PUT \
 --data "paths=/.well-known/acme-challenge" \
 --data "strip_path=false"
 
-# service: gui
-
-# createEndpoint "gui" "http://gui:80"  '"/"' "false"
-
 # service: gui-v2
-
 createEndpoint "gui-v2" "http://gui-v2:80"  '"/v2"' "true"
 
-# service: data-broker
-
-createEndpoint  "data-broker" "http://data-broker:80"  '"/device/(.*)/latest", "/subscription"' "false"
-addAuthToEndpoint "data-broker"
-
-createEndpoint "data-broker-streams" "http://data-broker:80"  '"/stream"' "true"
-addAuthToEndpoint "data-broker-streams"
-
-createEndpoint "ws-http" "http://data-broker:80"  '"/socket.io"' "false"
-
 # service: device-manager
-
 createEndpoint "device-manager-template" "http://device-manager-sidecar:5000"  '"/template"' "false"
 addAuthToEndpoint "device-manager-template"
 
 createEndpoint "device-manager-devices" "http://device-manager-sidecar:5000"  '"/device"' "false"
 addAuthToEndpoint "device-manager-devices"
 
-# service: image-manager
-
-createEndpoint "image" "http://image-manager:5000"  '"/fw-image"' "true"
-addAuthToEndpoint "image"
-
 # service: keycloak
-
 createEndpoint "keycloak" "http://keycloak:8080/auth"  '"/auth"' "true"
 
-# service: flowbroker
-
-createEndpoint "flows" "http://flowbroker:80"  '"/flows"' "true"
-addAuthToEndpoint "flows"
-
-createEndpoint "flowsIcons" "http://flowbroker:80/icons"  '"/flows/icons"' "true"
-
-createEndpoint "flowsRedImages" "http://flowbroker:80/red/images"  '"/flows/red/images"' "true"
-
-# service: history
-
-createEndpoint "history" "http://history:8000"  '"/history"' "true"
-addAuthToEndpoint "history"
-
 # service: data-manager
-
 createEndpoint "data-manager-import" "http://data-manager:3000/"  '"/import"' "false"
 addAuthToEndpoint "data-manager-import"
 
@@ -166,11 +126,9 @@ createEndpoint "data-manager-export" "http://data-manager:3000/"  '"/export"' "f
 addAuthToEndpoint "data-manager-export"
 
 # service: backstage
-
 createEndpoint "backstage" "http://backstage:3005"  '"/backstage"' "false"
 
 # service: cron
-
 createEndpoint "cron" "http://cron:5000/"  '"/cron"' "false"
 addAuthToEndpoint "cron"
 
@@ -179,12 +137,19 @@ createEndpoint "x509-identity-mgmt" "http://x509-identity-mgmt:3000/api"  '"/x50
 addAuthToEndpoint "x509-identity-mgmt"
 
 # service: influx-retriever
-createEndpoint "influxdb-retriever" "http://influxdb-retriever:3000/tss"  '"/tss"' "true"
+createEndpoint "influxdb-retriever" "http://influxdb-retriever:4000/tss"  '"/tss"' "true"
 addAuthToEndpoint "influxdb-retriever"
-createEndpoint "influxdb-retriever-api-docs" "http://influxdb-retriever:3000/tss/v1/api-docs"  '"/tss/v1/api-docs"' "true"
+
+createEndpoint "influxdb-retriever-api-docs" "http://influxdb-retriever:4000/tss/v1/api-docs"  '"/tss/v1/api-docs"' "true"
 
 # service: kafka-ws
 createEndpoint "kafka-ws" "http://kafka-ws:8080/"  '"/kafka-ws"' "false"
+
+# service: file-mgmt
+createEndpoint "file-mgmt" "http://file-mgmt:7000"  '"/file-mgmt"' "true"
+addAuthToEndpoint "file-mgmt"
+
+createEndpoint "minio-files" "http://minio-files:9000"  '"/minio-files"' "true"
 
 echo ""
 echo ""
@@ -198,10 +163,6 @@ curl -sS -X PATCH \
 
 createEndpoint "kafka-ws-ticket" "http://kafka-ws:8080/"  '"/kafka-ws/v[0-9]+/ticket"' "false"
 addAuthToEndpoint "kafka-ws-ticket"
-
-# service: file-mgmt
-createEndpoint "file-mgmt" "http://file-mgmt:7000"  '"/file-mgmt"' "true"
-addAuthToEndpoint "file-mgmt"
 
 echo ""
 echo ""

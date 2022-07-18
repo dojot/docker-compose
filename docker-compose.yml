@@ -117,8 +117,6 @@ services:
       postgres:
         condition: service_healthy
     restart: always
-    ports:
-      - "8080:8080"
     volumes:
       - ./keycloak/customRealmRepresentation.json:/opt/dojot/customRealmRepresentation.json:Z
       - ./secrets:/secrets
@@ -197,7 +195,7 @@ services:
       - ./secrets:/secrets
   
   device-manager:
-    image: dojot/device-manager:development
+    image: dojot/device-manager:${DOJOT_VERSION}
     restart: always
     environment:
       # TODO: Fill these env variables with suitable values
@@ -262,8 +260,6 @@ services:
     image: dojot/mongo:3.2
     restart: always
     user: "mongodb"
-    ports:
-      - 27017:27017
     healthcheck:
       test: echo 'db.runCommand("ping").ok' | mongo mongodb:27017/test --quiet
       interval: 10s
@@ -381,15 +377,19 @@ services:
   basic-auth:
     image: dojot/device-basic-authentication:${DOJOT_VERSION}
     restart: always
+    ports:
+      - "3002:3000"
+      - "9229:9229"
     depends_on:
       - kafka
       - mongodb
-      - device-manager
+      - device-manager    
     environment:
       BASIC_AUTH_LOG_CONSOLE_LEVEL: 'debug'
       BASIC_AUTH_LOG_VERBOSE: "true"
       BASIC_AUTH_PRODUCER_METADATA_BROKER_LIST: kafka:9092
       BASIC_AUTH_URL_DEVICE: "http://device-manager-sidecar:5000/device"
+      BASIC_AUTH_URL_DEVICES: "http://device-manager-sidecar:5000/device"
     volumes:
       - ./secrets:/secrets
     logging:
@@ -465,7 +465,7 @@ services:
       KONG_PG_DATABASE: kong
       KONG_PROXY_LISTEN: 0.0.0.0:${DOJOT_HTTP_PORT:-8000}, 0.0.0.0:${DOJOT_HTTPS_PORT:-8443} ssl
       KONG_PG_PASSWORD: kong
-      KONG_LOG_LEVEL: info
+      KONG_LOG_LEVEL: debug
       # To enable HTTPs external, it is necessary to configure public certificates
       # issued by a public CA, such as lets encrypt in KONG_SSL_CERT.
       KONG_SSL_CERT: ${KONG_SSL_CERT:-}
@@ -721,8 +721,6 @@ services:
 
   iotagent-mqtt-keycloak-sidecar:
     image: dojot/keycloak-microservice-sidecar:${DOJOT_VERSION}
-    ports:
-      - "3003:3000"
     environment:
       KEYCLOAKMICROSERVICESIDECAR_LOGGER_CONSOLE_LEVEL: "debug"
       KEYCLOAKMICROSERVICESIDECAR_SERVER_URL: 'http://certificate-acl:3000'
@@ -734,7 +732,6 @@ services:
       KEYCLOAKMICROSERVICESIDECAR_CONSUMER_GROUP_ID: dojot-iotagent-mqtt-sidecar
       KEYCLOAKMICROSERVICESIDECAR_PROXY_AUTH_MODE: "legacy"
       KEYCLOAKMICROSERVICESIDECAR_PROXY_TOKEN_INSERT: "keycloak"
-
     volumes:
       - ./secrets:/secrets
     
@@ -794,7 +791,7 @@ services:
   v2k-bridge-cert-sidecar:
     image: dojot/cert-sidecar:${DOJOT_VERSION}
     depends_on:
-      - x509-identity-mgmt     
+      - x509-identity-mgmt
     environment:
       CERT_SC_APP_SIDECAR_TO: 'v2k-bridge'
       CERT_SC_LOG_CONSOLE_LEVEL: 'info'
@@ -916,7 +913,7 @@ services:
       FILEMGMT_KEYCLOAK_URL: "http://keycloak:8080"
       FILEMGMT_KEYCLOAK_CLIENT_ID: "dojot-file-mgmt"
       FILEMGMT_KEYCLOAK_CLIENT_SECRET_FILE: "dojot-file-mgmt"
-      FILEMGMT_LOGGER_CONSOLE_LEVEL: "debug"
+      FILEMGMT_LOG_CONSOLE_LEVEL: "debug"
     secrets:
       - MINIO_SECRET_KEY
       - MINIO_ACCESS_KEY
@@ -940,10 +937,8 @@ services:
       - influxdb
       - keycloak
       - keycloak-proxy
-    ports:
-      - "4000:4000"
     environment:
-      RETRIEVER_LOG_CONSOLE_LEVEL: "info"
+      RETRIEVER_LOG_CONSOLE_LEVEL: "debug"
       RETRIEVER_KEYCLOAK_URI: "http://keycloak:8080"
       RETRIEVER_KEYCLOAK_CLIENT_ID: "dojot-influxdb-retriever"
       RETRIEVER_KEYCLOAK_CLIENT_SECRET_FILE: "dojot-influxdb-retriever"
@@ -1001,8 +996,6 @@ services:
       - influxdb-volume:/root/.influxdbv2
     healthcheck:
       test: "influx ping"
-    ports:
-      - "8086:8086"
     logging:
       driver: json-file
       options:
@@ -1014,20 +1007,28 @@ services:
     image: dojot/cron:${DOJOT_VERSION}
     restart: always
     environment:
-      CRON_KEYCLOAK_URI: "http://keycloak:8080"
+      CRON_KEYCLOAK_URL: "http://keycloak:8080"
       CRON_KEYCLOAK_CLIENT_ID: "dojot-cron"
       CRON_KEYCLOAK_CLIENT_SECRET_FILE: "dojot-cron"
       CRON_LOGGER_CONSOLE_LEVEL: "debug"
     volumes:
       - ./secrets:/secrets
-    ports:
-      - "5000:5000"
-      - "9229:9229"
     depends_on:
       - kafka
       - mongodb
     <<: *loki-logging
     <<: *dojot-networking
+
+  data-manager:
+    image: dojot/data-manager:development
+    restart: always
+    depends_on:
+      - device-manager-sidecar
+    <<: *loki-logging
+    <<: *dojot-networking
+    profiles:
+      - "import-export-configuration"
+      - "complete"
 
 volumes:
   ejbca-volume:

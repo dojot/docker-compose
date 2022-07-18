@@ -996,6 +996,31 @@
                         "scopes": [
                             {
                                 "name": "view"
+                            },
+                            {
+                                "name": "create"
+                            }
+                        ]
+                    },
+                    {
+                        "name": "file-mgmt",
+                        "ownerManagedAccess": true,
+                        "displayName": "file-mgmt: /file-mgmt",
+                        "attributes": {},
+                        "_id": "1c5c0182-c28e-4884-953d-7d6eb60acd5a",
+                        "uris": [],
+                        "scopes": [
+                            {
+                                "name": "create"
+                            },
+                            {
+                                "name": "view"
+                            },
+                            {
+                                "name": "update"
+                            },
+                            {
+                                "name": "delete"
                             }
                         ]
                     },
@@ -1268,7 +1293,7 @@
                         "decisionStrategy": "UNANIMOUS",
                         "config": {
                             "resources": "[\"influxdb-retriever\"]",
-                            "scopes": "[\"view\"]",
+                            "scopes": "[\"view\", \"create\"]",
                             "applyPolicies": "[\"Should be user\"]"
                         }
                     },
@@ -1400,6 +1425,18 @@
                         "decisionStrategy": "UNANIMOUS",
                         "config": {
                             "resources": "[\"device-manager-devices\"]",
+                            "scopes": "[\"update\",\"create\",\"delete\",\"view\"]",
+                            "applyPolicies": "[\"Should be user\"]"
+                        }
+                    },
+                    {
+                        "id": "8d56adaf-b8b9-4ae6-8e58-ea4c5ac75307",
+                        "name": "Full access in File-Mgmt - /file-mgmt",
+                        "type": "scope",
+                        "logic": "POSITIVE",
+                        "decisionStrategy": "UNANIMOUS",
+                        "config": {
+                            "resources": "[\"file-mgmt\"]",
                             "scopes": "[\"update\",\"create\",\"delete\",\"view\"]",
                             "applyPolicies": "[\"Should be user\"]"
                         }
@@ -1564,7 +1601,7 @@
             "implicitFlowEnabled": false,
             "directAccessGrantsEnabled": true,
             "serviceAccountsEnabled": true,
-            "authorizationServicesEnabled": true,
+            "authorizationServicesEnabled": false,
             "publicClient": false,
             "frontchannelLogout": false,
             "protocol": "openid-connect",
