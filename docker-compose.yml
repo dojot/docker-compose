@@ -117,8 +117,6 @@ services:
       postgres:
         condition: service_healthy
     restart: always
-    ports:
-      - "8080:8080"
     volumes:
       - ./keycloak/customRealmRepresentation.json:/opt/dojot/customRealmRepresentation.json:Z
       - ./secrets:/secrets
@@ -197,7 +195,7 @@ services:
       - ./secrets:/secrets
   
   device-manager:
-    image: dojot/device-manager:development
+    image: dojot/device-manager:${DOJOT_VERSION}
     restart: always
     environment:
       # TODO: Fill these env variables with suitable values
@@ -262,8 +260,6 @@ services:
     image: dojot/mongo:3.2
     restart: always
     user: "mongodb"
-    ports:
-      - 27017:27017
     healthcheck:
       test: echo 'db.runCommand("ping").ok' | mongo mongodb:27017/test --quiet
       interval: 10s
@@ -323,7 +319,7 @@ services:
     restart: always
     environment:
       NODE_ENV: production
-      X509IDMGMT_LOGGER_CONSOLE_LEVEL: debug
+      X509IDMGMT_LOGGER_CONSOLE_LEVEL: info
       X509IDMGMT_CERTIFICATE_BELONGSTO_APPLICATION: '["iotagent-mqtt", "v2k-bridge", "k2v-bridge", "http-agent"]'
       X509IDMGMT_MONGO_CONN_URI: "mongodb://mongodb:27017/x509-identity-mgmt"
       X509IDMGMT_EJBCA_HEALTHCHECK_URL: "http://x509-ejbca:8080/ejbca/publicweb/healthcheck/ejbcahealth"
@@ -363,7 +359,7 @@ services:
   certificate-acl:
     image: dojot/certificate-acl:${DOJOT_VERSION}
     environment:
-      CERTIFICATE_ACL_LOGGER_CONSOLE_LEVEL: "debug"
+      CERTIFICATE_ACL_LOGGER_CONSOLE_LEVEL: "info"
       CERTIFICATE_ACL_KEYCLOAK_CLIENT_SECRET_FILE: "dojot-certificate-acl"
       CERTIFICATE_ACL_KEYCLOAK_URL: "http://keycloak:8080"
     volumes:
@@ -381,15 +377,18 @@ services:
   basic-auth:
     image: dojot/device-basic-authentication:${DOJOT_VERSION}
     restart: always
+    ports:
+      - "3002:3000"
     depends_on:
       - kafka
       - mongodb
-      - device-manager
+      - device-manager    
     environment:
-      BASIC_AUTH_LOG_CONSOLE_LEVEL: 'debug'
+      BASIC_AUTH_LOG_CONSOLE_LEVEL: 'info'
       BASIC_AUTH_LOG_VERBOSE: "true"
       BASIC_AUTH_PRODUCER_METADATA_BROKER_LIST: kafka:9092
       BASIC_AUTH_URL_DEVICE: "http://device-manager-sidecar:5000/device"
+      BASIC_AUTH_URL_DEVICES: "http://device-manager-sidecar:5000/device"
     volumes:
       - ./secrets:/secrets
     logging:
@@ -610,17 +609,7 @@ services:
       BS_KEYCLOAK_SSL_CA: ${KONG_SSL_CERT_CA:-}
       BS_PROXY_TARGET: ${DOJOT_URL:-http://apigw:8000}
       BS_PROXY_SECURE: ${DOJOT_BACKSTAGE_PROXY_SECURE:-false}
-
-  gui-nx:
-    image: dojot/gui-nx:${DOJOT_VERSION} 
-    depends_on:
-      - backstage
-    restart: always
-    logging:
-      driver: json-file
-      options:
-        max-size: 20m
-        max-file: '5'
+      BS_USE_INFLUXDB: "true"
 
   ## IoT-Agent
   http-agent-redis:
@@ -643,7 +632,7 @@ services:
       - x509-identity-mgmt
     environment:
       CERT_SC_APP_SIDECAR_TO: 'http-agent'
-      CERT_SC_LOG_CONSOLE_LEVEL: 'debug'
+      CERT_SC_LOG_CONSOLE_LEVEL: 'info'
       CERT_SC_CERTS_HOSTNAMES: '["http-agent", "${DOJOT_DOMAIN_NAME:-localhost}"]'
       HOSTNAME: http-agent
       CERT_SC_CERTS_FILES_BASEPATH: /certs
@@ -674,13 +663,13 @@ services:
       - 3001:3001
     environment:
       HTTP_AGENT_HTTPS_CERT: '/certs/http-agent.crt'
-      HTTP_AGENT_SECURITY_AUTHORIZATION_MODE: 'basic-auth'
       HTTP_AGENT_HTTPS_KEY: '/certs/http-agent.key'
       HTTP_AGENT_HTTPS_CA: '/certs/cabundle.crt'
       HTTP_AGENT_SECURITY_CRL: '/certs/ca.crl'
       HTTP_AGENT_SECURITY_CERT_DIRECTORY: '/certs'
-      HTTP_AGENT_LOG_CONSOLE_LEVEL: 'debug'
+      HTTP_AGENT_LOG_CONSOLE_LEVEL: 'info'
       HTTP_AGENT_SECURITY_UNSECURE_MODE: 'true' 
+      HTTP_AGENT_SECURITY_AUTHORIZATION_MODE: 'basic-auth'
     volumes:
       - http-agent-cert-sidecar-volume:/certs
       - ./secrets:/secrets
@@ -721,10 +710,8 @@ services:
 
   iotagent-mqtt-keycloak-sidecar:
     image: dojot/keycloak-microservice-sidecar:${DOJOT_VERSION}
-    ports:
-      - "3003:3000"
     environment:
-      KEYCLOAKMICROSERVICESIDECAR_LOGGER_CONSOLE_LEVEL: "debug"
+      KEYCLOAKMICROSERVICESIDECAR_LOGGER_CONSOLE_LEVEL: "info"
       KEYCLOAKMICROSERVICESIDECAR_SERVER_URL: 'http://certificate-acl:3000'
       KEYCLOAKMICROSERVICESIDECAR_PROXY_PORT: "3000"
       KEYCLOAKMICROSERVICESIDECAR_KEYCLOAK_URL: http://keycloak:8080
@@ -734,7 +721,6 @@ services:
       KEYCLOAKMICROSERVICESIDECAR_CONSUMER_GROUP_ID: dojot-iotagent-mqtt-sidecar
       KEYCLOAKMICROSERVICESIDECAR_PROXY_AUTH_MODE: "legacy"
       KEYCLOAKMICROSERVICESIDECAR_PROXY_TOKEN_INSERT: "keycloak"
-
     volumes:
       - ./secrets:/secrets
     
@@ -794,7 +780,7 @@ services:
   v2k-bridge-cert-sidecar:
     image: dojot/cert-sidecar:${DOJOT_VERSION}
     depends_on:
-      - x509-identity-mgmt     
+      - x509-identity-mgmt
     environment:
       CERT_SC_APP_SIDECAR_TO: 'v2k-bridge'
       CERT_SC_LOG_CONSOLE_LEVEL: 'info'
@@ -916,7 +902,7 @@ services:
       FILEMGMT_KEYCLOAK_URL: "http://keycloak:8080"
       FILEMGMT_KEYCLOAK_CLIENT_ID: "dojot-file-mgmt"
       FILEMGMT_KEYCLOAK_CLIENT_SECRET_FILE: "dojot-file-mgmt"
-      FILEMGMT_LOGGER_CONSOLE_LEVEL: "debug"
+      FILEMGMT_LOG_CONSOLE_LEVEL: "info"
     secrets:
       - MINIO_SECRET_KEY
       - MINIO_ACCESS_KEY
@@ -940,14 +926,13 @@ services:
       - influxdb
       - keycloak
       - keycloak-proxy
-    ports:
-      - "4000:4000"
     environment:
       RETRIEVER_LOG_CONSOLE_LEVEL: "info"
       RETRIEVER_KEYCLOAK_URI: "http://keycloak:8080"
       RETRIEVER_KEYCLOAK_CLIENT_ID: "dojot-influxdb-retriever"
       RETRIEVER_KEYCLOAK_CLIENT_SECRET_FILE: "dojot-influxdb-retriever"
       RETRIEVER_SYNC_DEVICES: "http://device-manager-sidecar:5000/device"
+      RETRIEVER_SYNC_CRON_EXPRESSION: "*/5 * * * *"
     restart: always
     volumes:
       - ./secrets:/secrets
@@ -963,7 +948,7 @@ services:
       - kafka
       - influxdb
     environment:
-      STORER_LOG_CONSOLE_LEVEL: "debug"
+      STORER_LOG_CONSOLE_LEVEL: "info"
       STORER_INFLUX_RETENTION_HRS: 168 # used only for new created tenant after default
     restart: always
     logging:
@@ -1001,48 +986,117 @@ services:
       - influxdb-volume:/root/.influxdbv2
     healthcheck:
       test: "influx ping"
-    ports:
-      - "8086:8086"
     logging:
       driver: json-file
       options:
         max-size: 20m
         max-file: '5'
 
-  history:
-    image: dojot/history-sidecar:temp
-    restart: always
-    depends_on:
-      - influxdb-retriever
-    environment:
-      KEYCLOAKMICROSERVICESIDECAR_PROXY_PORT: "8000"
-      KEYCLOAKMICROSERVICESIDECAR_SERVER_URL: http://influxdb-retriever:4000
-      KEYCLOAKMICROSERVICESIDECAR_PROXY_FAKETOKEN_GENERATE: 'true'
-
   ## Cron
   cron:
-    image: dojot/cron:dev
+    image: dojot/cron:${DOJOT_VERSION}
     restart: always
     environment:
-      CRON_KEYCLOAK_URI: "http://keycloak:8080"
+      CRON_KEYCLOAK_URL: "http://keycloak:8080"
       CRON_KEYCLOAK_CLIENT_ID: "dojot-cron"
       CRON_KEYCLOAK_CLIENT_SECRET_FILE: "dojot-cron"
-      CRON_LOGGER_CONSOLE_LEVEL: "debug"
+      CRON_LOGGER_CONSOLE_LEVEL: "info"
     volumes:
       - ./secrets:/secrets
-    ports:
-      - "5000:5000"
-      - "9229:9229"
     depends_on:
       - kafka
       - mongodb
     <<: *loki-logging
     <<: *dojot-networking
 
-  api-mock:
-    image: dojot/api-temp:dev
-    ports:
-      - "5002:5000"
+  data-manager:
+    image: dojot/data-manager:development
+    restart: always
+    depends_on:
+      - device-manager-sidecar
+    <<: *loki-logging
+    <<: *dojot-networking
+    profiles:
+      - "import-export-configuration"
+      - "complete"
+
+  # GUI NX MFE
+  container-nx:
+    image: dojot/container-nx:${DOJOT_VERSION}
+    depends_on:
+      - backstage
+    restart: always
+    logging:
+      driver: json-file
+      options:
+        max-size: 20m
+        max-file: '5'
+
+  common-nx:
+    image: dojot/common-nx:${DOJOT_VERSION}
+    depends_on:
+      - backstage
+    restart: always
+    logging:
+      driver: json-file
+      options:
+        max-size: 20m
+        max-file: '5'
+
+  home-nx:
+    image: dojot/home-nx:${DOJOT_VERSION}
+    depends_on:
+      - backstage
+    restart: always
+    logging:
+      driver: json-file
+      options:
+        max-size: 20m
+        max-file: '5'
+
+  dashboard-nx:
+    image: dojot/dashboard-nx:${DOJOT_VERSION}
+    depends_on:
+      - backstage
+    restart: always
+    logging:
+      driver: json-file
+      options:
+        max-size: 20m
+        max-file: '5'
+
+  devices-nx:
+    image: dojot/devices-nx:${DOJOT_VERSION}
+    depends_on:
+      - backstage
+    restart: always
+    logging:
+      driver: json-file
+      options:
+        max-size: 20m
+        max-file: '5'
+
+  templates-nx:
+    image: dojot/templates-nx:${DOJOT_VERSION}
+    depends_on:
+      - backstage
+    restart: always
+    logging:
+      driver: json-file
+      options:
+        max-size: 20m
+        max-file: '5'
+
+  security-nx:
+    image: dojot/security-nx:${DOJOT_VERSION}
+    depends_on:
+      - backstage
+    restart: always
+    logging:
+      driver: json-file
+      options:
+        max-size: 20m
+        max-file: '5'
 
 volumes:
   ejbca-volume:
