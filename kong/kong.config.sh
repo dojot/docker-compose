@@ -105,9 +105,6 @@ curl  -sS -X PUT \
 --data "paths=/.well-known/acme-challenge" \
 --data "strip_path=false"
 
-# service: gui-v2
-createEndpoint "gui-v2" "http://gui-v2:80"  '"/v2"' "true"
-
 # service: device-manager
 createEndpoint "device-manager-template" "http://device-manager-sidecar:5000"  '"/template"' "false"
 addAuthToEndpoint "device-manager-template"
@@ -150,6 +147,14 @@ createEndpoint "file-mgmt" "http://file-mgmt:7000"  '"/file-mgmt"' "true"
 addAuthToEndpoint "file-mgmt"
 
 createEndpoint "minio-files" "http://minio-files:9000"  '"/minio-files"' "true"
+
+createEndpoint "container-nx" "http://container-nx:80" '"/v2"' "true"
+createEndpoint "common-nx" "http://common-nx:80" '"/mfe/common"' "true"
+createEndpoint "home-nx" "http://home-nx:80" '"/mfe/home"' "true"
+createEndpoint "dashboard-nx" "http://dashboard-nx:80" '"/mfe/dashboard"' "true"
+createEndpoint "devices-nx" "http://devices-nx:80" '"/mfe/devices"' "true"
+createEndpoint "templates-nx" "http://templates-nx:80" '"/mfe/templates"' "true"
+createEndpoint "security-nx" "http://security-nx:80" '"/mfe/security"' "true"
 
 echo ""
 echo ""
