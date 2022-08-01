@@ -204,3 +204,7 @@ curl  -s  -sS -X POST \
     --data "config.header_name=X-Request-Id" \
     --data "config.generator=uuid" \
     --data "config.echo_downstream=false"
+
+# service: basic-auth
+createEndpoint  "basic-auth" "http://basic-auth:3000" '"/basic-auth/v1/devices/(.*)/basic-credentials"' "false"
+addAuthToEndpoint "basic-auth"
