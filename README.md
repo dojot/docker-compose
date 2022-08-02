@@ -9,7 +9,7 @@ This repository contains the necessary configuration files for quick deployment 
 ### Requirements
 
 * Docker Engine >= 19.03 (Installation [here](https://docs.docker.com/engine/install/))
-* Docker Compose >= 1.27 (Installation [here](https://docs.docker.com/compose/install/))
+* Docker Compose >= 1.28 (Installation [here](https://docs.docker.com/compose/install/))
 > __Note__: All tests were performed with Docker CE on Ubuntu [18.04](https://releases.ubuntu.com/18.04/) and [20.04](https://releases.ubuntu.com/20.04/).
 
 
