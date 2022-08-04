@@ -208,3 +208,6 @@ curl  -s  -sS -X POST \
 # service: basic-auth
 createEndpoint  "basic-auth" "http://basic-auth:3000" '"/basic-auth/v1/devices/(.*)/basic-credentials"' "false"
 addAuthToEndpoint "basic-auth"
+
+# service: http-agent
+createEndpoint "http-agent" "http://http-agent:3001"  '"/http-agent/v1/unsecure/incoming-messages(.*)"' "false"
