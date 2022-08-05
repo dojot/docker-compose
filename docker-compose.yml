@@ -899,8 +899,6 @@ services:
       CERT_SC_CERTS_FILES_CERT: k2v-bridge.crt
       CERT_SC_CERTS_FILES_KEY: k2v-bridge.key     
     restart: always
-    # <<: *loki-logging
-    # <<: *dojot-networking
     <<: *loki-logging
     <<: *dojot-networking
     profiles:
@@ -910,7 +908,7 @@ services:
 
   ## file storage
   minio-files:
-    image: minio/minio:RELEASE.2021-11-09T03-21-45Z
+    image: minio/minio:RELEASE.2021-11-09T03-21-45Zs
     restart: always
     hostname: minio-files
     command: server /data --console-address ":9001"
