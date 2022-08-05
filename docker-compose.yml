@@ -338,7 +338,6 @@ services:
     <<: *dojot-networking
     profiles:
       - "x509"
-      - "basic-http"
       - "basic-mqtt"
       - "complete"
 
@@ -374,7 +373,6 @@ services:
     <<: *dojot-networking
     profiles:
       - "x509"
-      - "basic-http"
       - "basic-mqtt"
       - "complete"
 
