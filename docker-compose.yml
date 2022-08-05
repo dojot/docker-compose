@@ -247,24 +247,6 @@ services:
       - "basic-mqtt"
       - "complete"
   
-  device-manager-redis:
-    image: dojot/redis:5.0.5-alpine3.10
-    restart: always
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 1s
-      timeout: 3s
-      retries: 30
-    volumes:
-      - device-manager-redis-volume:/data
-    <<: *loki-logging
-    <<: *dojot-networking
-    profiles:
-      - "device-manager"
-      - "basic-http"
-      - "basic-mqtt"
-      - "complete"
-
   device-manager-sidecar:
     image: dojot/keycloak-microservice-sidecar:${DOJOT_VERSION}
     restart: always
@@ -284,6 +266,13 @@ services:
       KEYCLOAKMICROSERVICESIDECAR_PROXY_TOKEN_INSERT: "legacy"
     volumes:
       - ./secrets:/secrets
+    <<: *loki-logging
+    <<: *dojot-networking
+    profiles:
+      - "device-manager"
+      - "basic-http"
+      - "basic-mqtt"
+      - "complete"
 
   mongodb:
     image: dojot/mongo:3.2
@@ -922,7 +911,7 @@ services:
     <<: *loki-logging
     <<: *dojot-networking
     profiles:
-      - "v2k-bridge"
+      - "k2v-bridge"
       - "basic-mqtt"
       - "complete"
 
