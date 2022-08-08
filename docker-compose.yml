@@ -235,7 +235,6 @@ services:
       - postgres
       - kafka
       - data-broker
-      - device-manager-redis
     depends_on:
       postgres:
         condition: service_healthy
@@ -1220,7 +1219,6 @@ volumes:
   # flowbroker-volume:
   # flowbroker-redis-volume:
   data-broker-redis-volume:
-  device-manager-redis-volume:
   kafka-ws-redis-volume:
   backstage-redis-volume:
   influxdb-volume:
