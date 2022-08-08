@@ -265,6 +265,11 @@ services:
       KEYCLOAKMICROSERVICESIDECAR_PROXY_TOKEN_INSERT: "legacy"
     volumes:
       - ./secrets:/secrets
+    profiles:
+      - "device-manager"
+      - "basic-http"
+      - "basic-mqtt"
+      - "complete"
 
   mongodb:
     image: dojot/mongo:3.2
@@ -1077,7 +1082,7 @@ services:
       - mongodb
     <<: *loki-logging
     <<: *dojot-networking
-   profiles:
+    profiles:
       - "cron"
       - "complete"
 
