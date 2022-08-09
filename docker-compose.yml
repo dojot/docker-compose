@@ -25,6 +25,13 @@ services:
     volumes:
       - ./keycloak/customRealmRepresentation.json:/opt/dojot/customRealmRepresentation.json:Z
       - ./secrets:/secrets
+    <<: *loki-logging
+    <<: *dojot-networking
+    profiles:
+      - "create-secrets"
+      - "basic-http"
+      - "basic-mqtt"
+      - "complete"
 
   zookeeper:
     image: "confluentinc/cp-zookeeper:5.5.0"
@@ -55,6 +62,11 @@ services:
       - zookeeper-secrets-volume:/etc/zookeeper/secrets
     <<: *loki-logging
     <<: *dojot-networking
+    profiles:
+      - "zookeeper"
+      - "basic-http"
+      - "basic-mqtt"
+      - "complete"
 
 
   kafka:
@@ -81,6 +93,11 @@ services:
       - kafka-secrets-volume:/etc/kafka/secrets
     <<: *loki-logging
     <<: *dojot-networking
+    profiles:
+      - "kafka"
+      - "basic-http"
+      - "basic-mqtt"
+      - "complete"
 
   postgres:
     image: dojot/postgres:9.5.21-alpine
@@ -97,11 +114,14 @@ services:
     volumes:
       - ./postgres/init-db.sh:/docker-entrypoint-initdb.d/init-db.sh:Z
       - postgres-volume:/var/lib/postgresql/data
-    logging:
-      driver: json-file
-      options:
-        max-size: 20m
-        max-file: '5'
+    <<: *loki-logging
+    <<: *dojot-networking
+    profiles:
+      - "postgres"
+      - "basic-http"
+      - "basic-mqtt"
+      - "complete"
+
 
   keycloak:
     image: dojot/keycloak:${DOJOT_VERSION}
@@ -149,11 +169,13 @@ services:
       interval: 10s
       timeout: 10s
       retries: 5
-    logging:
-      driver: json-file
-      options:
-        max-size: 20m
-        max-file: '5'
+    <<: *loki-logging
+    <<: *dojot-networking
+    profiles:
+      - "keycloak"
+      - "basic-http"
+      - "basic-mqtt"
+      - "complete"
 
   keycloak-init:
     image: dojot/docker5gmedia-appropriate-curl-jq
@@ -167,11 +189,13 @@ services:
     volumes:
       - ./keycloak/keycloak.config.sh:/opt/keycloak.config.sh:Z
       - ./secrets:/secrets
-    logging:
-      driver: json-file
-      options:
-        max-size: 20m
-        max-file: '5'
+    <<: *loki-logging
+    <<: *dojot-networking
+    profiles:
+      - "keycloak"
+      - "basic-http"
+      - "basic-mqtt"
+      - "complete"
 
   keycloak-proxy:
     image: dojot/keycloak-proxy:${DOJOT_VERSION}
@@ -187,6 +211,13 @@ services:
       KEYCLOAKPROXY_KEYCLOAK_PROXY_PASSWORD_FILE: ${KEYCLOAK_PROXY_USER_PASSWORD_FILE:-KEYCLOAK_PROXY_USER}
     volumes:
       - ./secrets:/secrets
+    <<: *loki-logging
+    <<: *dojot-networking
+    profiles:
+      - "keycloak"
+      - "basic-http"
+      - "basic-mqtt"
+      - "complete"
   
   device-manager:
     image: dojot/device-manager:${DOJOT_VERSION}
@@ -204,31 +235,16 @@ services:
       - postgres
       - kafka
       - data-broker
-      - device-manager-redis
     depends_on:
       postgres:
         condition: service_healthy
-    logging:
-      driver: json-file
-      options:
-        max-size: 20m
-        max-file: '5'
-  
-  device-manager-redis:
-    image: dojot/redis:5.0.5-alpine3.10
-    restart: always
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 1s
-      timeout: 3s
-      retries: 30
-    volumes:
-      - device-manager-redis-volume:/data
-    logging:
-      driver: json-file
-      options:
-        max-size: 20m
-        max-file: '5'
+    <<: *loki-logging
+    <<: *dojot-networking
+    profiles:
+      - "device-manager"
+      - "basic-http"
+      - "basic-mqtt"
+      - "complete"
 
   device-manager-sidecar:
     image: dojot/keycloak-microservice-sidecar:${DOJOT_VERSION}
@@ -249,6 +265,11 @@ services:
       KEYCLOAKMICROSERVICESIDECAR_PROXY_TOKEN_INSERT: "legacy"
     volumes:
       - ./secrets:/secrets
+    profiles:
+      - "device-manager"
+      - "basic-http"
+      - "basic-mqtt"
+      - "complete"
 
   mongodb:
     image: dojot/mongo:3.2
@@ -260,14 +281,16 @@ services:
       timeout: 10s
       retries: 5
       start_period: 40s
-    logging:
-      driver: json-file
-      options:
-        max-size: 20m
-        max-file: '5'
     volumes:
       - mongodb-volume:/data/db
       - mongodb-cfg-volume:/data/configdb
+    <<: *loki-logging
+    <<: *dojot-networking
+    profiles:
+      - "mongodb"
+      - "basic-http"
+      - "basic-mqtt"
+      - "complete"
 
   ## Security
   x509-ejbca: # this service cannot be called 'ejbca'
@@ -297,11 +320,12 @@ services:
     volumes:
       - "ejbca-volume:/mnt/persistent"
       - "ejbca-client-tls-volume:/opt/tls"
-    logging:
-      driver: json-file
-      options:
-        max-size: 20m
-        max-file: '5'
+    <<: *loki-logging
+    <<: *dojot-networking
+    profiles:
+      - "x509"
+      - "basic-mqtt"
+      - "complete"
 
   x509-identity-mgmt:
     image: dojot/x509-identity-mgmt:${DOJOT_VERSION} 
@@ -331,11 +355,13 @@ services:
     volumes:
       - "ejbca-client-tls-volume:/opt/tls"
       - ./secrets:/secrets
-    logging:
-      driver: json-file
-      options:
-        max-size: 20m
-        max-file: '5'
+    <<: *loki-logging
+    <<: *dojot-networking
+    profiles:
+      - "x509"
+      - "basic-mqtt"
+      - "complete"
+
 
   acl-redis:
     image: dojot/redis:6.0.4-alpine3.11
@@ -349,6 +375,10 @@ services:
       - acl-redis-volume:/data
     <<: *loki-logging
     <<: *dojot-networking
+    profiles:
+      - "certificate-acl"
+      - "basic-mqtt"
+      - "complete"
 
   certificate-acl:
     image: dojot/certificate-acl:${DOJOT_VERSION}
@@ -367,6 +397,10 @@ services:
     restart: always
     <<: *loki-logging
     <<: *dojot-networking
+    profiles:
+      - "certificate-acl"
+      - "basic-mqtt"
+      - "complete"
   
   basic-auth:
     image: dojot/device-basic-authentication:${DOJOT_VERSION}
@@ -385,11 +419,12 @@ services:
       BASIC_AUTH_URL_DEVICES: "http://device-manager-sidecar:5000/device"
     volumes:
       - ./secrets:/secrets
-    logging:
-      driver: json-file
-      options:
-        max-size: 20m
-        max-file: '5'
+    <<: *loki-logging
+    <<: *dojot-networking
+    profiles:
+      - "basic-auth"
+      - "basic-http"
+      - "complete"
 
   ## kong
   kong-migrations:
@@ -406,11 +441,13 @@ services:
       KONG_PG_DATABASE: kong
       KONG_LOG_LEVEL: info
     restart: on-failure
-    logging:
-      driver: json-file
-      options:
-        max-size: 20m
-        max-file: '5'
+    <<: *loki-logging
+    <<: *dojot-networking
+    profiles:
+      - "kong"
+      - "basic-http"
+      - "basic-mqtt"
+      - "complete"
 
   kong-migrations-up:
     image:  dojot/kong:feature-api-gateway-kong  #dojot/kong:${DOJOT_VERSION}
@@ -426,11 +463,13 @@ services:
       KONG_PG_DATABASE: kong
       KONG_LOG_LEVEL: info
     restart: on-failure
-    logging:
-      driver: json-file
-      options:
-        max-size: 20m
-        max-file: '5'
+    <<: *loki-logging
+    <<: *dojot-networking
+    profiles:
+      - "kong"
+      - "basic-http"
+      - "basic-mqtt"
+      - "complete"
 
   letsencrypt-nginx:
     depends_on:
@@ -441,6 +480,11 @@ services:
     volumes:
       - ./letsencrypt-nginx/nginx-challenge.conf:/etc/nginx/conf.d/default.conf
       - /dojot/letsencrypt-site:/usr/share/nginx/html
+    <<: *loki-logging
+    <<: *dojot-networking
+    profiles:
+      - "letsencrypt"
+      - "complete"
 
   apigw:
     image: dojot/kong:feature-api-gateway-kong  #dojot/kong:feature-api-gateway-kong  #dojot/kong:${DOJOT_VERSION}
@@ -494,6 +538,13 @@ services:
       - /dojot/etc/letsencrypt/:/dojot/etc/letsencrypt/:Z
       - ./certs/:/certs/:Z
       - ./ca/:/ca/:Z
+    <<: *loki-logging
+    <<: *dojot-networking
+    profiles:
+      - "kong"
+      - "basic-http"
+      - "basic-mqtt"
+      - "complete"
     restart: always
     ## ## **`Gateway-static-dojot_default-1`**
     ## This setting `extra_hosts` is to be used together with the static ip of the
@@ -504,11 +555,7 @@ services:
     ## should also be uncommented.
     # extra_hosts:
     #   - "${DOJOT_DOMAIN_NAME}:127.0.0.1"
-    logging:
-      driver: json-file
-      options:
-        max-size: 20m
-        max-file: '5'
+
 
   kong-config:
     image: dojot/appropriate-curl
@@ -521,11 +568,13 @@ services:
       - apigw
     volumes:
       - ./kong/kong.config.sh:/opt/kong.config.sh:Z
-    logging:
-      driver: json-file
-      options:
-        max-size: 20m
-        max-file: '5'
+    <<: *loki-logging
+    <<: *dojot-networking
+    profiles:
+      - "kong"
+      - "basic-http"
+      - "basic-mqtt"
+      - "complete"
 
   ##kafka-ws
   kafka-ws:
@@ -540,11 +589,12 @@ services:
       # The KAFKA_WS_TICKET_SECRET should be unique for each environment
       KAFKA_WS_TICKET_SECRET: fT5nAgHR9pkj0yYsBdc4p+PPq6ArjshcPdz0HA6W
     restart: always
-    logging:
-      driver: json-file
-      options:
-        max-size: 20m
-        max-file: '5'
+    <<: *loki-logging
+    <<: *dojot-networking
+    profiles:
+      - "kafka-ws"
+      - "complete"
+
 
   kafka-ws-redis:
     image: dojot/redis:6.0.4-alpine3.11
@@ -556,11 +606,11 @@ services:
       retries: 30
     volumes:
       - kafka-ws-redis-volume:/data
-    logging:
-      driver: json-file
-      options:
-        max-size: 20m
-        max-file: '5'
+    <<: *loki-logging
+    <<: *dojot-networking
+    profiles:
+      - "kafka"
+      - "complete"
 
   ## GUI
   backstage-redis:
@@ -573,10 +623,12 @@ services:
     restart: always
     volumes:
       - backstage-redis-volume:/data
-    logging:
-      driver: json-file
-      options:
-        max-size: 100m
+    <<: *loki-logging
+    <<: *dojot-networking
+    profiles:
+      - "backstage"
+      - "front-end"
+      - "complete"
 
   backstage:
     image: dojot/backstage:${DOJOT_VERSION}
@@ -588,6 +640,12 @@ services:
     volumes:
       - ./certs/:/certs/:Z
       - ./ca/:/ca/:Z
+    <<: *loki-logging
+    <<: *dojot-networking
+    profiles:
+      - "backstage"
+      - "front-end"
+      - "complete"
     environment:
       BS_SESSION_SECRET: XeQNTdxLl8UGiOpgyEvm
       BS_LOG_CONSOLE_LEVEL: 'info'
@@ -613,6 +671,9 @@ services:
       - http-agent-redis-volume:/data
     <<: *loki-logging
     <<: *dojot-networking
+    profiles:
+      - "http-agent-x509"
+      - "complete"
 
 
   http-agent-cert-sidecar:
@@ -635,11 +696,12 @@ services:
       - http-agent-cert-sidecar-volume:/certs
       - ./secrets:/secrets
     restart: always
-    logging:
-      driver: json-file
-      options:
-        max-size: 20m
-        max-file: '5'
+    <<: *loki-logging
+    <<: *dojot-networking
+    profiles:
+      - "http-agent-x509"
+      - "complete"
+
 
   http-agent:
     image: dojot/http-agent:${DOJOT_VERSION}
@@ -664,6 +726,9 @@ services:
       - ./secrets:/secrets
     <<: *loki-logging
     <<: *dojot-networking
+    profiles:
+      - "http-agent-x509"
+      - "complete"
 
 
   iotagent-mqtt:
@@ -686,11 +751,12 @@ services:
       - iotagent-mqtt-log-volume:/vernemq/log
       - iotagent-mqtt-etc-volume:/vernemq/etc
       - iotagent-mqtt-cert-side-volume:/vernemq/cert
-    logging:
-      driver: json-file
-      options:
-        max-size: 20m
-        max-file: '5'
+    <<: *loki-logging
+    <<: *dojot-networking
+    profiles:
+      - "iotagent-mqtt"
+      - "basic-mqtt"
+      - "complete"
 
   iotagent-mqtt-keycloak-sidecar:
     image: dojot/keycloak-microservice-sidecar:${DOJOT_VERSION}
@@ -707,6 +773,12 @@ services:
       KEYCLOAKMICROSERVICESIDECAR_PROXY_TOKEN_INSERT: "keycloak"
     volumes:
       - ./secrets:/secrets
+    <<: *loki-logging
+    <<: *dojot-networking
+    profiles:
+      - "iotagent-mqtt"
+      - "basic-mqtt"
+      - "complete"
     
   iotagent-mqtt-cert-sidecar:
     image: dojot/cert-sidecar:${DOJOT_VERSION}
@@ -731,11 +803,12 @@ services:
       - iotagent-mqtt-cert-side-volume:/vernemq/cert
       - ./secrets:/secrets
     restart: always
-    logging:
-      driver: json-file
-      options:
-        max-size: 20m
-        max-file: '5'
+    <<: *loki-logging
+    <<: *dojot-networking
+    profiles:
+      - "iotagent-mqtt"
+      - "basic-mqtt"
+      - "complete"
 
   v2k-bridge:
     image: dojot/v2k-bridge:${DOJOT_VERSION}
@@ -755,11 +828,12 @@ services:
     restart: always
     volumes:
       - v2k-bridge-cert-side-volume:/certs
-    logging:
-      driver: json-file
-      options:
-        max-size: 20m
-        max-file: '5'
+    <<: *loki-logging
+    <<: *dojot-networking
+    profiles:
+      - "v2k-bridge"
+      - "basic-mqtt"
+      - "complete"
 
   v2k-bridge-cert-sidecar:
     image: dojot/cert-sidecar:${DOJOT_VERSION}
@@ -779,11 +853,12 @@ services:
       - v2k-bridge-cert-side-volume:/certs
       - ./secrets:/secrets
     restart: always
-    logging:
-      driver: json-file
-      options:
-        max-size: 20m
-        max-file: '5'
+    <<: *loki-logging
+    <<: *dojot-networking
+    profiles:
+      - "v2k-bridge"
+      - "basic-mqtt"
+      - "complete"
 
   k2v-bridge:
     image: dojot/k2v-bridge:${DOJOT_VERSION}
@@ -803,11 +878,12 @@ services:
     restart: always
     volumes:
       - k2v-bridge-cert-side-volume:/certs
-    logging:
-      driver: json-file
-      options:
-        max-size: 20m
-        max-file: '5'
+    <<: *loki-logging
+    <<: *dojot-networking
+    profiles:
+      - "k2v-bridge"
+      - "basic-mqtt"
+      - "complete"
 
   k2v-bridge-cert-sidecar:
     image: dojot/cert-sidecar:${DOJOT_VERSION}
@@ -827,11 +903,12 @@ services:
       CERT_SC_CERTS_FILES_CERT: k2v-bridge.crt
       CERT_SC_CERTS_FILES_KEY: k2v-bridge.key     
     restart: always
-    logging:
-      driver: json-file
-      options:
-        max-size: 20m
-        max-file: '5'
+    <<: *loki-logging
+    <<: *dojot-networking
+    profiles:
+      - "k2v-bridge"
+      - "basic-mqtt"
+      - "complete"
 
   ## file storage
   minio-files:
@@ -860,11 +937,11 @@ services:
     secrets:
       - MINIO_SECRET_KEY
       - MINIO_ACCESS_KEY
-    logging:
-      driver: json-file
-      options:
-        max-size: 20m
-        max-file: '5'
+    <<: *loki-logging
+    <<: *dojot-networking
+    profiles:
+      - "minio-files"
+      - "complete"
 
   file-mgmt:
     image: dojot/file-mgmt:${DOJOT_VERSION}
@@ -895,6 +972,11 @@ services:
       options:
         max-size: 20m
         max-file: '5'
+    <<: *loki-logging
+    <<: *dojot-networking
+    profiles:
+      - "file-mgmt"
+      - "complete"
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:9000/health"]
       interval: 30s
@@ -920,11 +1002,13 @@ services:
     restart: always
     volumes:
       - ./secrets:/secrets
-    logging:
-      driver: json-file
-      options:
-        max-size: 20m
-        max-file: '5'
+    <<: *loki-logging
+    <<: *dojot-networking
+    profiles:
+      - "influxdb"
+      - "basic-http"
+      - "basic-mqtt"
+      - "complete"
 
   influxdb-storer:
     image: dojot/influxdb-storer:${DOJOT_VERSION}
@@ -935,11 +1019,13 @@ services:
       STORER_LOG_CONSOLE_LEVEL: "info"
       STORER_INFLUX_RETENTION_HRS: 168 # used only for new created tenant after default
     restart: always
-    logging:
-      driver: json-file
-      options:
-        max-size: 20m
-        max-file: '5'
+    <<: *loki-logging
+    <<: *dojot-networking
+    profiles:
+      - "influxdb"
+      - "basic-http"
+      - "basic-mqtt"
+      - "complete"
 
   influxdb-setup:
     image: quay.io/influxdb/influxdb:v2.0.2
@@ -957,11 +1043,13 @@ services:
     depends_on:
       influxdb:
         condition: service_healthy
-    logging:
-      driver: json-file
-      options:
-        max-size: 20m
-        max-file: '5'
+    <<: *loki-logging
+    <<: *dojot-networking
+    profiles:
+      - "influxdb"
+      - "basic-http"
+      - "basic-mqtt"
+      - "complete"
 
   influxdb:
     image: quay.io/influxdb/influxdb:v2.0.2
@@ -970,11 +1058,13 @@ services:
       - influxdb-volume:/root/.influxdbv2
     healthcheck:
       test: "influx ping"
-    logging:
-      driver: json-file
-      options:
-        max-size: 20m
-        max-file: '5'
+    <<: *loki-logging
+    <<: *dojot-networking
+    profiles:
+      - "influxdb"
+      - "basic-http"
+      - "basic-mqtt"
+      - "complete"
 
   ## Cron
   cron:
@@ -992,6 +1082,9 @@ services:
       - mongodb
     <<: *loki-logging
     <<: *dojot-networking
+    profiles:
+      - "cron"
+      - "complete"
 
   data-manager:
     image: dojot/data-manager:development
@@ -1000,6 +1093,9 @@ services:
       - device-manager-sidecar
     <<: *loki-logging
     <<: *dojot-networking
+    profiles:
+      - "data-manager"
+      - "complete"
 
 
   # GUI NX MFE
@@ -1008,77 +1104,98 @@ services:
     depends_on:
       - backstage
     restart: always
-    logging:
-      driver: json-file
-      options:
-        max-size: 20m
-        max-file: '5'
+    <<: *loki-logging
+    <<: *dojot-networking
+    profiles:
+      - "nx"
+      - "front-end"
+      - "basic-http"
+      - "basic-mqtt"
+      - "complete"
 
   common-nx:
     image: dojot/common-nx:${DOJOT_VERSION}
     depends_on:
       - backstage
     restart: always
-    logging:
-      driver: json-file
-      options:
-        max-size: 20m
-        max-file: '5'
+    <<: *loki-logging
+    <<: *dojot-networking
+    profiles:
+      - "nx"
+      - "front-end"
+      - "basic-http"
+      - "basic-mqtt"
+      - "complete"
 
   home-nx:
     image: dojot/home-nx:${DOJOT_VERSION}
     depends_on:
       - backstage
     restart: always
-    logging:
-      driver: json-file
-      options:
-        max-size: 20m
-        max-file: '5'
+    <<: *loki-logging
+    <<: *dojot-networking
+    profiles:
+      - "nx"
+      - "front-end"
+      - "basic-http"
+      - "basic-mqtt"
+      - "complete"
 
   dashboard-nx:
     image: dojot/dashboard-nx:${DOJOT_VERSION}
     depends_on:
       - backstage
     restart: always
-    logging:
-      driver: json-file
-      options:
-        max-size: 20m
-        max-file: '5'
+    <<: *loki-logging
+    <<: *dojot-networking
+    profiles:
+      - "nx"
+      - "front-end"
+      - "basic-http"
+      - "basic-mqtt"
+      - "complete"
 
   devices-nx:
     image: dojot/devices-nx:${DOJOT_VERSION}
     depends_on:
       - backstage
     restart: always
-    logging:
-      driver: json-file
-      options:
-        max-size: 20m
-        max-file: '5'
+    <<: *loki-logging
+    <<: *dojot-networking
+    profiles:
+      - "nx"
+      - "front-end"
+      - "basic-http"
+      - "basic-mqtt"
+      - "complete"
 
   templates-nx:
     image: dojot/templates-nx:${DOJOT_VERSION}
     depends_on:
       - backstage
     restart: always
-    logging:
-      driver: json-file
-      options:
-        max-size: 20m
-        max-file: '5'
+    <<: *loki-logging
+    <<: *dojot-networking
+    profiles:
+      - "nx"
+      - "front-end"
+      - "basic-http"
+      - "basic-mqtt"
+      - "complete"
 
   security-nx:
     image: dojot/security-nx:${DOJOT_VERSION}
     depends_on:
       - backstage
     restart: always
-    logging:
-      driver: json-file
-      options:
-        max-size: 20m
-        max-file: '5'
+    <<: *loki-logging
+    <<: *dojot-networking
+    profiles:
+      - "nx"
+      - "front-end"
+      - "basic-http"
+      - "basic-mqtt"
+      - "complete"
 
 volumes:
   ejbca-volume:
@@ -1107,7 +1224,6 @@ volumes:
   # flowbroker-volume:
   # flowbroker-redis-volume:
   data-broker-redis-volume:
-  device-manager-redis-volume:
   kafka-ws-redis-volume:
   backstage-redis-volume:
   influxdb-volume:
