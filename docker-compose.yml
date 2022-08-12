@@ -154,7 +154,7 @@ services:
       DOJOT_REALM_SSL_MODE: 'NONE' #${KEYCLOAK_REALM_SSL_MODE:-NONE}
       DOJOT_KAFKA_SERVERS: kafka:9092
       DOJOT_CUSTOM_REALM_REP_FILE: "/opt/dojot/customRealmRepresentation.json"
-      DOJOT_SECRETS_PATH: "/secrets/" 
+      DOJOT_SECRETS_PATH: "/secrets/"
       # DOJOT_SMTP_HOST: smtp.gmail.com
       # DOJOT_SMTP_PORT: "587"
       # DOJOT_SMTP_SSL: "false"
@@ -218,7 +218,7 @@ services:
       - "basic-http"
       - "basic-mqtt"
       - "complete"
-  
+
   device-manager:
     image: dojot/device-manager:${DOJOT_VERSION}
     restart: always
@@ -294,7 +294,7 @@ services:
 
   ## Security
   x509-ejbca: # this service cannot be called 'ejbca'
-    image: dojot/ejbca:${DOJOT_VERSION} 
+    image: dojot/ejbca:${DOJOT_VERSION}
     depends_on:
       - postgres
     restart: always
@@ -328,7 +328,7 @@ services:
       - "complete"
 
   x509-identity-mgmt:
-    image: dojot/x509-identity-mgmt:${DOJOT_VERSION} 
+    image: dojot/x509-identity-mgmt:${DOJOT_VERSION}
     depends_on:
       - x509-ejbca
       - postgres
@@ -401,7 +401,7 @@ services:
       - "certificate-acl"
       - "basic-mqtt"
       - "complete"
-  
+
   basic-auth:
     image: dojot/device-basic-authentication:${DOJOT_VERSION}
     restart: always
@@ -410,7 +410,7 @@ services:
     depends_on:
       - kafka
       - mongodb
-      - device-manager    
+      - device-manager
     environment:
       BASIC_AUTH_LOG_CONSOLE_LEVEL: 'info'
       BASIC_AUTH_LOG_VERBOSE: "true"
@@ -719,7 +719,7 @@ services:
       HTTP_AGENT_SECURITY_CRL: '/certs/ca.crl'
       HTTP_AGENT_SECURITY_CERT_DIRECTORY: '/certs'
       HTTP_AGENT_LOG_CONSOLE_LEVEL: 'info'
-      HTTP_AGENT_SECURITY_UNSECURE_MODE: 'true' 
+      HTTP_AGENT_SECURITY_UNSECURE_MODE: 'true'
       HTTP_AGENT_SECURITY_AUTHORIZATION_MODE: 'basic-auth'
     volumes:
       - http-agent-cert-sidecar-volume:/certs
@@ -779,7 +779,7 @@ services:
       - "iotagent-mqtt"
       - "basic-mqtt"
       - "complete"
-    
+
   iotagent-mqtt-cert-sidecar:
     image: dojot/cert-sidecar:${DOJOT_VERSION}
     depends_on:
@@ -901,7 +901,7 @@ services:
       CERT_SC_CERTS_FILES_BASEPATH: /certs
       CERT_SC_CERTS_FILES_CA: ca.crt
       CERT_SC_CERTS_FILES_CERT: k2v-bridge.crt
-      CERT_SC_CERTS_FILES_KEY: k2v-bridge.key     
+      CERT_SC_CERTS_FILES_KEY: k2v-bridge.key
     restart: always
     <<: *loki-logging
     <<: *dojot-networking
@@ -1203,9 +1203,7 @@ volumes:
   postgres-volume:
   mongodb-volume:
   mongodb-cfg-volume:
-  # minio-volume:
   minio-file-volume:
-  # rabbitmq-volume:
   zookeeper-volume:
   zookeeper-log-volume:
   zookeeper-secrets-volume:
@@ -1221,8 +1219,6 @@ volumes:
   iotagent-mqtt-etc-volume:
   v2k-bridge-cert-side-volume:
   k2v-bridge-cert-side-volume:
-  # flowbroker-volume:
-  # flowbroker-redis-volume:
   data-broker-redis-volume:
   kafka-ws-redis-volume:
   backstage-redis-volume:
@@ -1239,5 +1235,3 @@ secrets:
 networks:
   default:
     name: dojot
-  flowbroker:
-    name: ${FLOWBROKER_NETWORK}
