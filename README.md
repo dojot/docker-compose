@@ -21,120 +21,101 @@
 1. [Issues and help](#issues-and-help)
 
 # Overview
-=======
-# Dojot Deploy - Docker Compose
 
-This deployment option is best suited to development and functional environments. For production environment we recommend to use [Kubernetes](https://github.com/dojot/ansible-dojot).
+## Dojot Deploy - Docker Compose
+
+This deployment option is best suited to development and functional environments.
 
 ## Getting Started
 
 This repository contains the necessary configuration files
 for quick deployment of the dojot platform using `docker-compose`.
 
-__Attention__ To get completely ready, **healthy**, all services in this `docker-compose` take an average of at least 12 minutes.
-
-# Disclaimer
+## Disclaimer
 
 This deployment option is best suited to development and functional environments.
 For production environment we recommend to use [Kubernetes with Ansible](https://github.com/dojot/ansible-dojot). See how to install on [guide](https://dojotdocs.readthedocs.io/en/latest/installation-guide.html#kubernetes).
 
 # Required settings and Recommended settings
 
-__Required setting:__ Before running this deployment, it is necessary to define a password value in the [.env](./.env) file for the `KEYCLOAK_MASTER_PASSWORD` and `KEYCLOAK_ADMIN_PASSWORD_TEMP`  variables. The value `KEYCLOAK_ADMIN_PASSWORD_TEMP` will be the password of the user *admin* of all tenants (equivalent to realms in the keycloak) when created. **Passwords must have a digit number, a letter in upper case, a letter in lower case, a special character, they cannot be the user or an email and must have 8 characters. If the password does not fit in some cases there will be errors internally when trying to run this `docker-compose`.**
+#### Required settings:
+Before running this deployment, it is necessary to define a password value in the [.env](./.env) file for the `KEYCLOAK_MASTER_PASSWORD` and `KEYCLOAK_ADMIN_PASSWORD_TEMP`  variables.
+The value `KEYCLOAK_ADMIN_PASSWORD_TEMP` will be the password of the *admin* user of all tenants (equivalent to realms in the keycloak) when it is created.
 
-__Recommended setting 1:__ It is recommended to configure Keycloak SMTP, see more in [Keycloak SMTP](#keycloak-smtp).
+**Passwords must have:**
+* a digit number
+* a letter in upper case
+* a letter in lower case
+* a special character
+* at least 8 characters
 
-__Recommended setting 2:__ It is highly recommended to use dojot with security (**https**) for a deployment on a **domain other than `localhost`** follow the guide at [How to run with HTTPS (secure dojot with Let's Encrypt)](#how-to-run-with-https-secure-dojot-with-lets-encrypt---recommended)  and don't forget the item [How to schedule domain certificate renewal](#how-to-schedule-domain-certificate-renewal-recommended-and-important).
+**Passwords cannot be the user or an email. If the password does not fit in these criteria, there will be internal errors when trying to run this `docker-compose`.**
 
-__Recommended setting 3:__ The values of secrets must be unique for each environment, to ensure security. Give preference to large random values. The environment variables for these secrets can be found in the `docker.compose.yml` file and are `BS_SESSION_SECRET` in the **backstage** service, `S3ACCESSKEY` and `S3SECRETKEY` in the **image-manager** service, `MINIO_ACCESS_KEY` and `MINIO_SECRET_KEY` in the **minio** service and `KAFKA_WS_TICKET_SECRET` in the **kafka-ws** service.
+#### Required settings:
+* It is recommended to configure Keycloak SMTP, see more in [Keycloak SMTP](#keycloak-smtp).
+
+* It is highly recommended to use dojot with security (**https**) for a deployment on a **domain other than `localhost`** follow the guide at [How to run with HTTPS (secure dojot with Let's Encrypt)](#how-to-run-with-https-secure-dojot-with-lets-encrypt---recommended)  and don't forget the item [How to schedule domain certificate renewal](#how-to-schedule-domain-certificate-renewal-recommended-and-important).
+
+* The values of secrets must be unique for each environment, to ensure security. Give preference to large random values. The environment variables for these secrets can be found in the `docker.compose.yml` file and are `BS_SESSION_SECRET` in the **backstage** service, `S3ACCESSKEY` and `S3SECRETKEY` in the **image-manager** service, `MINIO_ACCESS_KEY` and `MINIO_SECRET_KEY` in the **minio** service and `KAFKA_WS_TICKET_SECRET` in the **kafka-ws** service.
 
 # How to get it up and running
 
 **Before, it is necessary to do the step [`Required setting`](#required-settings-and-recommended-settings) of the previous topic.**
 
-To use this `docker-compose.yml`, you will need:
-=======
+To use the `docker-compose.yml` file, you will need to clone the [docker-compose](https://github.com/dojot/docker-compose.git) repository
+
 This repository contains the necessary configuration files for quick deployment of the Dojot Platform using `docker-compose`.
 
-### Requirements
+## Requirements
 
 * Docker Engine >= 19.03 (Installation [here](https://docs.docker.com/engine/install/))
-* Docker Compose >= 1.27 (Installation [here](https://docs.docker.com/compose/install/))
+* Docker Compose >= 1.28 (Installation [here](https://docs.docker.com/compose/install/))
 > __Note__: All tests were performed with Docker CE on Ubuntu [18.04](https://releases.ubuntu.com/18.04/) and [20.04](https://releases.ubuntu.com/20.04/).
+> __Note__: If you are using older `Docker Compose` versions, you shoud run the commands like that `docker-compose` instead of `docker compose`.
 
 
 ## Usage
 
 Before running this deployment it's necessary to define your domain name or IP in [.env](./.env) file, in the `DOJOT_DOMAIN_NAME` variable.
 
-Both are available in the [Docker official site](https://docs.docker.com/install/). All tests were performed with Docker CE. And also using Ubuntu 18.04 and 20.04.
 
 ## Deploy Options
 
-It's important to note that we have four ways to deploy dojot on Docker Compose and these ways will be shown in the topics below.
-You should check which way is most interesting for your use case and then follow the respective documentation.
-
-- [How to run on localhost](#how-to-run-on-localhost)
-- [How to run with HTTPS](#how-to-run-with-https)
-  - [Secure dojot with Let's Encrypt (recommended)](#secure-dojot-with-lets-encrypt-recommended)
-    - [How to schedule domain certificate renewal (recommended and important)](#how-to-schedule-domain-certificate-renewal-recommended-and-important)
-  - [Use HTTPS with self-signed certificate](#use-https-with-self-signed-certificate)
-- [Run on a domain other than localhost with http (not recommended)](#run-on-a-domain-other-than-localhost-with-http-not-recommended)
 
 __Note__ On some machines, when trying to run dojot on port ``80`` or ``433``, there are some internal permission errors in the `apigw (kong)` service. An alternative is to change the port value in ``DOJOT_HTTP_PORT`` to another one like ``8000`` or ``8443``. Also, the ports used by dojot cannot be in use.
 
 ### How to run on *localhost*
 
-Just run the command below:
-
-``` sh
-sudo docker-compose up  -d
-```
-
-After that the dojot must be accessible at `http://localhost:8000`. The tenant will be the value of the `KEYCLOAK_DEFAULT_REALM` variable which by default has the value `admin`, the username will be `admin` and the password the value defined in `KEYCLOAK_ADMIN_PASSWORD_TEMP`.
-
-### How to run with HTTPS
-
-#### Secure dojot with Let's Encrypt (recommended)
-Start the containers with command bellow:
-=======
 To start the containers, the following profiles are available:
+- complete
+- basic-http
+- basic-mqtt
+- <service-name> (each service has it own profile witch is the same name of the service)
 
-- basic (minimum services)
-- mongodb-pesistence
-- data-processing
-- cron-job
-- x509-certificates
-- front-end
-- lwm2m-iot-agent
-- device-management
-- api-gateway
-- user-management
-- data-processing-context
-- websocket-real-time
-- iot-agent-mqtt
-- iot-agent-http
-- import-export-configuration
-- influxdb-persistence
-- file-management
-- complete (all services)
+To run dojot with all services, run the command bellow:
+``` sh
+docker compose --profile complete up --detach
+```
 
-Start the containers with the minimum services using the command below:
-```bash
-docker-compose --profile basic up --detach
+If you want to run just the basic services (using http-agent), run the command bellow:
+``` sh
+docker compose --profile basic-http up --detach
 ```
-Or start all services with below command:
-```
-docker-compose --profile complete up --detach
+
+If you want to run just the basic services (using mqtt-agent), run the command bellow:
+``` sh
+docker compose --profile basic-mqtt up --detach
 ```
 
 > __Note__: To get completely ready, **healthy** :green_heart:, all services in this `docker-compose` take an average of at least `12 minutes`.
 
-For instructions on how to get it up and running, please check [Installation Guide](https://dojotdocs.readthedocs.io/en/latest/installation-guide.html#docker-compose). **Always change the ``admin`` user password to a suitable password and keep it safe.**
+After that, dojot must be accessible at `http://localhost:8000`.
+The tenant will be the value of the `KEYCLOAK_DEFAULT_REALM` variable which by default has the value `admin`.
+The username will be `admin` and the password will be th value defined in `KEYCLOAK_ADMIN_PASSWORD_TEMP`.
 
-Both are available in the [Docker Official Site](https://docs.docker.com/install/).
+## How to run with HTTPS
 
-### How to secure dojot with Nginx and Let's Encrypt
+### How to secure dojot with Nginx and Let's Encrypt (recommended)
 
 To get dojot running with https and Let's Encrypt you **MUST** ensure you have set up a static public IP address for your server and registered a domain for it.
 
@@ -161,13 +142,10 @@ Then change the file `letsencrypt-nginx/nginx-challenge.conf`, replacing __`<YOU
 After changing `letsencrypt-nginx/nginx-challenge.conf`, run the command below to run the service that will be used by Let's Encrypt to verify your registered domain.
 
 ``` sh
-sudo docker-compose up -d letsencrypt-nginx
-=======
-```bash
 # Go to the repository letsencrypt-nginx
 cd letsencrypt-nginx
 # Start the Nginx container
-sudo docker-compose --file docker-compose-challenge.yml up --detach
+docker compose --file docker-compose-challenge.yml up --detach
 ```
 
 Run the command below by changing the `<your domain>` and `<youremail@domain.com>` values, to perform domain ownership verification.
@@ -183,17 +161,6 @@ certonly --webroot \
 --email <youremail@domain.com> --agree-tos --no-eff-email \
 --webroot-path=/data/letsencrypt \
 -d <your domain>; sudo chmod -R 0755 /dojot/etc/letsencrypt/{live,archive}
-```bash
-sudo docker container run -it --rm \
-    -v /dojot/etc/letsencrypt:/etc/letsencrypt \
-    -v /dojot/var/lib/letsencrypt:/var/lib/letsencrypt \
-    -v /dojot/letsencrypt-site:/data/letsencrypt \
-    -v /dojot/var/log/letsencrypt:/var/log/letsencrypt \
-    certbot/certbot \
-    certonly --webroot \
-    --email <youremail@domain.com> --agree-tos --no-eff-email \
-    --webroot-path=/data/letsencrypt \
-    -d <your domain>
 ```
 
 Now that you have your certificate, you have to edit the [.env](./.env) again by adding the variables below. Do **not** remove the variables added in the previous step.
@@ -201,23 +168,27 @@ Now that you have your certificate, you have to edit the [.env](./.env) again by
 ``` sh
 KONG_SSL_CERT=/dojot/etc/letsencrypt/live/${DOJOT_DOMAIN_NAME}/fullchain.pem
 KONG_SSL_CERT_KEY=/dojot/etc/letsencrypt/live/${DOJOT_DOMAIN_NAME}/privkey.pem
-=======
-```bash
-sudo docker-compose --file docker-compose-challenge.yml down
 ```
 
-Now run the rest of the dojot services:
+If everything ran successfully, stop the temporary Nginx server because it is no more necessary:
+```bash
+sudo docker compose --file docker-compose-challenge.yml down
+```
+
+This Nginx service is specified in the docker-compose file
+letsencrypt-nginx/docker-compose-dojot-https.yml. It MUST run in the same network of
+other dojot's services. So before starting it, change the network in the configuration
+if necessary and replace the tag **<YOUR DOMAIN>** by the your registered domain
+in the files: letsencrypt-nginx/docker-compose-dojot-https.yml and letsencrypt-nginx/nginx-dojot-https.conf.
+Then spin up Nginx:
 
 ``` sh
-sudo docker-compose  up -d
-=======
-```bash
 sudo docker-compose --file docker-compose-dojot-https.yml up --detach
 ```
 
 After that the dojot must be accessible at `https://<your domain>`. The tenant will be the value of the `KEYCLOAK_DEFAULT_REALM` variable which by default has the value `admin`, the username will be `admin` and the password the value defined in `KEYCLOAK_ADMIN_PASSWORD_TEMP`.
 
-###### How to schedule domain certificate renewal (recommended and important)
+### How to schedule domain certificate renewal (recommended and important)
 
 Periodically, you need to renew the certificate. The process is very simple, run a Certbot command and restart the Nginx. To automate it with a cron job, run:
 
@@ -301,31 +272,6 @@ In addition it is necessary to configure in your browser a new *Certificate Auth
 __NOTE__ And also when accessing this url via CURL, postman and other such services, via code, it is necessary to use this `ca/ca.crt` file as being a CA, a *Certificate Authority* trustworthy.
 
 After that the dojot must be accessible at `https://<your domain>` in the browser that has been configured with the new **Certification Authority**. The tenant will be the value of the `KEYCLOAK_DEFAULT_REALM` variable which by default has the value `admin`, the username will be `admin` and the password the value defined in `KEYCLOAK_ADMIN_PASSWORD_TEMP`.
-
-### Run on a domain other than localhost with http (not recommended)
-
-**We discourage using this deployment mode for security reasons. Using it is at your own risk.**
-
-To get dojot running with a domain other than localhost with http, that domain/ip must be accessible where dojot is running and inside the docker network. See an alternative solution [alternative solution](#problems-with-domainip-not-accessible-on-docker-network).
-
-Add the following lines to the end of the file [.env](./.env) and change `<your domain>` for your domain or IP. (If you want to use port 8000 add the variable `DOJOT_HTTP_PORT` with 8000 value, It be accessible at `http://<your domain>:8000`.)
-
-``` sh
-DOJOT_DOMAIN_NAME=<your domain>
-
-DOJOT_HTTP_PORT=80
-
-DOJOT_URL=http://${DOJOT_DOMAIN_NAME}:${DOJOT_HTTP_PORT}
-
-```
-
-Then run the command below:
-
-``` sh
-sudo docker-compose up  -d
-```
-
-After that the dojot must be accessible at `http://<your domain>`. The tenant will be the value of the `KEYCLOAK_DEFAULT_REALM` variable which by default has the value `admin`, the username will be `admin` and the password the value defined in `KEYCLOAK_ADMIN_PASSWORD_TEMP`.
 
 ## Problems with domain/ip not accessible on docker network
 
