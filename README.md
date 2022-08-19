@@ -53,7 +53,7 @@ For instructions on how to get it up and running, please check [Installation Gui
 
 Both are available in the [Docker Official Site](https://docs.docker.com/install/).
 
-### How to run with HTTPS
+### How to run dojot with HTTPS
 
 #### Secure dojot with Let's Encrypt (recommended)
 
@@ -141,7 +141,7 @@ if the certificate is due for renewal.
 
 #### Secure dojot with self-signed certificate
 
-To get dojot running with https with self-signed certificate, that domain/ip must be accessible where dojot is running and inside the docker network. 
+To get dojot running with https with self-signed certificate, the domain/ip must be accessible where dojot is running and inside the docker network. 
 
 As prerequisites this uses [OpenSSL](https://www.openssl.org/).
 
@@ -180,13 +180,13 @@ Open up a browser and visit https://<YOUR IP>.
 
 You should see an error message telling the connection is not safe.
 
-Now you nedd to click on the warning botton next to your IP address.
+Now you need to click on the warning botton next to your IP address.
 
 Then click in the option telling the certificate is not valid. 
 
 Enter in details tab and export the certificate adding extension ".crt" .
 
-The next step, it is uploading the certificate (that you exported) in your browser.
+The next step, it is upload the certificate (that you exported) in your browser.
 
 ```bash
 *Chrome*
@@ -225,7 +225,7 @@ If you will use iotagent-mqtt to send message with self-signed certificate, it i
 
 ```sh
 Example:
-CERT_SC_CERTS_HOSTNAMES: '["http-agent", "${DOJOT_DOMAIN_NAME:-localhost}", "<server IP>", "<server Name>"]'
+CERT_SC_CERTS_HOSTNAMES: '["iotagent-mqtt", "${DOJOT_DOMAIN_NAME:-localhost}", "<server IP>", "<server Name>"]'
 ```
 
 > __Note__: *It is very important to include the quotes in the server IP and server name*
