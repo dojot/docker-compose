@@ -1,0 +1,33 @@
+version: '3.1'
+
+x-logging: &loki-logging
+  logging:
+    driver: 'json-file'
+    options:
+      max-size: '50m'
+      max-file: '3'
+      tag: "{{.ImageName}}|{{.Name}}|{{.ImageFullID}}|{{.FullID}}"
+
+x-networking: &dojot-networking
+  networks:
+    - default
+
+services:
+
+  https-nginx:
+    container_name: 'https-nginx'
+    image: nginx:latest
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx-dojot-https-self-signed-certificate.conf:/etc/nginx/conf.d/default.conf
+      - ./dojot-nginx-certificate.crt:/etc/nginx/certificate/nginx-certificate.crt
+      - ./dojot-nginx-certificate.key:/etc/nginx/certificate/nginx-certificate.key
+    <<: *loki-logging
+    <<: *dojot-networking
+
+networks:
+  default:
+    name: dojot

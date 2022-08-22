@@ -53,7 +53,9 @@ For instructions on how to get it up and running, please check [Installation Gui
 
 Both are available in the [Docker Official Site](https://docs.docker.com/install/).
 
-### How to secure dojot with Nginx and Let's Encrypt
+### How to run dojot with HTTPS
+
+#### Secure dojot with Let's Encrypt (recommended)
 
 To get dojot running with https, at least for the purposes of this guide, you **MUST** ensure
 you have set up a static public IP address for your server and registered a domain for it. Then
@@ -136,3 +138,100 @@ Place the following at the end of the file, then close and save it.
 
 The above command will run every night at 23:00, renewing the certificate and forcing Nginx to restart
 if the certificate is due for renewal.
+
+#### Secure dojot with self-signed certificate
+
+To get dojot running with https with self-signed certificate, the domain/ip must be accessible where dojot is running and inside the docker network. 
+
+As prerequisites this uses [OpenSSL](https://www.openssl.org/).
+
+On Debian-based Linux distributions, you can install these prerequisites by running:
+
+``` sh
+sudo apt install openssl
+```
+
+After installing the prerequisites if necessary, generate certificates 
+
+```sh
+cd self-signed-certificate-nginx
+openssl req -x509 -nodes -newkey rsa:2048 -days 365  \
+  -keyout dojot-nginx-certificate.key -out dojot-nginx-certificate.crt -subj '/CN=*<server IP>*,*<server Name>*' \
+  -addext 'subjectAltName=DNS:*<server Name>*,IP:*<server IP>*'
+
+Example:
+openssl req -x509 -nodes -newkey rsa:2048 -days 365  \
+  -keyout dojot-nginx-certificate.key -out dojot-nginx-certificate.crt -subj '/CN=dojot_CPQD' \
+  -addext 'subjectAltName=DNS:gcp-eun-doc,IP:10.233.48.15'
+```
+
+Now you have a certificate. The next step, is to configure a
+Nginx to receive the https requests and redirect the traffic to dojot's api gateway.
+
+This Nginx service is specified in the docker-compose file
+self-signed-certificate-nginx/docker-compose-dojot-https-self-signed-certificate.yml. It MUST run in the same network of
+other dojot's services. 
+
+```bash
+sudo docker-compose --file docker-compose-dojot-https-self-signed-certificate.yml up --detach
+```
+
+Open up a browser and visit https://<YOUR IP>. 
+
+You should see an error message telling the connection is not safe.
+
+Now you need to click on the warning botton next to your IP address.
+
+Then click in the option telling the certificate is not valid. 
+
+Enter in details tab and export the certificate adding extension ".crt" .
+
+The next step, it is upload the certificate (that you exported) in your browser.
+
+```bash
+*Chrome*
+
+Settings -> Privacy and Security -> Security -> Manage certificates -> Autorities -> Import
+
+Choose the saved file (example: dojot_CPQD.crt)
+
+Check all the options in the box and click OK
+
+Reload the connection in the browser and now your connection is safe and the certificate is recognized by the browser.
+
+```
+
+```bash
+*Firefox*
+The certificate is recognized by the browser automatically
+```
+
+If you will use http-agent to send message with self-signed certificate, it is necessary configure the `http-agent-cert-sidecar` environment variable `CERT_SC_CERTS_HOSTNAMES` including the `server IP` and `server name`
+
+```sh
+Example:
+CERT_SC_CERTS_HOSTNAMES: '["http-agent", "${DOJOT_DOMAIN_NAME:-localhost}", "<server IP>", "<server Name>"]'
+```
+
+> __Note__: *It is very important to include the quotes in the server IP and server name*
+
+Now, apply the changes running:
+
+```sh
+docker-compose --profile complete up -d
+```
+
+If you will use iotagent-mqtt to send message with self-signed certificate, it is necessary configure the `iotagent-mqtt-cert-sidecar` environment variable `CERT_SC_CERTS_HOSTNAMES` including the `server IP` and `server name`
+
+```sh
+Example:
+CERT_SC_CERTS_HOSTNAMES: '["iotagent-mqtt", "${DOJOT_DOMAIN_NAME:-localhost}", "<server IP>", "<server Name>"]'
+```
+
+> __Note__: *It is very important to include the quotes in the server IP and server name*
+
+Now, apply the changes running:
+
+```sh
+docker-compose --profile complete up -d
+```
