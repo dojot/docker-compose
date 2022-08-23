@@ -1255,9 +1255,6 @@ services:
   #
   konga:
     image: dojot/pantsel_konga:0.14.7
-    depends_on:
-      - apigw
-      - mongodb
     ports:
       - 1337:1337
     environment:
@@ -1278,14 +1275,12 @@ services:
         max-size: 20m
         max-file: '5'
     profiles:
-      - "development"
+      - "tools"
 
 
   # GUI to Kafka - BEGIN
   kafdrop:
     image: obsidiandynamics/kafdrop:latest
-    depends_on:
-      - kafka
     ports:
       - 9090:9000
     environment:
@@ -1299,21 +1294,19 @@ services:
         max-size: 20m
         max-file: '5'
     profiles:
-      - "development"
+      - "tools"
 
 # GUI to mongo - BEGIN
 # GUI will be available at http://${DOJOT_DOMAIN_NAME}:8383
   mongo-express-gui:
     image: mongo-express
-    depends_on:
-      - mongodb
     restart: always
     environment:
       ME_CONFIG_MONGODB_SERVER: mongodb
     ports:
       - "8383:8081"
     profiles:
-      - "development"
+      - "tools"
 
 # GUI to postgres - BEGIN
 # GUI will be available at http://${DOJOT_DOMAIN_NAME}:5050
@@ -1322,14 +1315,11 @@ services:
     environment:
       PGADMIN_DEFAULT_EMAIL: admin@pgadmin.com
       PGADMIN_DEFAULT_PASSWORD: admin
-    depends_on:
-      postgres:
-        condition: service_healthy
     restart: always
     ports:
       - 5050:80
     profiles:
-    - "development"
+    - "tools"
 
   basic-auth:
     image: dojot/device-basic-authentication:${DOJOT_BACKEND_VERSION}
