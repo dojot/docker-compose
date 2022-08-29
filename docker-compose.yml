@@ -254,13 +254,14 @@ services:
       - keycloak-proxy
       - device-manager
     environment:
+      HOSTNAME: device-manager-sidecar-1
       KEYCLOAKMICROSERVICESIDECAR_PROXY_PORT: "5000"
       KEYCLOAKMICROSERVICESIDECAR_SERVER_URL: http://device-manager:5000
       KEYCLOAKMICROSERVICESIDECAR_KEYCLOAK_URL: http://keycloak:8080
       KEYCLOAKMICROSERVICESIDECAR_KEYCLOAK_CLIENT_ID: dojot-device-manager-sidecar
       KEYCLOAKMICROSERVICESIDECAR_KEYCLOAK_CLIENT_SECRET_FILE: dojot-device-manager-sidecar
       KEYCLOAKMICROSERVICESIDECAR_KEYCLOAK_TENANTS_URL: http://keycloak-proxy:8081/api/v1/tenant
-      KEYCLOAKMICROSERVICESIDECAR_CONSUMER_GROUP_ID: device-manager-sidecar
+      KEYCLOAKMICROSERVICESIDECAR_CONSUMER_GROUP_ID: device-manager-sidecar-1
       KEYCLOAKMICROSERVICESIDECAR_PROXY_AUTH_MODE: "keycloak"
       KEYCLOAKMICROSERVICESIDECAR_PROXY_TOKEN_INSERT: "legacy"
     volumes:
@@ -761,6 +762,7 @@ services:
   iotagent-mqtt-keycloak-sidecar:
     image: dojot/keycloak-microservice-sidecar:${DOJOT_VERSION}
     environment:
+      HOSTNAME: 'iotagent-mqtt-keycloak-sidecar-1'
       KEYCLOAKMICROSERVICESIDECAR_LOGGER_CONSOLE_LEVEL: "info"
       KEYCLOAKMICROSERVICESIDECAR_SERVER_URL: 'http://certificate-acl:3000'
       KEYCLOAKMICROSERVICESIDECAR_PROXY_PORT: "3000"
@@ -998,7 +1000,7 @@ services:
       RETRIEVER_KEYCLOAK_CLIENT_ID: "dojot-influxdb-retriever"
       RETRIEVER_KEYCLOAK_CLIENT_SECRET_FILE: "dojot-influxdb-retriever"
       RETRIEVER_SYNC_DEVICES: "http://device-manager-sidecar:5000/device"
-      RETRIEVER_SYNC_CRON_EXPRESSION: "*/5 * * * *"
+      RETRIEVER_SYNC_CRON_EXPRESSION: "* */3 * * *"
     restart: always
     volumes:
       - ./secrets:/secrets
