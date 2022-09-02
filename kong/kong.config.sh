@@ -1,6 +1,14 @@
 #!/bin/sh
-
 kong="http://apigw:8001"
+dojot_domain_name=${DOJOT_DOMAIN_NAME:-localhost}
+route_allow_only_https=${DOJOT_KONG_ROUTE_ALLOW_ONLY_HTTPS:-false}
+
+route_allow_protocol='"http","https"'
+
+if [ "$route_allow_only_https" = "true" ]; then
+    echo "Allow onlyhttps"
+    route_allow_protocol='"https"'
+fi;
 
 # check if kong is started
 if curl --output /dev/null --silent --head --fail "$kong"; then
@@ -18,14 +26,21 @@ addAuthToEndpoint() {
 echo ""
 echo ""
 echo "- addAuthToEndpoint: ServiceName=${1}"
-curl  -sS  -X POST \
+
+# To understand about lua patterns and its limitations http://lua-users.org/wiki/PatternsTutorial
+# This regex is to guarantee whether or not it has port 443 and 80, it will be able to validate the issuer
+allowed_iss_url="https?://${dojot_domain_name}:?(%d*)/auth/realms/(.+)"
+
+curl -sS -X POST \
+--url ${kong}/services/"${1}"/plugins \
+--data "name=jwt-keycloak" \
+--data-urlencode "config.allowed_iss=${allowed_iss_url}"
+
+curl -sS -X POST \
 --url ${kong}/services/"${1}"/plugins/ \
 --data "name=pepkong" \
---data "config.pdpUrl=http://auth:5000/pdp"
+--data "config.resource=${1}"
 
-curl  -sS  -X POST \
---url ${kong}/services/"${1}"/plugins/ \
---data "name=jwt"
 }
 
 # add a Service
@@ -57,7 +72,9 @@ echo "-- createRoute: ServiceName=${1} Url=${2} PathS=${3} StripPath=${4}"
     -d @- ) <<PAYLOAD
 {
     "paths": [${3}],
-    "strip_path": ${4}
+    "strip_path": ${4},
+    "protocols": [${route_allow_protocol}],
+    "https_redirect_status_code": 301
 }
 PAYLOAD
 }
@@ -77,92 +94,38 @@ createService "${1}" "${2}"
 createRoute "${1}" "${1}_route" "${3}" "${4}"
 }
 
-# service: gui
+# service: letsencrypt-nginx
+curl  -sS -X PUT \
+--url ${kong}/services/letsencrypt-nginx \
+--data "name=letsencrypt-nginx" \
+--data "url=http://letsencrypt-nginx:80"
 
-createEndpoint "gui" "http://gui:80"  '"/"' "false"
-
-# service: gui-v2
-
-createEndpoint "gui-v2" "http://gui-v2:80"  '"/v2"' "true"
-
-# service: data-broker
-
-createEndpoint  "data-broker" "http://data-broker:80"  '"/device/(.*)/latest", "/subscription"' "false"
-addAuthToEndpoint "data-broker"
-
-createEndpoint "data-streams" "http://data-broker:80"  '"/stream"' "true"
-addAuthToEndpoint "data-streams"
-
-createEndpoint "ws-http" "http://data-broker:80"  '"/socket.io"' "false"
+curl  -sS -X PUT \
+--url ${kong}/services/letsencrypt-nginx/routes/letsencrypt-nginx_route \
+--data "paths=/.well-known/acme-challenge" \
+--data "strip_path=false"
 
 # service: device-manager
+createEndpoint "device-manager-template" "http://device-manager-sidecar:5000"  '"/template"' "false"
+addAuthToEndpoint "device-manager-template"
 
-createEndpoint "device-manager" "http://device-manager:5000"  '"/device", "/template"' "false"
-addAuthToEndpoint "device-manager"
+createEndpoint "device-manager-devices" "http://device-manager-sidecar:5000"  '"/device"' "false"
+addAuthToEndpoint "device-manager-devices"
 
-# service: image-manager
-
-createEndpoint "image" "http://image-manager:5000"  '"/fw-image"' "true"
-addAuthToEndpoint "image"
-
-# service: auth
-
-createEndpoint "auth-permissions-service" "http://auth:5000/pap"  '"/auth/pap"' "true"
-addAuthToEndpoint "auth-permissions-service"
-
-createEndpoint "auth-service" "http://auth:5000"  '"/auth"' "true"
-echo ""
-echo ""
-echo "- add plugin rate-limiting in auth-service"
-curl  -s  -sS -X POST \
---url ${kong}/services/auth-service/plugins/ \
---data "name=rate-limiting" \
---data "config.minute=5" \
---data "config.hour=40" \
---data "config.policy=local"
-
-createEndpoint "auth-revoke" "http://auth:5000"  '"/auth/revoke"' "false"
-# rate plugin limit to avoid brute-force atacks
-echo ""
-echo ""
-echo "- add plugin request-termination in auth-revoke"
-curl  -s  -sS -X POST \
---url ${kong}/services/auth-revoke/plugins/ \
-    --data "name=request-termination" \
-    --data "config.status_code=403" \
-    --data "config.message=Not authorized"
-
-createEndpoint "user-service" "http://auth:5000/user"  '"/auth/user"' "true"
-addAuthToEndpoint "user-service"
-
-# service: flowbroker
-
-createEndpoint "flows" "http://flowbroker:80"  '"/flows"' "true"
-addAuthToEndpoint "flows"
-
-createEndpoint "flowsIcons" "http://flowbroker:80/icons"  '"/flows/icons"' "true"
-
-createEndpoint "flowsRedImages" "http://flowbroker:80/red/images"  '"/flows/red/images"' "true"
-
-# service: history
-
-createEndpoint "history" "http://history:8000"  '"/history"' "true"
-addAuthToEndpoint "history"
+# service: keycloak
+createEndpoint "keycloak" "http://keycloak:8080/auth"  '"/auth"' "true"
 
 # service: data-manager
+createEndpoint "data-manager-import" "http://data-manager:3000/"  '"/import"' "false"
+addAuthToEndpoint "data-manager-import"
 
-createEndpoint "data-manager" "http://data-manager:3000/"  '"/export", "/import"' "false"
-addAuthToEndpoint "data-manager"
+createEndpoint "data-manager-export" "http://data-manager:3000/"  '"/export"' "false"
+addAuthToEndpoint "data-manager-export"
 
 # service: backstage
-
-createEndpoint "backstage_graphql_auth" "http://backstage:3005/"  '"/graphql-auth"' "false"
-
-createEndpoint "backstage_graphql" "http://backstage:3005/"  '"/graphql"' "false"
-addAuthToEndpoint "backstage_graphql"
+createEndpoint "backstage" "http://backstage:3005"  '"/backstage"' "false"
 
 # service: cron
-
 createEndpoint "cron" "http://cron:5000/"  '"/cron"' "false"
 addAuthToEndpoint "cron"
 
@@ -171,12 +134,27 @@ createEndpoint "x509-identity-mgmt" "http://x509-identity-mgmt:3000/api"  '"/x50
 addAuthToEndpoint "x509-identity-mgmt"
 
 # service: influx-retriever
-createEndpoint "influxdb-retriever" "http://influxdb-retriever:3000/tss"  '"/tss"' "true"
+createEndpoint "influxdb-retriever" "http://influxdb-retriever:4000/tss"  '"/tss"' "true"
 addAuthToEndpoint "influxdb-retriever"
-createEndpoint "influxdb-retriever-api-docs" "http://influxdb-retriever:3000/tss/v1/api-docs"  '"/tss/v1/api-docs"' "true"
+
+createEndpoint "influxdb-retriever-api-docs" "http://influxdb-retriever:4000/tss/v1/api-docs"  '"/tss/v1/api-docs"' "true"
 
 # service: kafka-ws
 createEndpoint "kafka-ws" "http://kafka-ws:8080/"  '"/kafka-ws"' "false"
+
+# service: file-mgmt
+createEndpoint "file-mgmt" "http://file-mgmt:7000"  '"/file-mgmt"' "true"
+addAuthToEndpoint "file-mgmt"
+
+createEndpoint "minio-files" "http://minio-files:9000"  '"/minio-files"' "true"
+
+createEndpoint "container-nx" "http://container-nx:80" '"/v2"' "true"
+createEndpoint "common-nx" "http://common-nx:80" '"/mfe/common"' "true"
+createEndpoint "home-nx" "http://home-nx:80" '"/mfe/home"' "true"
+createEndpoint "dashboard-nx" "http://dashboard-nx:80" '"/mfe/dashboard"' "true"
+createEndpoint "devices-nx" "http://devices-nx:80" '"/mfe/devices"' "true"
+createEndpoint "templates-nx" "http://templates-nx:80" '"/mfe/templates"' "true"
+createEndpoint "security-nx" "http://security-nx:80" '"/mfe/security"' "true"
 
 echo ""
 echo ""
@@ -190,10 +168,6 @@ curl -sS -X PATCH \
 
 createEndpoint "kafka-ws-ticket" "http://kafka-ws:8080/"  '"/kafka-ws/v[0-9]+/ticket"' "false"
 addAuthToEndpoint "kafka-ws-ticket"
-
-# service: file-mgmt
-createEndpoint "file-mgmt" "http://file-mgmt:7000"  '"/file-mgmt"' "true"
-addAuthToEndpoint "file-mgmt"
 
 echo ""
 echo ""
