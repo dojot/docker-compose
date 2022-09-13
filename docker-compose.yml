@@ -124,7 +124,7 @@ services:
 
 
   keycloak:
-    image: dojot/keycloak:${DOJOT_VERSION}
+    image: dojot/keycloak:${DOJOT_BACKEND_VERSION}
     depends_on:
       kafka:
         condition: service_healthy
@@ -154,7 +154,7 @@ services:
       DOJOT_REALM_SSL_MODE: 'NONE' #${KEYCLOAK_REALM_SSL_MODE:-NONE}
       DOJOT_KAFKA_SERVERS: kafka:9092
       DOJOT_CUSTOM_REALM_REP_FILE: "/opt/dojot/customRealmRepresentation.json"
-      DOJOT_SECRETS_PATH: "/secrets/" 
+      DOJOT_SECRETS_PATH: "/secrets/"
       # DOJOT_SMTP_HOST: smtp.gmail.com
       # DOJOT_SMTP_PORT: "587"
       # DOJOT_SMTP_SSL: "false"
@@ -198,7 +198,7 @@ services:
       - "complete"
 
   keycloak-proxy:
-    image: dojot/keycloak-proxy:${DOJOT_VERSION}
+    image: dojot/keycloak-proxy:${DOJOT_BACKEND_VERSION}
     restart: always
     depends_on:
       - keycloak
@@ -218,9 +218,9 @@ services:
       - "basic-http"
       - "basic-mqtt"
       - "complete"
-  
+
   device-manager:
-    image: dojot/device-manager:${DOJOT_VERSION}
+    image: dojot/device-manager:${DOJOT_BACKEND_VERSION}
     restart: always
     environment:
       # TODO: Fill these env variables with suitable values
@@ -234,7 +234,6 @@ services:
     depends_on:
       - postgres
       - kafka
-      - data-broker
     depends_on:
       postgres:
         condition: service_healthy
@@ -247,7 +246,7 @@ services:
       - "complete"
 
   device-manager-sidecar:
-    image: dojot/keycloak-microservice-sidecar:${DOJOT_VERSION}
+    image: dojot/keycloak-microservice-sidecar:${DOJOT_BACKEND_VERSION}
     restart: always
     depends_on:
       - keycloak
@@ -266,6 +265,8 @@ services:
       KEYCLOAKMICROSERVICESIDECAR_PROXY_TOKEN_INSERT: "legacy"
     volumes:
       - ./secrets:/secrets
+    <<: *loki-logging
+    <<: *dojot-networking
     profiles:
       - "device-manager"
       - "basic-http"
@@ -295,7 +296,7 @@ services:
 
   ## Security
   x509-ejbca: # this service cannot be called 'ejbca'
-    image: dojot/ejbca:${DOJOT_VERSION} 
+    image: dojot/ejbca:${DOJOT_BACKEND_VERSION}
     depends_on:
       - postgres
     restart: always
@@ -329,7 +330,7 @@ services:
       - "complete"
 
   x509-identity-mgmt:
-    image: dojot/x509-identity-mgmt:${DOJOT_VERSION} 
+    image: dojot/x509-identity-mgmt:${DOJOT_BACKEND_VERSION}
     depends_on:
       - x509-ejbca
       - postgres
@@ -339,7 +340,7 @@ services:
     environment:
       NODE_ENV: production
       X509IDMGMT_LOGGER_CONSOLE_LEVEL: info
-      X509IDMGMT_CERTIFICATE_BELONGSTO_APPLICATION: '["iotagent-mqtt", "v2k-bridge", "k2v-bridge", "http-agent"]'
+      X509IDMGMT_CERTIFICATE_BELONGSTO_APPLICATION: '["iotagent-mqtt", "v2k-bridge", "k2v-bridge", "http-agent-x509"]'
       X509IDMGMT_MONGO_CONN_URI: "mongodb://mongodb:27017/x509-identity-mgmt"
       X509IDMGMT_EJBCA_HEALTHCHECK_URL: "http://x509-ejbca:8080/ejbca/publicweb/healthcheck/ejbcahealth"
       X509IDMGMT_EJBCA_WSDL: "https://x509-ejbca:8443/ejbca/ejbcaws/ejbcaws?wsdl"
@@ -382,7 +383,7 @@ services:
       - "complete"
 
   certificate-acl:
-    image: dojot/certificate-acl:${DOJOT_VERSION}
+    image: dojot/certificate-acl:${DOJOT_BACKEND_VERSION}
     environment:
       CERTIFICATE_ACL_LOGGER_CONSOLE_LEVEL: "info"
       CERTIFICATE_ACL_KEYCLOAK_CLIENT_SECRET_FILE: "dojot-certificate-acl"
@@ -402,16 +403,16 @@ services:
       - "certificate-acl"
       - "basic-mqtt"
       - "complete"
-  
+
   basic-auth:
-    image: dojot/device-basic-authentication:${DOJOT_VERSION}
+    image: dojot/device-basic-authentication:${DOJOT_BACKEND_VERSION}
     restart: always
     ports:
       - "3002:3000"
     depends_on:
       - kafka
       - mongodb
-      - device-manager    
+      - device-manager
     environment:
       BASIC_AUTH_LOG_CONSOLE_LEVEL: 'info'
       BASIC_AUTH_LOG_VERBOSE: "true"
@@ -429,7 +430,7 @@ services:
 
   ## kong
   kong-migrations:
-    image: dojot/kong:feature-api-gateway-kong  #dojot/kong:${DOJOT_VERSION}
+    image: dojot/kong:feature-api-gateway-kong  #dojot/kong:${DOJOT_BACKEND_VERSION}
     command: kong migrations bootstrap
     depends_on:
       postgres:
@@ -451,7 +452,7 @@ services:
       - "complete"
 
   kong-migrations-up:
-    image:  dojot/kong:feature-api-gateway-kong  #dojot/kong:${DOJOT_VERSION}
+    image:  dojot/kong:feature-api-gateway-kong  #dojot/kong:${DOJOT_BACKEND_VERSION}
     command: kong migrations up && kong migrations finish
     depends_on:
       postgres:
@@ -488,7 +489,7 @@ services:
       - "complete"
 
   apigw:
-    image: dojot/kong:feature-api-gateway-kong  #dojot/kong:feature-api-gateway-kong  #dojot/kong:${DOJOT_VERSION}
+    image: dojot/kong:feature-api-gateway-kong  #dojot/kong:feature-api-gateway-kong  #dojot/kong:${DOJOT_BACKEND_VERSION}
     depends_on:
       postgres:
         condition: service_healthy
@@ -579,7 +580,7 @@ services:
 
   ##kafka-ws
   kafka-ws:
-    image: dojot/kafka-ws:${DOJOT_VERSION}
+    image: dojot/kafka-ws:${DOJOT_BACKEND_VERSION}
     depends_on:
       - kafka
       - kafka-ws-redis
@@ -629,10 +630,12 @@ services:
     profiles:
       - "backstage"
       - "front-end"
+      - "basic-http"
+      - "basic-mqtt"
       - "complete"
 
   backstage:
-    image: dojot/backstage:${DOJOT_VERSION}
+    image: dojot/backstage:${DOJOT_FRONTEND_VERSION}
     restart: always
     depends_on:
       - keycloak
@@ -646,6 +649,8 @@ services:
     profiles:
       - "backstage"
       - "front-end"
+      - "basic-http"
+      - "basic-mqtt"
       - "complete"
     environment:
       BS_SESSION_SECRET: XeQNTdxLl8UGiOpgyEvm
@@ -665,11 +670,11 @@ services:
       BS_USE_INFLUXDB: "true"
 
   ## IoT-Agent
-  http-agent-redis:
+  http-agent-redis-x509:
     image: dojot/redis:6.0.4-alpine3.11
     restart: always
     volumes:
-      - http-agent-redis-volume:/data
+      - http-agent-redis-x509-volume:/data
     <<: *loki-logging
     <<: *dojot-networking
     profiles:
@@ -677,15 +682,15 @@ services:
       - "complete"
 
 
-  http-agent-cert-sidecar:
-    image: dojot/cert-sidecar:${DOJOT_VERSION}
+  http-agent-cert-sidecar-x509:
+    image: dojot/cert-sidecar:${DOJOT_BACKEND_VERSION}
     depends_on:
       - x509-identity-mgmt
     environment:
-      CERT_SC_APP_SIDECAR_TO: 'http-agent'
+      CERT_SC_APP_SIDECAR_TO: 'http-agent-x509'
       CERT_SC_LOG_CONSOLE_LEVEL: 'info'
-      CERT_SC_CERTS_HOSTNAMES: '["http-agent", "${DOJOT_DOMAIN_NAME:-localhost}"]'
-      HOSTNAME: http-agent
+      CERT_SC_CERTS_HOSTNAMES: '["http-agent-x509", "${DOJOT_DOMAIN_NAME:-localhost}"]'
+      HOSTNAME: http-agent-x509
       CERT_SC_CERTS_FILES_BASEPATH: /certs
       CERT_SC_CERTS_FILES_CA: ca.crt
       CERT_SC_CERTS_FILES_CERT: http-agent.crt
@@ -694,7 +699,7 @@ services:
       CERT_SC_CERTS_FILES_CABUNDLE: cabundle.crt
       CERT_SC_CRON_CABUNDLE: "true"
     volumes:
-      - http-agent-cert-sidecar-volume:/certs
+      - http-agent-cert-sidecar-x509-volume:/certs
       - ./secrets:/secrets
     restart: always
     <<: *loki-logging
@@ -704,26 +709,24 @@ services:
       - "complete"
 
 
-  http-agent:
-    image: dojot/http-agent:${DOJOT_VERSION}
+  http-agent-x509:
+    image: dojot/http-agent:${DOJOT_BACKEND_VERSION}
     restart: always
     depends_on:
       - kafka
       - certificate-acl
     ports:
       - 3000:3000
-      - 3001:3001
     environment:
       HTTP_AGENT_HTTPS_CERT: '/certs/http-agent.crt'
       HTTP_AGENT_HTTPS_KEY: '/certs/http-agent.key'
       HTTP_AGENT_HTTPS_CA: '/certs/cabundle.crt'
       HTTP_AGENT_SECURITY_CRL: '/certs/ca.crl'
       HTTP_AGENT_SECURITY_CERT_DIRECTORY: '/certs'
+      HTTP_AGENT_REDIS_HOST: 'http-agent-redis-x509'
       HTTP_AGENT_LOG_CONSOLE_LEVEL: 'info'
-      HTTP_AGENT_SECURITY_UNSECURE_MODE: 'true' 
-      HTTP_AGENT_SECURITY_AUTHORIZATION_MODE: 'basic-auth'
     volumes:
-      - http-agent-cert-sidecar-volume:/certs
+      - http-agent-cert-sidecar-x509-volume:/certs
       - ./secrets:/secrets
     <<: *loki-logging
     <<: *dojot-networking
@@ -731,9 +734,42 @@ services:
       - "http-agent-x509"
       - "complete"
 
+  http-agent-redis-basic:
+    image: dojot/redis:6.0.4-alpine3.11
+    restart: always
+    volumes:
+      - http-agent-redis-basic-volume:/data
+    <<: *loki-logging
+    <<: *dojot-networking
+    profiles:
+      - "http-agent-basic"
+      - "basic-http"
+      - "complete"
+
+  http-agent-basic:
+    image: dojot/http-agent:${DOJOT_BACKEND_VERSION}
+    restart: always
+    depends_on:
+      - kafka
+    ports:
+      - 3001:3001
+    environment:
+      HTTP_AGENT_LOG_CONSOLE_LEVEL: 'debug'
+      HTTP_AGENT_SECURITY_UNSECURE_MODE_ONLY: 'true'
+      HTTP_AGENT_SECURITY_UNSECURE_MODE: 'true'
+      HTTP_AGENT_SECURITY_AUTHORIZATION_MODE: 'basic-auth'
+      HTTP_AGENT_REDIS_HOST: 'http-agent-redis-basic'
+    volumes:
+      - ./secrets:/secrets
+    <<: *loki-logging
+    <<: *dojot-networking
+    profiles:
+      - "http-agent-basic"
+      - "basic-http"
+      - "complete"
 
   iotagent-mqtt:
-    image: dojot/vernemq-dojot:${DOJOT_VERSION}
+    image: dojot/vernemq-dojot:${DOJOT_BACKEND_VERSION}
     command: ["/bin/bash", "-c", "echo $$VERNEMQ_CONF | base64 -d > /etc/vernemq/vernemq.conf; echo $$VM_ARGS | base64 -d > /etc/vernemq/vm.args; start_vernemq"]
     depends_on:
       - iotagent-mqtt-cert-sidecar
@@ -760,7 +796,7 @@ services:
       - "complete"
 
   iotagent-mqtt-keycloak-sidecar:
-    image: dojot/keycloak-microservice-sidecar:${DOJOT_VERSION}
+    image: dojot/keycloak-microservice-sidecar:${DOJOT_BACKEND_VERSION}
     environment:
       HOSTNAME: 'iotagent-mqtt-keycloak-sidecar-1'
       KEYCLOAKMICROSERVICESIDECAR_LOGGER_CONSOLE_LEVEL: "info"
@@ -781,9 +817,9 @@ services:
       - "iotagent-mqtt"
       - "basic-mqtt"
       - "complete"
-    
+
   iotagent-mqtt-cert-sidecar:
-    image: dojot/cert-sidecar:${DOJOT_VERSION}
+    image: dojot/cert-sidecar:${DOJOT_BACKEND_VERSION}
     depends_on:
       - x509-identity-mgmt
     environment:
@@ -813,7 +849,7 @@ services:
       - "complete"
 
   v2k-bridge:
-    image: dojot/v2k-bridge:${DOJOT_VERSION}
+    image: dojot/v2k-bridge:${DOJOT_BACKEND_VERSION}
     depends_on:
       - iotagent-mqtt
       - kafka
@@ -838,7 +874,7 @@ services:
       - "complete"
 
   v2k-bridge-cert-sidecar:
-    image: dojot/cert-sidecar:${DOJOT_VERSION}
+    image: dojot/cert-sidecar:${DOJOT_BACKEND_VERSION}
     depends_on:
       - x509-identity-mgmt
     environment:
@@ -863,7 +899,7 @@ services:
       - "complete"
 
   k2v-bridge:
-    image: dojot/k2v-bridge:${DOJOT_VERSION}
+    image: dojot/k2v-bridge:${DOJOT_BACKEND_VERSION}
     depends_on:
       - iotagent-mqtt
       - kafka
@@ -888,7 +924,7 @@ services:
       - "complete"
 
   k2v-bridge-cert-sidecar:
-    image: dojot/cert-sidecar:${DOJOT_VERSION}
+    image: dojot/cert-sidecar:${DOJOT_BACKEND_VERSION}
     depends_on:
       - x509-identity-mgmt
     volumes:
@@ -903,7 +939,7 @@ services:
       CERT_SC_CERTS_FILES_BASEPATH: /certs
       CERT_SC_CERTS_FILES_CA: ca.crt
       CERT_SC_CERTS_FILES_CERT: k2v-bridge.crt
-      CERT_SC_CERTS_FILES_KEY: k2v-bridge.key     
+      CERT_SC_CERTS_FILES_KEY: k2v-bridge.key
     restart: always
     <<: *loki-logging
     <<: *dojot-networking
@@ -946,7 +982,7 @@ services:
       - "complete"
 
   file-mgmt:
-    image: dojot/file-mgmt:${DOJOT_VERSION}
+    image: dojot/file-mgmt:${DOJOT_BACKEND_VERSION}
     restart: always
     depends_on:
       - minio-files
@@ -987,7 +1023,7 @@ services:
 
   ## storage
   influxdb-retriever:
-    image: dojot/influxdb-retriever:${DOJOT_VERSION}
+    image: dojot/influxdb-retriever:${DOJOT_BACKEND_VERSION}
     depends_on:
       - device-manager
       - kafka
@@ -1013,7 +1049,7 @@ services:
       - "complete"
 
   influxdb-storer:
-    image: dojot/influxdb-storer:${DOJOT_VERSION}
+    image: dojot/influxdb-storer:${DOJOT_BACKEND_VERSION}
     depends_on:
       - kafka
       - influxdb
@@ -1070,7 +1106,7 @@ services:
 
   ## Cron
   cron:
-    image: dojot/cron:${DOJOT_VERSION}
+    image: dojot/cron:${DOJOT_BACKEND_VERSION}
     restart: always
     environment:
       CRON_KEYCLOAK_URL: "http://keycloak:8080"
@@ -1102,7 +1138,7 @@ services:
 
   # GUI NX MFE
   container-nx:
-    image: dojot/container-nx:${DOJOT_VERSION}
+    image: dojot/container-nx:${DOJOT_FRONTEND_VERSION}
     depends_on:
       - backstage
     restart: always
@@ -1116,7 +1152,7 @@ services:
       - "complete"
 
   common-nx:
-    image: dojot/common-nx:${DOJOT_VERSION}
+    image: dojot/common-nx:${DOJOT_FRONTEND_VERSION}
     depends_on:
       - backstage
     restart: always
@@ -1130,7 +1166,7 @@ services:
       - "complete"
 
   home-nx:
-    image: dojot/home-nx:${DOJOT_VERSION}
+    image: dojot/home-nx:${DOJOT_FRONTEND_VERSION}
     depends_on:
       - backstage
     restart: always
@@ -1144,7 +1180,7 @@ services:
       - "complete"
 
   dashboard-nx:
-    image: dojot/dashboard-nx:${DOJOT_VERSION}
+    image: dojot/dashboard-nx:${DOJOT_FRONTEND_VERSION}
     depends_on:
       - backstage
     restart: always
@@ -1158,7 +1194,7 @@ services:
       - "complete"
 
   devices-nx:
-    image: dojot/devices-nx:${DOJOT_VERSION}
+    image: dojot/devices-nx:${DOJOT_FRONTEND_VERSION}
     depends_on:
       - backstage
     restart: always
@@ -1172,7 +1208,7 @@ services:
       - "complete"
 
   templates-nx:
-    image: dojot/templates-nx:${DOJOT_VERSION}
+    image: dojot/templates-nx:${DOJOT_FRONTEND_VERSION}
     depends_on:
       - backstage
     restart: always
@@ -1186,7 +1222,7 @@ services:
       - "complete"
 
   security-nx:
-    image: dojot/security-nx:${DOJOT_VERSION}
+    image: dojot/security-nx:${DOJOT_FRONTEND_VERSION}
     depends_on:
       - backstage
     restart: always
@@ -1205,16 +1241,15 @@ volumes:
   postgres-volume:
   mongodb-volume:
   mongodb-cfg-volume:
-  # minio-volume:
   minio-file-volume:
-  # rabbitmq-volume:
   zookeeper-volume:
   zookeeper-log-volume:
   zookeeper-secrets-volume:
   kafka-volume:
   kafka-secrets-volume:
-  http-agent-cert-sidecar-volume:
-  http-agent-redis-volume:
+  http-agent-cert-sidecar-x509-volume:
+  http-agent-redis-x509-volume:
+  http-agent-redis-basic-volume:
   certs:
   ca:
   iotagent-mqtt-cert-side-volume:
@@ -1223,9 +1258,6 @@ volumes:
   iotagent-mqtt-etc-volume:
   v2k-bridge-cert-side-volume:
   k2v-bridge-cert-side-volume:
-  # flowbroker-volume:
-  # flowbroker-redis-volume:
-  data-broker-redis-volume:
   kafka-ws-redis-volume:
   backstage-redis-volume:
   influxdb-volume:
@@ -1241,5 +1273,3 @@ secrets:
 networks:
   default:
     name: dojot
-  flowbroker:
-    name: ${FLOWBROKER_NETWORK}
