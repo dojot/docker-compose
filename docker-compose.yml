@@ -957,9 +957,6 @@ services:
     volumes:
       - minio-file-volume:/data
       - ./secrets:/secrets
-    ports:
-      - "9010:9000"
-      - "9011:9001"
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:9001/minio/health/live"]
       interval: 30s
@@ -996,6 +993,7 @@ services:
       FILEMGMT_SERVER_HOST: file-mgmt
       FILEMGMT_MINIO_ACCESS_KEY_FILE: MINIO_ACCESS_KEY
       FILEMGMT_MINIO_SECRET_KEY_FILE: MINIO_SECRET_KEY
+      FILEMGMT_MINIO_BUCKET_SUFFIX: ${MINIO_BUCKET_SUFFIX}
       FILEMGMT_CONSUMER_METADATA_BROKER_LIST: kafka:9092
       FILEMGMT_KEYCLOAK_TENANTS_URL: "http://keycloak-proxy:8081/api/v1/tenant"
       FILEMGMT_KEYCLOAK_URL: "http://keycloak:8080"
