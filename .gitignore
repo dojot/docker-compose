@@ -8,7 +8,5 @@ build/
 .vscode/
 .history/
 
-secrets/MINIO_ACCESS_KEY
-secrets/MINIO_SECRET_KEY
 secrets/*
 !secrets/create_secrets.sh
