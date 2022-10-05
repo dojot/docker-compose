@@ -1234,6 +1234,77 @@ services:
       - "basic-mqtt"
       - "complete"
 
+  # GUI to Kong Admin API - BEGIN
+  # Konga GUI will be available at http://localhost:1337
+  #
+  konga:
+    image: dojot/pantsel_konga:0.14.7
+    ports:
+      - 1337:1337
+    environment:
+      DB_ADAPTER: mongo
+      DB_DATABASE: konga
+      DB_HOST: mongodb
+      KONGA_LOG_LEVEL: info
+      NO_AUTH: "true"
+      KONGA_SEED_KONG_NODE_DATA_SOURCE_FILE: /konga.js
+      NODE_ENV: production
+      BASE_URL: ${DOJOT_DOMAIN_NAME:-"localhost"}
+    volumes:
+      - ./kong/konga.config.js:/konga.js:ro
+    restart: on-failure
+    logging:
+      driver: json-file
+      options:
+        max-size: 20m
+        max-file: '5'
+    profiles:
+      - "tools"
+
+
+  # GUI to Kafka - BEGIN
+  kafdrop:
+    image: obsidiandynamics/kafdrop:latest
+    ports:
+      - 9090:9000
+    environment:
+      KAFKA_BROKERCONNECT: "kafka:9092"
+      JVM_OPTS: "-Xms32M -Xmx64M"
+      SERVER_SERVLET_CONTEXTPATH: "/"
+    restart: on-failure
+    logging:
+      driver: json-file
+      options:
+        max-size: 20m
+        max-file: '5'
+    profiles:
+      - "tools"
+
+# GUI to mongo - BEGIN
+# GUI will be available at http://${DOJOT_DOMAIN_NAME}:8383
+  mongo-express-gui:
+    image: mongo-express
+    restart: always
+    environment:
+      ME_CONFIG_MONGODB_SERVER: mongodb
+    ports:
+      - "8383:8081"
+    profiles:
+      - "tools"
+
+# GUI to postgres - BEGIN
+# GUI will be available at http://${DOJOT_DOMAIN_NAME}:5050
+  pgadmin:
+    image: dpage/pgadmin4
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@pgadmin.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+    restart: always
+    ports:
+      - 5050:80
+    profiles:
+    - "tools"
+
 volumes:
   ejbca-volume:
   ejbca-client-tls-volume:
