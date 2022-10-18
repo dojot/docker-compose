@@ -1048,7 +1048,7 @@ services:
       - "complete"
 
   influxdb-telegraf:
-    image: dojot/telegraf:dev
+    image: dojot/telegraf:${DOJOT_BACKEND_VERSION}
     depends_on:
       - kafka
       - influxdb
