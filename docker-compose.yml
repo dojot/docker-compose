@@ -1053,7 +1053,7 @@ services:
       - kafka
       - influxdb
     environment:
-      TELEGRAF_DEBUG: true
+      TELEGRAF_DEBUG: false
       TELEGRAF_INFLUXDB_URL: "http://influxdb:8086"
       TELEGRAF_INFLUXDB_TOKEN: "dojot@token_default"
       TELEGRAF_INFLUXDB_BUCKET_NAME: "devices"
@@ -1062,14 +1062,15 @@ services:
       TELEGRAF_KAFKA_DATA_TOPIC: "^.+device-data"
       TELEGRAF_KAFKA_DATA_TOPIC_REFRESH_INTERVAL: "180s"
       TELEGRAF_KAFKA_DATA_OFFSET: oldest
-      TELEGRAF_KAFKA_DATA_MAX_BUFFER: 5000
+      TELEGRAF_KAFKA_DATA_MAX_BUFFER: 10000
       TELEGRAF_DATA_READ_INTERVAL: "3s"
       TELEGRAF_DATA_FLUSH_INTERVAL: "3s"
-      TELEGRAF_DATA_BATCH_SIZE: 2000
-      TELEGRAF_DATA_BUFFER_LIMIT: 10000
+      TELEGRAF_DATA_BATCH_SIZE: 10000
+      TELEGRAF_DATA_BUFFER_LIMIT: 20000
       TELEGRAF_KAFKA_TENANCY_TOPIC: "dojot-management.dojot.tenancy"
       TELEGRAF_KAFKA_TENANCY_OFFSET: oldest
       TELEGRAF_TENANCY_INTERVAL: "120s"
+      TELEGRAF_DEFAULT_RETENTION: 604800
     volumes:
       - ./influxdb/telegraf/:/etc/telegraf/
     restart: always

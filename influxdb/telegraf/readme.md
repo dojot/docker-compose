@@ -20,6 +20,7 @@
 | TELEGRAF_KAFKA_TENANCY_TOPIC                | Tenancy topic in kafka                                                          |               | string                  |
 | TELEGRAF_KAFKA_TENANCY_OFFSET               | Kafka Data topic offset.                                                        | newest        | oldest, newest           |
 | TELEGRAF_KAFKA_TENANCY_INTERVAL             | Interval for verifying a new tenant                                             | 60s           | Intervals are durations of time and can be specified for supporting settings by combining an integer value and time unit as a string value. Valid time units are ns, us (or µs), ms, s, m, h. |
+|TELEGRAF_DEFAULT_RETENTION                   | Data retention in seconds                                                       | 0             | int                       |
 ||
 
 Note: All variables are required
