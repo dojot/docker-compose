@@ -148,6 +148,8 @@ addAuthToEndpoint "file-mgmt"
 
 createEndpoint "minio-files" "http://minio-files:9000"  '"/minio-files"' "true"
 
+createEndpoint "report-manager" "http://report-manager:3791"  '"/report-manager"' "true"
+
 createEndpoint "container-nx" "http://container-nx:80" '"/v2"' "true"
 createEndpoint "common-nx" "http://common-nx:80" '"/mfe/common"' "true"
 createEndpoint "home-nx" "http://home-nx:80" '"/mfe/home"' "true"
