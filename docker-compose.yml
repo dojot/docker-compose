@@ -1153,8 +1153,10 @@ services:
       interval: 30s
       timeout: 20s
       retries: 3
+    <<: *loki-logging
+    <<: *dojot-networking
     profiles:
-      - "device-manager"
+      - "nx"
       - "basic-http"
       - "basic-mqtt"
       - "complete"
@@ -1167,6 +1169,9 @@ services:
     <<: *loki-logging
     <<: *dojot-networking
     profiles:
+      - "nx"
+      - "basic-http"
+      - "basic-mqtt"
       - "complete"
 
 
