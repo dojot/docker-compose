@@ -14,12 +14,14 @@ KEYCLOAK_PROXY_USER_SECRET=$(cat ../secrets/${KEYCLOAK_PROXY_PASSWORD_FILE:-"KEY
 CERT_SUPPORT_CLIENT_ID=${CERT_SUPPORT_CLIENT_ID:-"dojot-cert-support"}
 CERT_SUPPORT_CLIENT_SECRET=$(cat ../secrets/${CERT_SUPPORT_CLIENT_SECRET_FILE:-"dojot-cert-support"})
 
+DOJOT_DOMAIN_NAME=$(grep DOJOT_DOMAIN_NAME /opt/env | awk -F"=" '{print $2}')
 
 echo KEYCLOAK_HOST=$KEYCLOAK_HOST
 echo KEYCLOAK_MASTER_USER=$KEYCLOAK_MASTER_USER
 echo KEYCLOAK_PROXY_CLIENT_ID=${KEYCLOAK_PROXY_CLIENT_ID}
 echo KEYCLOAK_PROXY_USER=${KEYCLOAK_PROXY_USER}
 echo CERT_SUPPORT_CLIENT_ID=${CERT_SUPPORT_CLIENT_ID}
+echo DOJOT_DOMAIN_NAME=${DOJOT_DOMAIN_NAME}
 
 # check if Keycloak is started
 if curl --output /dev/null --silent --head --fail "$KEYCLOAK_HOST"; then
@@ -63,7 +65,7 @@ createKeycloakProxyClient() {
           \"attributes\":{},
           \"redirectUris\":[],
           \"clientId\":\"keycloak-proxy\",
-          \"rootUrl\":\"http://localhost:8000/\",
+          \"rootUrl\":\"http://${DOJOT_DOMAIN_NAME}:8000/\",
           \"protocol\":\"openid-connect\",
           \"publicClient\":false,
           \"secret\":\"${KEYCLOAK_PROXY_CLIENT_SECRET}\",
@@ -124,7 +126,7 @@ createCertSupportClient() {
         \"attributes\":{},
         \"redirectUris\":[],
         \"clientId\":\"${CERT_SUPPORT_CLIENT_ID}\",
-        \"rootUrl\":\"http://localhost:8000/\",
+        \"rootUrl\":\"http://${DOJOT_DOMAIN_NAME}:8000/\",
         \"protocol\":\"openid-connect\",
         \"publicClient\":false,
         \"secret\":\"${CERT_SUPPORT_CLIENT_SECRET}\",

@@ -1,6 +1,6 @@
 #!/bin/sh
 kong="http://apigw:8001"
-dojot_domain_name=${DOJOT_DOMAIN_NAME:-localhost}
+dojot_domain_name=$(grep DOJOT_DOMAIN_NAME /opt/env | awk -F"=" '{print $2}')
 route_allow_only_https=${DOJOT_KONG_ROUTE_ALLOW_ONLY_HTTPS:-false}
 
 route_allow_protocol='"http","https"'
@@ -155,6 +155,13 @@ createEndpoint "dashboard-nx" "http://dashboard-nx:80" '"/mfe/dashboard"' "true"
 createEndpoint "devices-nx" "http://devices-nx:80" '"/mfe/devices"' "true"
 createEndpoint "templates-nx" "http://templates-nx:80" '"/mfe/templates"' "true"
 createEndpoint "security-nx" "http://security-nx:80" '"/mfe/security"' "true"
+
+# service: basic-auth
+createEndpoint  "basic-auth" "http://basic-auth:3000" '"/basic-auth/v1/devices/(.*)/basic-credentials"' "false"
+addAuthToEndpoint "basic-auth"
+
+# service: http-agent
+createEndpoint "http-agent" "http://http-agent:3001"  '"/http-agent/v1/unsecure/incoming-messages(.*)"' "false"
 
 echo ""
 echo ""
