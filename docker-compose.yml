@@ -428,8 +428,6 @@ services:
   basic-auth:
     image: dojot/device-basic-authentication:${DOJOT_BACKEND_VERSION}
     restart: always
-    ports:
-      - "3002:3000"
     depends_on:
       - kafka
       - mongodb
@@ -773,8 +771,6 @@ services:
     restart: always
     depends_on:
       - kafka
-    ports:
-      - 3001:3001
     environment:
       HTTP_AGENT_LOG_CONSOLE_LEVEL: 'debug'
       HTTP_AGENT_SECURITY_UNSECURE_MODE_ONLY: 'true'
