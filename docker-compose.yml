@@ -676,17 +676,17 @@ services:
       BS_SESSION_SECRET: XeQNTdxLl8UGiOpgyEvm
       BS_LOG_CONSOLE_LEVEL: 'info'
       BS_BASE_URL: "http://${DOJOT_DOMAIN_NAME}:8000"
-      BS_GRAPHQL_SECURE: false
+      BS_GRAPHQL_SECURE: "false"
       BS_GRAPHQL_SSL_CA: ${KONG_SSL_CERT_CA:-}
       BS_GRAPHQL_BASE_URL: http://apigw:8000
       BS_SESSION_DOMAIN: ${DOJOT_DOMAIN_NAME}
-      BS_SESSION_COOKIE_HTTPS: false
+      BS_SESSION_COOKIE_HTTPS: "false"
       BS_KEYCLOAK_EXTERNAL_URL: "http://${DOJOT_DOMAIN_NAME}:8000/auth"
       BS_KEYCLOAK_INTERNAL_URL: "http://apigw:8000/auth"
-      BS_KEYCLOAK_SECURE: false
+      BS_KEYCLOAK_SECURE: "false"
       BS_KEYCLOAK_SSL_CA: ${KONG_SSL_CERT_CA:-}
       BS_PROXY_TARGET: http://apigw:8000
-      BS_PROXY_SECURE: false
+      BS_PROXY_SECURE: "false"
       BS_USE_INFLUXDB: "true"
 
   ## IoT-Agent
