@@ -1273,6 +1273,21 @@ services:
       - "basic-mqtt"
       - "complete"
 
+  reports-nx:
+    image: dojot/reports-nx:${DOJOT_VERSION}
+    depends_on:
+      - backstage
+    restart: always
+    <<: *loki-logging
+    <<: *dojot-networking
+    profiles:
+      - "nx"
+      - "front-end"
+      - "basic-http"
+      - "basic-mqtt"
+      - "complete"
+
+
   # GUI to Kong Admin API - BEGIN
   # Konga GUI will be available at http://localhost:1337
   #
