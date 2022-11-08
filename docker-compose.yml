@@ -266,8 +266,7 @@ services:
       - "complete"
 
   device-manager-sidecar:
-    #image: dojot/keycloak-microservice-sidecar:${DOJOT_BACKEND_VERSION}
-    image: marianoleonardo/keycloak-microservice-sidecar:temporary-solution
+    image: dojot/keycloak-microservice-sidecar:${DOJOT_BACKEND_VERSION}
     restart: always
     depends_on:
       - keycloak
@@ -814,8 +813,7 @@ services:
       - "complete"
 
   iotagent-mqtt-keycloak-sidecar:
-    #image: dojot/keycloak-microservice-sidecar:${DOJOT_BACKEND_VERSION}
-    image: marianoleonardo/keycloak-microservice-sidecar:temporary-solution
+    image: dojot/keycloak-microservice-sidecar:${DOJOT_BACKEND_VERSION}
     environment:
       HOSTNAME: 'iotagent-mqtt-keycloak-sidecar-1'
       KEYCLOAKMICROSERVICESIDECAR_LOGGER_CONSOLE_LEVEL: "info"
