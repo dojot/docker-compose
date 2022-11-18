@@ -1052,7 +1052,9 @@ services:
       RETRIEVER_KEYCLOAK_CLIENT_ID: "dojot-influxdb-retriever"
       RETRIEVER_KEYCLOAK_CLIENT_SECRET_FILE: "dojot-influxdb-retriever"
       RETRIEVER_SYNC_DEVICES: "http://device-manager-sidecar:5000/device"
-      RETRIEVER_SYNC_CRON_EXPRESSION: "* */3 * * *"
+      RETRIEVER_SYNC_CRON_EXPRESSION: "0 0 */3 * * *"
+      RETRIEVER_CONSUMER_TOPIC_METADATA_REFRESH_INTERVAL_MS: 6000
+      RETRIEVER_TOPIC_AUTO_OFFSET_RESET: "earliest"
     restart: always
     volumes:
       - ./secrets:/secrets
@@ -1077,6 +1079,8 @@ services:
       TELEGRAF_KAFKA_BROKER: "kafka:9092"
       TELEGRAF_KAFKA_CONSUMER_GROUP: "influxdb-telegraf"
       TELEGRAF_KAFKA_DATA_TOPIC: "^.+device-data"
+      TELEGRAF_KAFKA_ACTUATE_TOPIC: "^.+dojot.device-manager.device.actuation"
+      TELEGRAF_KAFKA_TENANCY_TOPIC: "dojot-management.dojot.tenancy"
       TELEGRAF_KAFKA_DATA_TOPIC_REFRESH_INTERVAL: "180s"
       TELEGRAF_KAFKA_DATA_OFFSET: oldest
       TELEGRAF_KAFKA_DATA_MAX_BUFFER: 10000
@@ -1084,7 +1088,6 @@ services:
       TELEGRAF_DATA_FLUSH_INTERVAL: "3s"
       TELEGRAF_DATA_BATCH_SIZE: 10000
       TELEGRAF_DATA_BUFFER_LIMIT: 20000
-      TELEGRAF_KAFKA_TENANCY_TOPIC: "dojot-management.dojot.tenancy"
       TELEGRAF_KAFKA_TENANCY_OFFSET: oldest
       TELEGRAF_TENANCY_INTERVAL: "120s"
       TELEGRAF_DEFAULT_RETENTION: 604800
