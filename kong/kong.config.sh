@@ -185,3 +185,22 @@ curl  -s  -sS -X POST \
     --data "config.header_name=X-Request-Id" \
     --data "config.generator=uuid" \
     --data "config.echo_downstream=false"
+
+echo ""
+echo ""
+echo "*********************AUDIT*******************************"
+
+curl -sS -X POST \
+--url ${kong}/services/device-manager-devices/plugins/ \
+--data "name=file-log"  \
+--data "config.path=/home/kong/device.log"
+
+curl -sS -X POST \
+--url ${kong}/services/device-manager-template/plugins/ \
+--data "name=file-log"  \
+--data "config.path=/home/kong/template.log"
+
+curl -sS -X POST \
+--url ${kong}/services/x509-identity-mgmt/plugins/ \
+--data "name=file-log"  \
+--data "config.path=/home/kong/x509-identity-mgmt.log"
