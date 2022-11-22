@@ -1333,7 +1333,7 @@ services:
       - "complete"
 
   reports-nx:
-    image: dojot/reports-nx:${DOJOT_VERSION}
+    image: dojot/reports-nx:${DOJOT_FRONTEND_VERSION}
     depends_on:
       - backstage
     restart: always
