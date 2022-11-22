@@ -2383,6 +2383,143 @@
             }
         },
         {
+          "id": "cb6ed391-5660-4f99-8686-7d10b1ef3343",
+          "clientId": "dojot-device-manager-batch",
+          "rootUrl": "http://localhost:8000",
+          "adminUrl": "http://localhost:8000/",
+          "surrogateAuthRequired": false,
+          "enabled": true,
+          "alwaysDisplayInConsole": false,
+          "clientAuthenticatorType": "client-secret",
+          "secret": "**********",
+          "redirectUris": [
+            "http://localhost:8000/*"
+          ],
+          "webOrigins": [
+            "http://localhost:8000"
+          ],
+          "notBefore": 0,
+          "bearerOnly": false,
+          "consentRequired": false,
+          "standardFlowEnabled": true,
+          "implicitFlowEnabled": false,
+          "directAccessGrantsEnabled": true,
+          "serviceAccountsEnabled": true,
+          "authorizationServicesEnabled": true,
+          "publicClient": false,
+          "frontchannelLogout": false,
+          "protocol": "openid-connect",
+          "attributes": {
+            "backchannel.logout.session.required": "true",
+            "backchannel.logout.revoke.offline.tokens": "false"
+          },
+          "authenticationFlowBindingOverrides": {},
+          "fullScopeAllowed": true,
+          "nodeReRegistrationTimeout": -1,
+          "protocolMappers": [
+            {
+              "id": "e01f0d22-e6fa-47eb-9ba8-373b89d724b7",
+              "name": "Client ID",
+              "protocol": "openid-connect",
+              "protocolMapper": "oidc-usersessionmodel-note-mapper",
+              "consentRequired": false,
+              "config": {
+                "user.session.note": "clientId",
+                "userinfo.token.claim": "true",
+                "id.token.claim": "true",
+                "access.token.claim": "true",
+                "claim.name": "clientId",
+                "jsonType.label": "String"
+              }
+            },
+            {
+              "id": "a4f57082-0f8d-44f8-90e8-2555faeb1aa7",
+              "name": "Client Host",
+              "protocol": "openid-connect",
+              "protocolMapper": "oidc-usersessionmodel-note-mapper",
+              "consentRequired": false,
+              "config": {
+                "user.session.note": "clientHost",
+                "userinfo.token.claim": "true",
+                "id.token.claim": "true",
+                "access.token.claim": "true",
+                "claim.name": "clientHost",
+                "jsonType.label": "String"
+              }
+            },
+            {
+              "id": "05d91ae4-64e4-40e3-95e3-07bf663d1732",
+              "name": "Client IP Address",
+              "protocol": "openid-connect",
+              "protocolMapper": "oidc-usersessionmodel-note-mapper",
+              "consentRequired": false,
+              "config": {
+                "user.session.note": "clientAddress",
+                "userinfo.token.claim": "true",
+                "id.token.claim": "true",
+                "access.token.claim": "true",
+                "claim.name": "clientAddress",
+                "jsonType.label": "String"
+              }
+            }
+          ],
+          "defaultClientScopes": [
+            "web-origins",
+            "profile",
+            "roles",
+            "email"
+          ],
+          "optionalClientScopes": [
+            "address",
+            "phone",
+            "offline_access",
+            "microprofile-jwt"
+          ],
+          "authorizationSettings": {
+            "allowRemoteResourceManagement": true,
+            "policyEnforcementMode": "ENFORCING",
+            "resources": [
+              {
+                "name": "Default Resource",
+                "type": "urn:dojot-device-manager-batch:resources:default",
+                "ownerManagedAccess": false,
+                "attributes": {},
+                "_id": "9265e051-bc41-4cab-96d3-7844795f0abb",
+                "uris": [
+                  "/*"
+                ]
+              }
+            ],
+            "policies": [
+              {
+                "id": "7227bf1e-e3b2-4921-b59f-f5d4806925ab",
+                "name": "Default Policy",
+                "description": "A policy that grants access only for users within this realm",
+                "type": "js",
+                "logic": "POSITIVE",
+                "decisionStrategy": "AFFIRMATIVE",
+                "config": {
+                  "code": "// by default, grants any permission associated with this policy\n$evaluation.grant();\n"
+                }
+              },
+              {
+                "id": "22df7b7e-606f-4090-9a06-f5a14bc144c7",
+                "name": "Default Permission",
+                "description": "A permission that applies to the default resource type",
+                "type": "resource",
+                "logic": "POSITIVE",
+                "decisionStrategy": "UNANIMOUS",
+                "config": {
+                  "defaultResourceType": "urn:dojot-device-manager-batch:resources:default",
+                  "applyPolicies": "[\"Default Policy\"]"
+                }
+              }
+            ],
+            "scopes": [],
+            "decisionStrategy": "UNANIMOUS"
+          }
+        },
+        {
             "id": "d8b0b24a-5b8b-4860-982e-f2f2e7e5e488",
             "clientId": "dojot-device-manager-sidecar",
             "rootUrl": "http://localhost:8000/",

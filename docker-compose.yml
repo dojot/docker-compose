@@ -265,6 +265,30 @@ services:
       - "basic-mqtt"
       - "complete"
 
+  device-manager-batch:
+    #image: marcelopimentel/dojot-device-manager-batch:v2_22112022
+    image: dojot/device-manager-batch:dev
+    restart: always
+    depends_on:
+     - kafka
+     - keycloak
+     - keycloak-proxy
+     - postgres
+     - device-manager
+    environment:
+      HOSTNAME: 'device-manager-batch-1'
+      DEVICEMANAGERBATCH_CONSUMER_METADATA_BROKER_LIST: kafka:9092
+      DEVICEMANAGERBATCH_KEYCLOAK_TENANTS_URL: "http://keycloak-proxy:8081/api/v1/tenant"
+      DEVICEMANAGERBATCH_KEYCLOAK_URL: "http://keycloak:8080"
+      DEVICEMANAGERBATCH_KEYCLOAK_CLIENT_ID: dojot-device-manager-batch
+      DEVICEMANAGERBATCH_KEYCLOAK_CLIENT_SECRET_FILE: dojot-device-manager-batch
+    volumes:
+     - ./secrets:/secrets
+    profiles:
+     - "device-manager"
+     - "basic-http"
+     - "basic-mqtt"
+     - "complete"    
   device-manager-sidecar:
     image: dojot/keycloak-microservice-sidecar:${DOJOT_BACKEND_VERSION}
     restart: always
