@@ -1052,7 +1052,9 @@ services:
       RETRIEVER_KEYCLOAK_CLIENT_ID: "dojot-influxdb-retriever"
       RETRIEVER_KEYCLOAK_CLIENT_SECRET_FILE: "dojot-influxdb-retriever"
       RETRIEVER_SYNC_DEVICES: "http://device-manager-sidecar:5000/device"
-      RETRIEVER_SYNC_CRON_EXPRESSION: "* */3 * * *"
+      RETRIEVER_SYNC_CRON_EXPRESSION: "0 0 */3 * * *"
+      RETRIEVER_CONSUMER_TOPIC_METADATA_REFRESH_INTERVAL_MS: 6000
+      RETRIEVER_TOPIC_AUTO_OFFSET_RESET: "earliest"
     restart: always
     volumes:
       - ./secrets:/secrets
@@ -1064,14 +1066,33 @@ services:
       - "basic-mqtt"
       - "complete"
 
-  influxdb-storer:
-    image: dojot/influxdb-storer:${DOJOT_BACKEND_VERSION}
+  influxdb-telegraf:
+    image: dojot/telegraf:${DOJOT_BACKEND_VERSION}
     depends_on:
       - kafka
       - influxdb
     environment:
-      STORER_LOG_CONSOLE_LEVEL: "info"
-      STORER_INFLUX_RETENTION_HRS: 168 # used only for new created tenant after default
+      TELEGRAF_DEBUG: false
+      TELEGRAF_INFLUXDB_URL: "http://influxdb:8086"
+      TELEGRAF_INFLUXDB_TOKEN: "dojot@token_default"
+      TELEGRAF_INFLUXDB_BUCKET_NAME: "devices"
+      TELEGRAF_KAFKA_BROKER: "kafka:9092"
+      TELEGRAF_KAFKA_CONSUMER_GROUP: "influxdb-telegraf"
+      TELEGRAF_KAFKA_DATA_TOPIC: "^.+device-data"
+      TELEGRAF_KAFKA_ACTUATE_TOPIC: "^.+dojot.device-manager.device.actuation"
+      TELEGRAF_KAFKA_TENANCY_TOPIC: "dojot-management.dojot.tenancy"
+      TELEGRAF_KAFKA_DATA_TOPIC_REFRESH_INTERVAL: "180s"
+      TELEGRAF_KAFKA_DATA_OFFSET: oldest
+      TELEGRAF_KAFKA_DATA_MAX_BUFFER: 10000
+      TELEGRAF_DATA_READ_INTERVAL: "3s"
+      TELEGRAF_DATA_FLUSH_INTERVAL: "3s"
+      TELEGRAF_DATA_BATCH_SIZE: 10000
+      TELEGRAF_DATA_BUFFER_LIMIT: 20000
+      TELEGRAF_KAFKA_TENANCY_OFFSET: oldest
+      TELEGRAF_TENANCY_INTERVAL: "120s"
+      TELEGRAF_DEFAULT_RETENTION: 604800
+    volumes:
+      - ./influxdb/telegraf/:/etc/telegraf/
     restart: always
     <<: *loki-logging
     <<: *dojot-networking
