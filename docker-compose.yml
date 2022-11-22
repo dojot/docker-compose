@@ -1193,6 +1193,46 @@ services:
       - "complete"
 
 
+  # Report Manager
+  report-manager:
+    image: dojot/report-manager:${DOJOT_BACKEND_VERSION}
+    restart: always
+    depends_on:
+      - keycloak
+      - keycloak-proxy
+      - postgres
+      - create_secrets
+    environment:
+      HOSTNAME: 'report-manager-1'
+    volumes:
+      - ./secrets:/secrets
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/health"]
+      interval: 30s
+      timeout: 20s
+      retries: 3
+    <<: *loki-logging
+    <<: *dojot-networking
+    profiles:
+      - "nx"
+      - "basic-http"
+      - "basic-mqtt"
+      - "complete"
+
+  report-manager-redis:
+    image: dojot/redis:6.0.4-alpine3.11
+    restart: always
+    volumes:
+      - report-manager-redis-volume:/data
+    <<: *loki-logging
+    <<: *dojot-networking
+    profiles:
+      - "nx"
+      - "basic-http"
+      - "basic-mqtt"
+      - "complete"
+
+
   # GUI NX MFE
   container-nx:
     image: dojot/container-nx:${DOJOT_FRONTEND_VERSION}
@@ -1406,6 +1446,7 @@ volumes:
   influxdb-volume:
   influxdb-chronograf-volume:
   acl-redis-volume:
+  report-manager-redis-volume:
 
 secrets:
   MINIO_SECRET_KEY:
