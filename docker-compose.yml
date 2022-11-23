@@ -883,6 +883,7 @@ services:
     restart: always
     volumes:
       - v2k-bridge-cert-side-volume:/certs
+      - ./secrets:/secrets
     <<: *loki-logging
     <<: *dojot-networking
     profiles:

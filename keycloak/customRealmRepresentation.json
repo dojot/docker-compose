@@ -2937,6 +2937,140 @@
                 "scopes": [],
                 "decisionStrategy": "UNANIMOUS"
             }
+        },
+        {
+            "id": "4349c31c-b3a5-4598-8dc9-1bea112af100",
+            "clientId": "dojot-v2k-bridge",
+            "rootUrl": "http://localhost:8000/",
+            "adminUrl": "http://localhost:8000/",
+            "surrogateAuthRequired": false,
+            "enabled": true,
+            "alwaysDisplayInConsole": false,
+            "clientAuthenticatorType": "client-secret",
+            "secret": "***********",
+            "redirectUris": [
+              "http://localhost:8000/*"
+            ],
+            "webOrigins": [
+              "http://localhost:8000"
+            ],
+            "notBefore": 0,
+            "bearerOnly": false,
+            "consentRequired": false,
+            "standardFlowEnabled": true,
+            "implicitFlowEnabled": false,
+            "directAccessGrantsEnabled": true,
+            "serviceAccountsEnabled": true,
+            "authorizationServicesEnabled": true,
+            "publicClient": false,
+            "frontchannelLogout": false,
+            "protocol": "openid-connect",
+            "attributes": {
+              "backchannel.logout.session.required": "true",
+              "backchannel.logout.revoke.offline.tokens": "false"
+            },
+            "authenticationFlowBindingOverrides": {},
+            "fullScopeAllowed": true,
+            "nodeReRegistrationTimeout": -1,
+            "protocolMappers": [
+              {
+                "id": "04f9867e-82d5-4e8c-984f-d591214c22da",
+                "name": "Client Host",
+                "protocol": "openid-connect",
+                "protocolMapper": "oidc-usersessionmodel-note-mapper",
+                "consentRequired": false,
+                "config": {
+                  "user.session.note": "clientHost",
+                  "id.token.claim": "true",
+                  "access.token.claim": "true",
+                  "claim.name": "clientHost",
+                  "jsonType.label": "String"
+                }
+              },
+              {
+                "id": "9b26fe97-23ba-4ae6-97e2-5c895b3ebded",
+                "name": "Client ID",
+                "protocol": "openid-connect",
+                "protocolMapper": "oidc-usersessionmodel-note-mapper",
+                "consentRequired": false,
+                "config": {
+                  "user.session.note": "clientId",
+                  "id.token.claim": "true",
+                  "access.token.claim": "true",
+                  "claim.name": "clientId",
+                  "jsonType.label": "String"
+                }
+              },
+              {
+                "id": "8eae40f3-ba96-4bda-82e2-d22dd977ddf9",
+                "name": "Client IP Address",
+                "protocol": "openid-connect",
+                "protocolMapper": "oidc-usersessionmodel-note-mapper",
+                "consentRequired": false,
+                "config": {
+                  "user.session.note": "clientAddress",
+                  "id.token.claim": "true",
+                  "access.token.claim": "true",
+                  "claim.name": "clientAddress",
+                  "jsonType.label": "String"
+                }
+              }
+            ],
+            "defaultClientScopes": [
+              "web-origins",
+              "profile",
+              "roles",
+              "email"
+            ],
+            "optionalClientScopes": [
+              "address",
+              "phone",
+              "offline_access",
+              "microprofile-jwt"
+            ],
+            "authorizationSettings": {
+              "allowRemoteResourceManagement": true,
+              "policyEnforcementMode": "ENFORCING",
+              "resources": [
+                {
+                  "name": "Default Resource",
+                  "type": "urn:keycloak-proxy:resources:default",
+                  "ownerManagedAccess": false,
+                  "attributes": {},
+                  "_id": "2b325353-c201-4b26-a408-00dde68df194",
+                  "uris": [
+                    "/*"
+                  ]
+                }
+              ],
+              "policies": [
+                {
+                  "id": "1f239810-63bb-448f-b04e-b7ba72135a92",
+                  "name": "Default Policy",
+                  "description": "A policy that grants access only for users within this realm",
+                  "type": "js",
+                  "logic": "POSITIVE",
+                  "decisionStrategy": "AFFIRMATIVE",
+                  "config": {
+                    "code": "// by default, grants any permission associated with this policy\n$evaluation.grant();\n"
+                  }
+                },
+                {
+                  "id": "0852a31e-9c53-440e-ac9b-cd8f7dc05d24",
+                  "name": "Default Permission",
+                  "description": "A permission that applies to the default resource type",
+                  "type": "resource",
+                  "logic": "POSITIVE",
+                  "decisionStrategy": "UNANIMOUS",
+                  "config": {
+                    "defaultResourceType": "urn:keycloak-proxy:resources:default",
+                    "applyPolicies": "[\"Default Policy\"]"
+                  }
+                }
+              ],
+              "scopes": [],
+              "decisionStrategy": "UNANIMOUS"
+            }
         }
     ],
     "clientScopes": [
