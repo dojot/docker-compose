@@ -266,8 +266,7 @@ services:
       - "complete"
 
   device-manager-batch:
-    #image: marcelopimentel/dojot-device-manager-batch:v2_22112022
-    image: dojot/device-manager-batch:dev
+    image: dojot/device-manager-batch:${DOJOT_BACKEND_VERSION}
     restart: always
     depends_on:
      - kafka
@@ -276,7 +275,7 @@ services:
      - postgres
      - device-manager
     environment:
-      HOSTNAME: 'device-manager-batch-1'
+      HOSTNAME: 'device-manager-batch'
       DEVICEMANAGERBATCH_CONSUMER_METADATA_BROKER_LIST: kafka:9092
       DEVICEMANAGERBATCH_KEYCLOAK_TENANTS_URL: "http://keycloak-proxy:8081/api/v1/tenant"
       DEVICEMANAGERBATCH_KEYCLOAK_URL: "http://keycloak:8080"
