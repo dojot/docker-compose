@@ -287,7 +287,7 @@ services:
      - "device-manager"
      - "basic-http"
      - "basic-mqtt"
-     - "complete"    
+     - "complete"
   device-manager-sidecar:
     image: dojot/keycloak-microservice-sidecar:${DOJOT_BACKEND_VERSION}
     restart: always
