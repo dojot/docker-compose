@@ -558,6 +558,7 @@ services:
       - /dojot/etc/letsencrypt/:/dojot/etc/letsencrypt/:Z
       - ./certs/:/certs/:Z
       - ./ca/:/ca/:Z
+      - ./kong/audit:/home/kong:rw
     <<: *loki-logging
     <<: *dojot-networking
     profiles:
@@ -1332,7 +1333,7 @@ services:
 # GUI to postgres - BEGIN
 # GUI will be available at http://${DOJOT_DOMAIN_NAME}:5050
   pgadmin:
-    image: dpage/pgadmin4
+    image: dpage/pgadmin4:6.9
     environment:
       PGADMIN_DEFAULT_EMAIL: admin@pgadmin.com
       PGADMIN_DEFAULT_PASSWORD: admin
