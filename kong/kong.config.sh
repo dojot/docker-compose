@@ -148,6 +148,9 @@ addAuthToEndpoint "file-mgmt"
 
 createEndpoint "minio-files" "http://minio-files:9000"  '"/minio-files"' "true"
 
+createEndpoint "report-manager" "http://report-manager:3791"  '"/report-manager"' "true"
+addAuthToEndpoint "report-manager"
+
 createEndpoint "container-nx" "http://container-nx:80" '"/v2"' "true"
 createEndpoint "common-nx" "http://common-nx:80" '"/mfe/common"' "true"
 createEndpoint "home-nx" "http://home-nx:80" '"/mfe/home"' "true"
@@ -155,6 +158,7 @@ createEndpoint "dashboard-nx" "http://dashboard-nx:80" '"/mfe/dashboard"' "true"
 createEndpoint "devices-nx" "http://devices-nx:80" '"/mfe/devices"' "true"
 createEndpoint "templates-nx" "http://templates-nx:80" '"/mfe/templates"' "true"
 createEndpoint "security-nx" "http://security-nx:80" '"/mfe/security"' "true"
+createEndpoint "reports-nx" "http://reports-nx:80" '"/mfe/reports"' "true"
 
 # service: basic-auth
 createEndpoint  "basic-auth" "http://basic-auth:3000" '"/basic-auth/v1/devices/(.*)/basic-credentials"' "false"
@@ -185,3 +189,22 @@ curl  -s  -sS -X POST \
     --data "config.header_name=X-Request-Id" \
     --data "config.generator=uuid" \
     --data "config.echo_downstream=false"
+
+echo ""
+echo ""
+echo "*********************AUDIT*******************************"
+
+curl -sS -X POST \
+--url ${kong}/services/device-manager-devices/plugins/ \
+--data "name=file-log"  \
+--data "config.path=/home/kong/device.log"
+
+curl -sS -X POST \
+--url ${kong}/services/device-manager-template/plugins/ \
+--data "name=file-log"  \
+--data "config.path=/home/kong/template.log"
+
+curl -sS -X POST \
+--url ${kong}/services/x509-identity-mgmt/plugins/ \
+--data "name=file-log"  \
+--data "config.path=/home/kong/x509-identity-mgmt.log"
