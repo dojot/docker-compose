@@ -14,6 +14,17 @@ x-networking: &dojot-networking
   networks:
     - default
 
+x-redis: &redis-service
+  image: dojot/redis:6.0.4-alpine3.11
+  restart: always
+  healthcheck:
+    test: ["CMD", "redis-cli", "ping"]
+    interval: 1s
+    timeout: 3s
+    retries: 30
+  <<: *loki-logging
+  <<: *dojot-networking
+
 services:
   ## main
   keycloak-config:
@@ -129,7 +140,7 @@ services:
       retries: 5
     restart: always
     volumes:
-      - ./postgres/init-db.sh:/docker-entrypoint-initdb.d/init-db.sh:Z
+      - ./postgres/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql:ro
       - postgres-volume:/var/lib/postgresql/data
     <<: *loki-logging
     <<: *dojot-networking
@@ -391,17 +402,9 @@ services:
 
 
   acl-redis:
-    image: dojot/redis:6.0.4-alpine3.11
-    restart: always
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 1s
-      timeout: 3s
-      retries: 30
+    <<: *redis-service
     volumes:
       - acl-redis-volume:/data
-    <<: *loki-logging
-    <<: *dojot-networking
     profiles:
       - "certificate-acl"
       - "basic-mqtt"
@@ -629,34 +632,18 @@ services:
 
 
   kafka-ws-redis:
-    image: dojot/redis:6.0.4-alpine3.11
-    restart: always
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 1s
-      timeout: 3s
-      retries: 30
+    <<: *redis-service
     volumes:
       - kafka-ws-redis-volume:/data
-    <<: *loki-logging
-    <<: *dojot-networking
     profiles:
       - "kafka"
       - "complete"
 
   ## GUI
   backstage-redis:
-    image: dojot/redis:6.0.4-alpine3.11
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 1s
-      timeout: 3s
-      retries: 30
-    restart: always
+    <<: *redis-service
     volumes:
       - backstage-redis-volume:/data
-    <<: *loki-logging
-    <<: *dojot-networking
     profiles:
       - "backstage"
       - "front-end"
@@ -706,17 +693,9 @@ services:
 
   ## IoT-Agent
   http-agent-redis-x509:
-    image: dojot/redis:6.0.4-alpine3.11
-    restart: always
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 1s
-      timeout: 3s
-      retries: 30
+    <<: *redis-service
     volumes:
       - http-agent-redis-x509-volume:/data
-    <<: *loki-logging
-    <<: *dojot-networking
     profiles:
       - "http-agent-x509"
       - "complete"
@@ -775,17 +754,9 @@ services:
       - "complete"
 
   http-agent-redis-basic:
-    image: dojot/redis:6.0.4-alpine3.11
-    restart: always
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 1s
-      timeout: 3s
-      retries: 30
+    <<: *redis-service
     volumes:
       - http-agent-redis-basic-volume:/data
-    <<: *loki-logging
-    <<: *dojot-networking
     profiles:
       - "http-agent-basic"
       - "basic-http"
@@ -1262,17 +1233,9 @@ services:
       - "complete"
 
   report-manager-redis:
-    image: dojot/redis:6.0.4-alpine3.11
-    restart: always
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 1s
-      timeout: 3s
-      retries: 30
+    <<: *redis-service
     volumes:
       - report-manager-redis-volume:/data
-    <<: *loki-logging
-    <<: *dojot-networking
     profiles:
       - "nx"
       - "basic-http"
