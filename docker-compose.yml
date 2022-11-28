@@ -1205,7 +1205,9 @@ services:
       - postgres
       - create_secrets
     environment:
-      HOSTNAME: 'report-manager-1'
+      HOSTNAME: "report-manager-1"
+      REPORT_MANAGER_LOGGER_LEVEL: "info"
+      REPORT_MANAGER_LOGGER_VERBOSE: "true"
     volumes:
       - ./secrets:/secrets
     healthcheck:
