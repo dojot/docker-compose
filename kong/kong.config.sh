@@ -162,6 +162,7 @@ createEndpoint "reports-nx" "http://reports-nx:80" '"/mfe/reports"' "true"
 
 # service: device-manager-batch
 createEndpoint "device-manager-batch" "http://device-manager-batch:8089" '"/device-manager-batch"' "true"
+addAuthToEndpoint "device-manager-batch"
 
 # service: basic-auth
 createEndpoint  "basic-auth" "http://basic-auth:3000" '"/basic-auth/v1/devices/(.*)/basic-credentials"' "false"
