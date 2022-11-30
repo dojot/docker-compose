@@ -954,7 +954,7 @@
                         "jsonType.label": "String"
                     }
                 }
-
+        
             ],
             "defaultClientScopes": [
                 "web-origins",
@@ -983,6 +983,54 @@
                         "scopes": [
                             {
                                 "name": "view"
+                            }
+                        ]
+                    },
+                    {
+                        "name": "basic-auth",
+                        "ownerManagedAccess": true,
+                        "displayName": "basic-auth: /basic-auth",
+                        "attributes": {},
+                        "_id": "8f60cd90-5aa1-43fb-9d3e-7b878a2a9fa2",
+                        "uris": [],
+                        "scopes": [
+                            {
+                                "name": "create"
+                            }
+                        ]
+                    },
+                    {
+                        "name": "device-manager-batch",
+                        "ownerManagedAccess": true,
+                        "displayName": "device-manager-batch: /device-manager-batch",
+                        "attributes": {},
+                        "_id": "d092ec11-8404-43f8-ae09-cf769f7d7a26",
+                        "uris": [],
+                        "scopes": [
+                            {
+                                "name": "update"
+                            }
+                        ]
+                    },
+                    {
+                        "name": "report-manager",
+                        "ownerManagedAccess": true,
+                        "displayName": "report-manager: /report-manager",
+                        "attributes": {},
+                        "_id": "a8012ce0-2d5e-4ea4-935e-219f9fea2f5d",
+                        "uris": [],
+                        "scopes": [
+                            {
+                                "name": "create"
+                            },
+                            {
+                                "name": "view"
+                            },
+                            {
+                                "name": "update"
+                            },
+                            {
+                                "name": "delete"
                             }
                         ]
                     },
@@ -1294,6 +1342,42 @@
                         "config": {
                             "resources": "[\"influxdb-retriever\"]",
                             "scopes": "[\"view\", \"create\"]",
+                            "applyPolicies": "[\"Should be user\"]"
+                        }
+                    },
+                    {
+                        "id": "5277e723-dce6-4c5e-853a-addc436f7893",
+                        "name": "Generate basic-auth - /basic-auth",
+                        "type": "scope",
+                        "logic": "POSITIVE",
+                        "decisionStrategy": "UNANIMOUS",
+                        "config": {
+                            "resources": "[\"basic-auth\"]",
+                            "scopes": "[\"create\"]",
+                            "applyPolicies": "[\"Should be user\"]"
+                        }
+                    },
+                    {
+                        "id": "251bf0f7-058a-4732-9a7f-3e613f6e6d17",
+                        "name": "Submit a deletion device batch in device-manager-batch - /device-manager-batch",
+                        "type": "scope",
+                        "logic": "POSITIVE",
+                        "decisionStrategy": "UNANIMOUS",
+                        "config": {
+                            "resources": "[\"device-manager-batch\"]",
+                            "scopes": "[\"update\"]",
+                            "applyPolicies": "[\"Should be user\"]"
+                        }
+                    },
+                    {
+                        "id": "8a388b02-dae7-4465-be45-eca44a7b0fab",
+                        "name": "full access report-manager - /report-manager",
+                        "type": "scope",
+                        "logic": "POSITIVE",
+                        "decisionStrategy": "UNANIMOUS",
+                        "config": {
+                            "resources": "[\"report-manager\"]",
+                            "scopes": "[\"update\",\"create\",\"delete\",\"view\"]",
                             "applyPolicies": "[\"Should be user\"]"
                         }
                     },
