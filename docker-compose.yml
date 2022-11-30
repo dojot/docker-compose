@@ -1207,7 +1207,6 @@ services:
     environment:
       HOSTNAME: "report-manager"
       REPORT_MANAGER_LOGGER_LEVEL: "info"
-      REPORT_MANAGER_LOGGER_VERBOSE: "true"
     volumes:
       - ./secrets:/secrets
     healthcheck:
