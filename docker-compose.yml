@@ -1240,7 +1240,6 @@ services:
       - create-secrets
     environment:
       HOSTNAME: "report-manager"
-      REPORT_MANAGER_LOGGER_LEVEL: "info"
     volumes:
       - ./secrets:/secrets
     healthcheck:
