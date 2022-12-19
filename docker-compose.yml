@@ -1255,25 +1255,19 @@ services:
     <<: *loki-logging
     <<: *dojot-networking
     profiles:
-      - "data-processing"
-      - "import-export-configuration"
+      - "flowbroker"
+      - "basic-http"
+      - "basic-mqtt"
       - "complete"
 
   flowbroker-redis:
-    image: dojot/redis:5.0.5-alpine3.10
-    restart: always
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 1s
-      timeout: 3s
-      retries: 30
+    <<: *redis-service
     volumes:
       - flowbroker-redis-volume:/data
-    <<: *loki-logging
-    <<: *dojot-networking
     profiles:
-      - "data-processing"
-      - "import-export-configuration"
+      - "flowbroker"
+      - "basic-http"
+      - "basic-mqtt"
       - "complete"
 
   flowbroker-context-manager:
@@ -1293,9 +1287,9 @@ services:
     <<: *loki-logging
     <<: *dojot-networking
     profiles:
-      - "data-processing"
-      - "data-processing-context"
-      - "import-export-configuration"
+      - "flowbroker"
+      - "basic-http"
+      - "basic-mqtt"
       - "complete"
 
   rabbitmq:
@@ -1321,8 +1315,9 @@ services:
     <<: *loki-logging
     <<: *dojot-networking
     profiles:
-      - "data-processing"
-      - "import-export-configuration"
+      - "flowbroker"
+      - "basic-http"
+      - "basic-mqtt"
       - "complete"
 
   # Report Manager
@@ -1498,6 +1493,25 @@ services:
 
   reports-nx:
     image: dojot/reports-nx:${DOJOT_FRONTEND_VERSION}
+    depends_on:
+      - backstage
+    restart: always
+    healthcheck:
+      test: ["CMD", "service", "nginx", "status"]
+      interval: 30s
+      timeout: 20s
+      retries: 3
+    <<: *loki-logging
+    <<: *dojot-networking
+    profiles:
+      - "nx"
+      - "front-end"
+      - "basic-http"
+      - "basic-mqtt"
+      - "complete"
+      -
+  flows-nx:
+    image: dojot/flows-nx:${DOJOT_FRONTEND_VERSION}
     depends_on:
       - backstage
     restart: always
