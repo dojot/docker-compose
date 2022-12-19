@@ -1228,6 +1228,102 @@ services:
       - "data-manager"
       - "complete"
 
+  ## Flowbroker
+  flowbroker:
+    image: dojot/flowbroker:${DOJOT_BACKEND_VERSION}
+    environment:
+      DEPLOY_ENGINE: "docker"
+      FLOWBROKER_NETWORK: ${FLOWBROKER_NETWORK}
+      DOJOT_MANAGEMENT_USER: 'flowbroker'
+      KAFKA_GROUP_ID: 'flowbroker-group'
+      LOG_LEVEL: 'info'
+    depends_on:
+      - rabbitmq
+      - kafka
+      - mongodb
+      - keycloak
+      - keycloak-init
+      - flowbroker-context-manager
+      - flowbroker-redis
+    networks:
+      - default
+      - ${FLOWBROKER_NETWORK}
+    volumes:
+      - flowbroker-volume:/data
+      - /var/run/docker.sock:/var/run/docker.sock:Z
+      - ./secrets/:/secrets/
+    <<: *loki-logging
+    <<: *dojot-networking
+    profiles:
+      - "data-processing"
+      - "import-export-configuration"
+      - "complete"
+
+  flowbroker-redis:
+    image: dojot/redis:5.0.5-alpine3.10
+    restart: always
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 1s
+      timeout: 3s
+      retries: 30
+    volumes:
+      - flowbroker-redis-volume:/data
+    <<: *loki-logging
+    <<: *dojot-networking
+    profiles:
+      - "data-processing"
+      - "import-export-configuration"
+      - "complete"
+
+  flowbroker-context-manager:
+    image: dojot/flowbroker-context-manager:${DOJOT_BACKEND_VERSION}
+    restart: always
+    environment:
+      ZOOKEEPER_HOST: zookeeper
+      ZOOKEEPER_PORT: 2181
+      ZEROMQ_PORT: 5556
+      HOLD_LOCK_TIMEOUT: 10000
+      WAIT_LOCK_TIMEOUT: 30000
+    depends_on:
+      - zookeeper
+    networks:
+      - default
+      - flowbroker
+    <<: *loki-logging
+    <<: *dojot-networking
+    profiles:
+      - "data-processing"
+      - "data-processing-context"
+      - "import-export-configuration"
+      - "complete"
+
+  rabbitmq:
+    image: rabbitmq:3.9.10-management-alpine
+    restart: unless-stopped
+    hostname: rabbitmq
+    cap_add:
+      - ALL
+    ulimits:
+      nofile:
+        soft: 2000
+        hard: 2000
+    healthcheck:
+      test: rabbitmq-diagnostics -q ping
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 10s
+    volumes:
+      - type: volume
+        source: rabbitmq-volume
+        target: /var/lib/rabbitmq
+    <<: *loki-logging
+    <<: *dojot-networking
+    profiles:
+      - "data-processing"
+      - "import-export-configuration"
+      - "complete"
 
   # Report Manager
   report-manager:
@@ -1519,6 +1615,9 @@ volumes:
   influxdb-volume:
   influxdb-chronograf-volume:
   acl-redis-volume:
+  flowbroker-redis-volume:
+  rabbitmq-volume:
+  flowbroker-volume:
   report-manager-redis-volume:
 
 secrets:
@@ -1528,5 +1627,7 @@ secrets:
     file: ./secrets/MINIO_ACCESS_KEY
 
 networks:
+  flowbroker:
+    name: ${FLOWBROKER_NETWORK}
   default:
     name: dojot

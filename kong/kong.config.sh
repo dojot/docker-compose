@@ -148,6 +148,15 @@ addAuthToEndpoint "file-mgmt"
 
 createEndpoint "minio-files" "http://minio-files:9000"  '"/minio-files"' "true"
 
+# Flowbroker
+createEndpoint "flows" "http://flowbroker:80"  '"/flows"' "true"
+addAuthToEndpoint "flows"
+
+createEndpoint "flowsIcons" "http://flowbroker:80/icons"  '"/flows/icons"' "true"
+
+createEndpoint "flowsRedImages" "http://flowbroker:80/red/images"  '"/flows/red/images"' "true"
+
+# Gui
 createEndpoint "report-manager" "http://report-manager:3791"  '"/report-manager"' "true"
 addAuthToEndpoint "report-manager"
 
@@ -159,6 +168,7 @@ createEndpoint "devices-nx" "http://devices-nx:80" '"/mfe/devices"' "true"
 createEndpoint "templates-nx" "http://templates-nx:80" '"/mfe/templates"' "true"
 createEndpoint "security-nx" "http://security-nx:80" '"/mfe/security"' "true"
 createEndpoint "reports-nx" "http://reports-nx:80" '"/mfe/reports"' "true"
+createEndpoint "flows-nx" "http://flows-nx:80" '"/mfe/flows"' "true"
 
 # service: device-manager-batch
 createEndpoint "device-manager-batch" "http://device-manager-batch:8089" '"/device-manager-batch"' "true"
@@ -170,6 +180,7 @@ addAuthToEndpoint "basic-auth"
 
 # service: http-agent
 createEndpoint "http-agent-basic" "http://http-agent-basic:3001"  '"/http-agent/v1/unsecure/incoming-messages(.*)"' "false"
+
 
 echo ""
 echo ""

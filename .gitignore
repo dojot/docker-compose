@@ -7,6 +7,7 @@ node_modules
 build/
 .vscode/
 .history/
+.DS_Store
 
 secrets/*
 !secrets/create_secrets.sh
