@@ -1231,6 +1231,7 @@ services:
   ## Flowbroker
   flowbroker:
     image: dojot/flowbroker:${DOJOT_BACKEND_VERSION}
+    restart: always
     environment:
       DEPLOY_ENGINE: "docker"
       FLOWBROKER_NETWORK: ${FLOWBROKER_NETWORK}
@@ -1238,13 +1239,22 @@ services:
       KAFKA_GROUP_ID: 'flowbroker-group'
       LOG_LEVEL: 'info'
     depends_on:
-      - rabbitmq
-      - kafka
-      - mongodb
-      - keycloak
-      - keycloak-init
-      - flowbroker-context-manager
-      - flowbroker-redis
+      rabbitmq:
+        condition: service_started
+      kafka:
+        condition: service_started
+      mongodb:
+        condition: service_started
+      keycloak:
+        condition: service_started
+      keycloak-init:
+        condition: service_started
+      flowbroker-context-manager:
+        condition: service_started
+      flowbroker-redis:
+        condition: service_started
+      keycloak-proxy:
+        condition: service_healthy
     networks:
       - default
       - ${FLOWBROKER_NETWORK}
@@ -1252,6 +1262,11 @@ services:
       - flowbroker-volume:/data
       - /var/run/docker.sock:/var/run/docker.sock:Z
       - ./secrets/:/secrets/
+    healthcheck:
+      test: echo stat | nc localhost 80
+      interval: 30s
+      timeout: 20s
+      retries: 3
     <<: *loki-logging
     <<: *dojot-networking
     profiles:
@@ -1284,6 +1299,11 @@ services:
     networks:
       - default
       - flowbroker
+    healthcheck:
+      test: echo stat | nc localhost 80
+      interval: 30s
+      timeout: 20s
+      retries: 3
     <<: *loki-logging
     <<: *dojot-networking
     profiles:
