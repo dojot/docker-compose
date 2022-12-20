@@ -1509,7 +1509,7 @@ services:
       - "basic-http"
       - "basic-mqtt"
       - "complete"
-      -
+
   flows-nx:
     image: dojot/flows-nx:${DOJOT_FRONTEND_VERSION}
     depends_on:
