@@ -1238,14 +1238,20 @@ services:
       KAFKA_GROUP_ID: 'flowbroker-group'
       LOG_LEVEL: 'info'
     depends_on:
-      - rabbitmq
-      - kafka
-      - mongodb
-      - keycloak
-      - keycloak-init
-      - flowbroker-context-manager
-      - flowbroker-redis
-    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+      mongodb:
+        condition: service_healthy
+      keycloak:
+        condition: service_healthy
+      keycloak-init:
+        condition: service_started
+      flowbroker-context-manager:
+        condition: service_healthy
+      flowbroker-redis:
+        condition: service_healthy
       keycloak-proxy:
         condition: service_healthy
     networks:
