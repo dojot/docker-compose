@@ -1245,6 +1245,9 @@ services:
       - keycloak-init
       - flowbroker-context-manager
       - flowbroker-redis
+    depends_on:
+      keycloak-proxy:
+        condition: service_healthy
     networks:
       - default
       - ${FLOWBROKER_NETWORK}
@@ -1252,6 +1255,17 @@ services:
       - flowbroker-volume:/data
       - /var/run/docker.sock:/var/run/docker.sock:Z
       - ./secrets/:/secrets/
+    healthcheck:
+      test: echo stat | nc localhost 80
+      interval: 30s
+      timeout: 20s
+      retries: 3
+
+    # healthcheck:
+    #   test: ["CMD", "curl", "-f", "http://localhost:80/healthckeck"]
+    #   interval: 30s
+    #   timeout: 20s
+    #   retries: 3
     <<: *loki-logging
     <<: *dojot-networking
     profiles:
@@ -1284,6 +1298,11 @@ services:
     networks:
       - default
       - flowbroker
+    healthcheck:
+      test: echo stat | nc localhost 80
+      interval: 30s
+      timeout: 20s
+      retries: 3
     <<: *loki-logging
     <<: *dojot-networking
     profiles:
