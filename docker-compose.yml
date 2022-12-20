@@ -1231,6 +1231,7 @@ services:
   ## Flowbroker
   flowbroker:
     image: dojot/flowbroker:${DOJOT_BACKEND_VERSION}
+    restart: always
     environment:
       DEPLOY_ENGINE: "docker"
       FLOWBROKER_NETWORK: ${FLOWBROKER_NETWORK}
@@ -1239,19 +1240,19 @@ services:
       LOG_LEVEL: 'info'
     depends_on:
       rabbitmq:
-        condition: service_healthy
+        condition: service_started
       kafka:
-        condition: service_healthy
+        condition: service_started
       mongodb:
-        condition: service_healthy
+        condition: service_started
       keycloak:
-        condition: service_healthy
+        condition: service_started
       keycloak-init:
         condition: service_started
       flowbroker-context-manager:
-        condition: service_healthy
+        condition: service_started
       flowbroker-redis:
-        condition: service_healthy
+        condition: service_started
       keycloak-proxy:
         condition: service_healthy
     networks:
