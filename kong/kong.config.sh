@@ -178,6 +178,9 @@ addAuthToEndpoint "device-manager-batch"
 createEndpoint  "basic-auth" "http://basic-auth:3000" '"/basic-auth/v1/devices/(.*)/basic-credentials"' "false"
 addAuthToEndpoint "basic-auth"
 
+createEndpoint  "basic-auth-validation" "http://basic-auth:3000" '"/basic-auth/v1/internal/authentication"' "false"
+addAuthToEndpoint "basic-auth-validation"
+
 # service: http-agent
 createEndpoint "http-agent-basic" "http://http-agent-basic:3001"  '"/http-agent/v1/unsecure/incoming-messages(.*)"' "false"
 
