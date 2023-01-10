@@ -466,8 +466,6 @@ services:
       BASIC_AUTH_LOG_CONSOLE_LEVEL: 'info'
       BASIC_AUTH_LOG_VERBOSE: "true"
       BASIC_AUTH_PRODUCER_METADATA_BROKER_LIST: kafka:9092
-      BASIC_AUTH_URL_DEVICE: "http://device-manager-sidecar:5000/device"
-      BASIC_AUTH_URL_DEVICES: "http://device-manager-sidecar:5000/device"
     volumes:
       - ./secrets:/secrets
     <<: *loki-logging
