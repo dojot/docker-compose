@@ -34,8 +34,7 @@ services:
       FALCON_SETTINGS_MODULE: 'history.settings.docker'
       DOJOT_MANAGEMENT_USER: 'history'
       LOG_LEVEL: INFO
-    <<: *loki-logging
-    <<: *dojot-networking
+    <<: [*loki-logging, *dojot-networking]
     profiles:
       - "basic"
       - "mongodb-persistence"
@@ -55,8 +54,7 @@ services:
       KAFKA_GROUP_ID: 'persister-group'
       LOG_LEVEL: INFO
       HISTORY_DB_DATA_EXPIRATION: 604800 #Time in seconds - Set to collection when device is created.
-    <<: *loki-logging
-    <<: *dojot-networking
+    <<: [*loki-logging, *dojot-networking]
     profiles:
       - "basic"
       - "mongodb-persistence"
@@ -76,8 +74,7 @@ services:
       - mongodb-volume:/data/db
       - mongodb-cfg-volume:/data/configdb
     command: '--wiredTigerCacheSizeGB 1'
-    <<: *loki-logging
-    <<: *dojot-networking
+    <<: [*loki-logging, *dojot-networking]
     profiles:
       - "basic"
       - "mongodb-persistence"
@@ -94,8 +91,7 @@ services:
     depends_on:
       - backstage
     restart: always
-    <<: *loki-logging
-    <<: *dojot-networking
+    <<: [*loki-logging, *dojot-networking]
     profiles:
       - "basic"
       - "front-end"
@@ -106,8 +102,7 @@ services:
     depends_on:
       - backstage
     restart: always
-    <<: *loki-logging
-    <<: *dojot-networking
+    <<: [*loki-logging, *dojot-networking]
     profiles:
       - "front-end"
       - "complete"
@@ -127,8 +122,7 @@ services:
       LOG_LEVEL: 'info'
       KAFKA_NUM_PARTITIONS: 1
       KAFKA_REPLICATION_FACTOR: 1
-    <<: *loki-logging
-    <<: *dojot-networking
+    <<: [*loki-logging, *dojot-networking]
     profiles:
       - "basic"
       - "mongodb-persistence"
@@ -150,8 +144,7 @@ services:
       retries: 30
     volumes:
       - data-broker-redis-volume:/data
-    <<: *loki-logging
-    <<: *dojot-networking
+    <<: [*loki-logging, *dojot-networking]
     profiles:
       - "basic"
       - "mongodb-persistence"
@@ -185,8 +178,7 @@ services:
       - 5693:5693/udp # file server coap port
       - 5694:5694/udp # file server dtls port
     restart: always
-    <<: *loki-logging
-    <<: *dojot-networking
+    <<: [*loki-logging, *dojot-networking]
     profiles:
       - "lwm2m-iot-agent"
       - "complete"
@@ -204,8 +196,7 @@ services:
       DBHOST: postgres
       DBUSER: imgm
       DBPASS: imgm
-    <<: *loki-logging
-    <<: *dojot-networking
+    <<: [*loki-logging, *dojot-networking]
     profiles:
       - "lwm2m-iot-agent"
       - "complete"
@@ -230,8 +221,7 @@ services:
     command: server /data
     volumes:
       - minio-volume:/data
-    <<: *loki-logging
-    <<: *dojot-networking
+    <<: [*loki-logging, *dojot-networking]
     profiles:
       - "lwm2m-iot-agent"
       - "complete"
@@ -263,8 +253,7 @@ services:
     secrets:
       - MINIO_SECRET_KEY
       - MINIO_ACCESS_KEY
-    <<: *loki-logging
-    <<: *dojot-networking
+    <<: [*loki-logging, *dojot-networking]
     profiles:
       - "file-management"
       - "complete"
@@ -311,8 +300,7 @@ services:
       interval: 30s
       timeout: 20s
       retries: 3
-    <<: *loki-logging
-    <<: *dojot-networking
+    <<: [*loki-logging, *dojot-networking]
     profiles:
       - "file-management"
       - "complete"
@@ -333,11 +321,7 @@ services:
       - postgres
       - kafka
       - data-broker
-    depends_on:
-      postgres:
-        condition: service_healthy
-    <<: *loki-logging
-    <<: *dojot-networking
+    <<: [*loki-logging, *dojot-networking]
     profiles:
       - "basic"
       - "device-management"
@@ -361,8 +345,7 @@ services:
       - ./postgres/init-db.sh:/docker-entrypoint-initdb.d/init-db.sh:Z
       - postgres-volume:/var/lib/postgresql/data
       - ./secrets:/secrets
-    <<: *loki-logging
-    <<: *dojot-networking
+    <<: [*loki-logging, *dojot-networking]
     profiles:
       - "basic"
       - "device-management"
@@ -396,8 +379,7 @@ services:
     restart: on-failure
     volumes:
       - ./secrets:/secrets
-    <<: *loki-logging
-    <<: *dojot-networking
+    <<: [*loki-logging, *dojot-networking]
     profiles:
       - "basic"
       - "api-gateway"
@@ -429,8 +411,7 @@ services:
     restart: on-failure
     volumes:
       - ./secrets:/secrets
-    <<: *loki-logging
-    <<: *dojot-networking
+    <<: [*loki-logging, *dojot-networking]
     profiles:
       - "basic"
       - "api-gateway"
@@ -489,8 +470,7 @@ services:
     restart: always
     volumes:
       - ./secrets:/secrets
-    <<: *loki-logging
-    <<: *dojot-networking
+    <<: [*loki-logging, *dojot-networking]
     profiles:
       - "basic"
       - "front-end"
@@ -513,8 +493,7 @@ services:
       - apigw
     volumes:
       - ./kong/kong.config.sh:/opt/kong.config.sh:Z
-    <<: *loki-logging
-    <<: *dojot-networking
+    <<: [*loki-logging, *dojot-networking]
     profiles:
       - "basic"
       - "api-gateway"
@@ -545,8 +524,7 @@ services:
       AUTH_CACHE_NAME: "redis"
       DOJOT_MANAGEMENT_USER: 'auth'
       KAFKA_GROUP_ID: 'auth-group'
-    <<: *loki-logging
-    <<: *dojot-networking
+    <<: [*loki-logging, *dojot-networking]
     profiles:
       - "basic"
       - "user-management"
@@ -565,8 +543,7 @@ services:
     restart: always
     volumes:
       - auth-redis-volume:/data
-    <<: *loki-logging
-    <<: *dojot-networking
+    <<: [*loki-logging, *dojot-networking]
     profiles:
       - "basic"
       - "user-management"
@@ -603,8 +580,7 @@ services:
     volumes:
       - flowbroker-volume:/data
       - /var/run/docker.sock:/var/run/docker.sock:Z
-    <<: *loki-logging
-    <<: *dojot-networking
+    <<: [*loki-logging, *dojot-networking]
     profiles:
       - "data-processing"
       - "import-export-configuration"
@@ -620,8 +596,7 @@ services:
       retries: 30
     volumes:
       - flowbroker-redis-volume:/data
-    <<: *loki-logging
-    <<: *dojot-networking
+    <<: [*loki-logging, *dojot-networking]
     profiles:
       - "data-processing"
       - "import-export-configuration"
@@ -641,8 +616,7 @@ services:
     networks:
       - default
       - flowbroker
-    <<: *loki-logging
-    <<: *dojot-networking
+    <<: [*loki-logging, *dojot-networking]
     profiles:
       - "data-processing"
       - "data-processing-context"
@@ -669,8 +643,7 @@ services:
       - type: volume
         source: rabbitmq-volume
         target: /var/lib/rabbitmq
-    <<: *loki-logging
-    <<: *dojot-networking
+    <<: [*loki-logging, *dojot-networking]
     profiles:
       - "data-processing"
       - "import-export-configuration"
@@ -703,8 +676,7 @@ services:
       - zookeeper-volume:/var/lib/zookeeper/data
       - zookeeper-log-volume:/var/lib/zookeeper/log
       - zookeeper-secrets-volume:/etc/zookeeper/secrets
-    <<: *loki-logging
-    <<: *dojot-networking
+    <<: [*loki-logging, *dojot-networking]
     profiles:
       - "basic"
       - "data-processing-context"
@@ -743,8 +715,7 @@ services:
     volumes:
       - kafka-volume:/var/lib/kafka/data
       - kafka-secrets-volume:/etc/kafka/secrets
-    <<: *loki-logging
-    <<: *dojot-networking
+    <<: [*loki-logging, *dojot-networking]
     profiles:
       - "basic"
       - "mongodb-persistence"
@@ -785,8 +756,7 @@ services:
       start_period: 2m
     volumes:
       - "ejbca-client-tls-volume:/opt/tls"
-    <<: *loki-logging
-    <<: *dojot-networking
+    <<: [*loki-logging, *dojot-networking]
     profiles:
       - "basic"
       - "x509-certificates"
@@ -821,8 +791,7 @@ services:
     volumes:
       - "ejbca-volume:/mnt/persistent"
       - "ejbca-client-tls-volume:/opt/tls"
-    <<: *loki-logging
-    <<: *dojot-networking
+    <<: [*loki-logging, *dojot-networking]
     profiles:
       - "basic"
       - "x509-certificates"
@@ -842,8 +811,7 @@ services:
       # The KAFKA_WS_TICKET_SECRET should be unique for each environment
       KAFKA_WS_TICKET_SECRET: fT5nAgHR9pkj0yYsBdc4p+PPq6ArjshcPdz0HA6W
     restart: always
-    <<: *loki-logging
-    <<: *dojot-networking
+    <<: [*loki-logging, *dojot-networking]
     profiles:
       - "websocket-real-time"
       - "complete"
@@ -858,8 +826,7 @@ services:
       retries: 30
     volumes:
       - kafka-ws-redis-volume:/data
-    <<: *loki-logging
-    <<: *dojot-networking
+    <<: [*loki-logging, *dojot-networking]
     profiles:
       - "websocket-real-time"
       - "complete"
@@ -874,8 +841,7 @@ services:
       retries: 30
     volumes:
       - acl-redis-volume:/data
-    <<: *loki-logging
-    <<: *dojot-networking
+    <<: [*loki-logging, *dojot-networking]
     profiles:
       - "basic"
       - "x509-certificates"
@@ -892,8 +858,7 @@ services:
       - kafka
       - x509-identity-mgmt
     restart: always
-    <<: *loki-logging
-    <<: *dojot-networking
+    <<: [*loki-logging, *dojot-networking]
     profiles:
       - "basic"
       - "x509-certificates"
@@ -921,8 +886,7 @@ services:
       - iotagent-mqtt-log-volume:/vernemq/log
       - iotagent-mqtt-etc-volume:/vernemq/etc
       - iotagent-mqtt-cert-side-volume:/vernemq/cert
-    <<: *loki-logging
-    <<: *dojot-networking
+    <<: [*loki-logging, *dojot-networking]
     profiles:
       - "iot-agent-mqtt"
       - "complete"
@@ -949,8 +913,7 @@ services:
     volumes:
       - iotagent-mqtt-cert-side-volume:/vernemq/cert
     restart: always
-    <<: *loki-logging
-    <<: *dojot-networking
+    <<: [*loki-logging, *dojot-networking]
     profiles:
       - "iot-agent-mqtt"
       - "x509-certificates"
@@ -975,8 +938,7 @@ services:
     restart: always
     volumes:
       - v2k-bridge-cert-side-volume:/certs
-    <<: *loki-logging
-    <<: *dojot-networking
+    <<: [*loki-logging, *dojot-networking]
     profiles:
       - "iot-agent-mqtt"
       - "complete"
@@ -998,8 +960,7 @@ services:
     volumes:
       - v2k-bridge-cert-side-volume:/certs
     restart: always
-    <<: *loki-logging
-    <<: *dojot-networking
+    <<: [*loki-logging, *dojot-networking]
     profiles:
       - "iot-agent-mqtt"
       - "x509-certificates"
@@ -1024,8 +985,7 @@ services:
     restart: always
     volumes:
       - k2v-bridge-cert-side-volume:/certs
-    <<: *loki-logging
-    <<: *dojot-networking
+    <<: [*loki-logging, *dojot-networking]
     profiles:
       - "iot-agent-mqtt"
       - "complete"
@@ -1047,8 +1007,7 @@ services:
     volumes:
       - k2v-bridge-cert-side-volume:/certs
     restart: always
-    <<: *loki-logging
-    <<: *dojot-networking
+    <<: [*loki-logging, *dojot-networking]
     profiles:
       - "iot-agent-mqtt"
       - "x509-certificates"
@@ -1073,8 +1032,7 @@ services:
     volumes:
       - http-agent-cert-sidecar-volume:/certs
     restart: always
-    <<: *loki-logging
-    <<: *dojot-networking
+    <<: [*loki-logging, *dojot-networking]
     profiles:
       - "basic"
       - "iot-agent-http"
@@ -1103,8 +1061,7 @@ services:
       HTTP_AGENT_LOG_CONSOLE_LEVEL: 'info'
     volumes:
       - http-agent-cert-sidecar-volume:/certs
-    <<: *loki-logging
-    <<: *dojot-networking
+    <<: [*loki-logging, *dojot-networking]
     profiles:
       - "basic"
       - "iot-agent-http"
@@ -1115,8 +1072,7 @@ services:
     restart: always
     volumes:
       - http-agent-redis-volume:/data
-    <<: *loki-logging
-    <<: *dojot-networking
+    <<: [*loki-logging, *dojot-networking]
     profiles:
       - "basic"
       - "iot-agent-http"
@@ -1128,8 +1084,7 @@ services:
     depends_on:
       - flowbroker
       - device-manager
-    <<: *loki-logging
-    <<: *dojot-networking
+    <<: [*loki-logging, *dojot-networking]
     profiles:
       - "import-export-configuration"
       - "complete"
@@ -1139,8 +1094,7 @@ services:
     restart: always
     depends_on:
       - postgres
-    <<: *loki-logging
-    <<: *dojot-networking
+    <<: [*loki-logging, *dojot-networking]
     profiles:
       - "basic"
       - "front-end"
@@ -1154,8 +1108,7 @@ services:
       - data-broker
       - auth
       - mongodb
-    <<: *loki-logging
-    <<: *dojot-networking
+    <<: [*loki-logging, *dojot-networking]
     profiles:
       - "data-processing"
       - "cron-job"
@@ -1170,8 +1123,7 @@ services:
     environment:
       RETRIEVER_LOG_CONSOLE_LEVEL: "info"
     restart: always
-    <<: *loki-logging
-    <<: *dojot-networking
+    <<: [*loki-logging, *dojot-networking]
     profiles:
       - "influxdb-persistence"
       - "complete"
@@ -1185,8 +1137,7 @@ services:
       STORER_LOG_CONSOLE_LEVEL: "info"
       STORER_INFLUX_RETENTION_HRS: 168 # used only for new created tenant after default
     restart: always
-    <<: *loki-logging
-    <<: *dojot-networking
+    <<: [*loki-logging, *dojot-networking]
     profiles:
       - "influxdb-persistence"
       - "complete"
@@ -1207,8 +1158,7 @@ services:
     depends_on:
       influxdb:
         condition: service_healthy
-    <<: *loki-logging
-    <<: *dojot-networking
+    <<: [*loki-logging, *dojot-networking]
     profiles:
       - "influxdb-persistence"
       - "complete"
@@ -1222,8 +1172,7 @@ services:
       - influxdb-volume:/root/.influxdbv2
     healthcheck:
       test: "influx ping"
-    <<: *loki-logging
-    <<: *dojot-networking
+    <<: [*loki-logging, *dojot-networking]
     profiles:
       - "influxdb-persistence"
       - "complete"
@@ -1242,8 +1191,7 @@ services:
       - INFLUXDB_URL=http://influxdb:8086
       - INFLUXDB_USERNAME=admin
       - INFLUXDB_PASSWORD=admin
-    <<: *loki-logging
-    <<: *dojot-networking
+    <<: [*loki-logging, *dojot-networking]
     profiles:
       - "influxdb-persistence"
       - "complete"
@@ -1334,8 +1282,7 @@ services:
       BASIC_AUTH_LOG_CONSOLE_LEVEL: 'info'
       BASIC_AUTH_LOG_VERBOSE: "true"
       BASIC_AUTH_PRODUCER_METADATA_BROKER_LIST: kafka:9092
-    <<: *loki-logging
-    <<: *dojot-networking
+    <<: [*loki-logging, *dojot-networking]
     profiles:
       - "basic"
       - "iot-agent-http"
